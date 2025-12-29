@@ -1,124 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ProWorldz Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProWorldz Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
-    
-
-<div class="dashboard">
-
- <!-- Sidebar -->
-<aside class="sidebar">
-  <div class="logo">P</div>
-
-  <ul class="menu">
-
-    <li class="active">
-      <a href="dashboard.html">
-        <i class="fa-solid fa-house"></i>
-        <span>Dashboard</span>
-      </a>
-    </li>
-
-    <li>
-      <a href="assignment.html">
-        <i class="fa-solid fa-book"></i>
-        <span>Assignment</span>
-      </a>
-    </li>
-
-    <li>
-      <a href="aboutus.html">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>About Us</span>
-      </a>
-    </li>
-
-    <li>
-      <a href="contactus.css">
-        <i class="fa-solid fa-phone"></i>
-        <span>Contact Us</span>
-      </a>
-    </li>
-
-    <li>
-      <a href="ourcourse.css">
-        <i class="fa-solid fa-graduation-cap"></i>
-        <span>Courses</span>
-      </a>
-    </li>
-
-  </ul>
-</aside>
 
 
-  <!-- Main -->
-  <main class="main">
+    <div class="dashboard">
 
-    <!-- Top Bar -->
-    <div class="topbar">
-      <div class="search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" placeholder="Search">
-      </div>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="close-btn" id="closeBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+            <!-- <div class="logo">P</div> -->
 
-      <div class="profile">
-        <div class="avatar"></div>
-        <div>
-          <h4>Your Name</h4>
-          <span>3rd year</span>
-        </div>
-      </div>
+            <ul class="menu">
+
+                <li class="active">
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="assignment.html">
+                        <i class="fa-solid fa-book"></i>
+                        <span>Assignment</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="aboutus.html">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>About Us</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="contactus.html">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>Contact Us</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="ourcourse.html">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>Courses</span>
+                    </a>
+                </li>
+
+            </ul>
+        </aside>
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay"></div>
+
+
+
+        <!-- Main -->
+        <main class="main">
+
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="menu-btn" id="menuBtn">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search">
+                </div>
+
+                <div class="profile">
+                    <div class="avatar"></div>
+                    <div class="profile-info">
+                        <h4>Your Name</h4>
+                        <span>3rd year</span>
+                    </div>
+
+                    <!-- LOGOUT -->
+                    <a href="login.html" class="logout-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Logout
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Welcome Card -->
+            <section class="welcome">
+                <p>December 24, 2025</p>
+                <h2>Welcome back, ProWorldz!</h2>
+                <span>Always stay updated in your student portal</span>
+            </section>
+
+            <!-- Finance -->
+            <h3 class="section-title">Finance</h3>
+
+            <div class="cards">
+                <div class="card">
+                    <h1>$10,000</h1>
+                    <p>Total Payable</p>
+                </div>
+
+                <div class="card highlight">
+                    <h1>$5,000</h1>
+                    <p>Total Paid</p>
+                </div>
+
+                <div class="card">
+                    <h1>$300</h1>
+                    <p>Others</p>
+                </div>
+            </div>
+
+            <!-- Courses -->
+            <h3 class="section-title">Enrolled Courses</h3>
+
+            <div class="courses">
+                <div class="course">Object Oriented Programming</div>
+                <div class="course">Fundamentals of Web</div>
+                <div class="course">Data Structures & Algorithms</div>
+                <div class="course">Database Management</div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- Welcome Card -->
-    <section class="welcome">
-      <p>December 24, 2025</p>
-      <h2>Welcome back, ProWorldz!</h2>
-      <span>Always stay updated in your student portal</span>
-    </section>
+    <script>
+        const menuBtn = document.getElementById("menuBtn");
+        const closeBtn = document.getElementById("closeBtn");
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.getElementById("overlay");
 
-    <!-- Finance -->
-    <h3 class="section-title">Finance</h3>
+        menuBtn.addEventListener("click", () => {
+            sidebar.classList.add("active");
+            overlay.classList.add("active");
+        });
 
-    <div class="cards">
-      <div class="card">
-        <h1>$10,000</h1>
-        <p>Total Payable</p>
-      </div>
+        closeBtn.addEventListener("click", closeMenu);
+        overlay.addEventListener("click", closeMenu);
 
-      <div class="card highlight">
-        <h1>$5,000</h1>
-        <p>Total Paid</p>
-      </div>
+        function closeMenu() {
+            sidebar.classList.remove("active");
+            overlay.classList.remove("active");
+        }
+    </script>
 
-      <div class="card">
-        <h1>$300</h1>
-        <p>Others</p>
-      </div>
-    </div>
 
-    <!-- Courses -->
-    <h3 class="section-title">Enrolled Courses</h3>
-
-    <div class="courses">
-      <div class="course">Object Oriented Programming</div>
-      <div class="course">Fundamentals of Web</div>
-      <div class="course">Data Structures & Algorithms</div>
-      <div class="course">Database Management</div>
-    </div>
-
-  </main>
-</div>
 
 </body>
+
 </html>

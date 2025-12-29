@@ -15,6 +15,10 @@ body{
   display:flex;
 }
 
+.menu{
+    padding-top: 50px;
+}
+
 /* SIDEBAR */
 .sidebar{
   width:240px;
@@ -189,3 +193,139 @@ body{
   background:#ff5722;
   transform:translateY(-6px);
 }
+
+
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  position:relative;
+}
+
+.logout-btn{
+  margin-left:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 14px;
+  border-radius:20px;
+  background:#ff3c00;
+  color:#fff;
+  text-decoration:none;
+  font-size:13px;
+  transition:.3s;
+}
+
+.logout-btn:hover{
+  background:#ff1f00;
+  box-shadow:0 0 15px rgba(255,60,0,.5);
+}
+.menu-btn{
+  display:none;
+  font-size:22px;
+  cursor:pointer;
+  color:#fff;
+}
+@media(max-width:1024px){
+  .sidebar{
+    width:200px;
+  }
+
+  .main{
+    margin-left:200px;
+  }
+
+  .search{
+    width:220px;
+  }
+}
+
+@media(max-width:768px){
+
+  /* Show hamburger */
+  .menu-btn{
+    display:block;
+  }
+
+
+
+  /* Sidebar slide */
+  .sidebar{
+    position:fixed;
+    left:-100%;
+    top:0;
+    width:230px;
+    height:100vh;
+    z-index:1000;
+    transition:.4s ease;
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  /* Main full width */
+  .main{
+    margin-left:0;
+    padding:20px;
+  }
+
+  /* Topbar layout */
+  .topbar{
+    flex-wrap:wrap;
+    gap:15px;
+  }
+
+  .search{
+    width:100%;
+    order:3;
+  }
+
+  .profile{
+    margin-left:auto;
+  }
+
+  /* Cards & courses stack */
+  .cards,
+  .courses{
+    grid-template-columns:1fr;
+  }
+
+  /* Logout smaller */
+  .logout-btn{
+    padding:5px 12px;
+    font-size:12px;
+  }
+  .close-btn{
+    display:block;
+    z-index:1100;
+  }
+
+  .overlay.active{
+    display:block;
+  }
+}
+
+
+/* CLOSE BUTTON */
+.close-btn{
+  display:none;
+  position:absolute;
+  top:18px;
+  right:18px;
+  font-size:22px;
+  cursor:pointer;
+  color:#fff;
+}
+
+/* OVERLAY */
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:900;
+}
+
+

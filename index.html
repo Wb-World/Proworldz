@@ -15,28 +15,41 @@
 </head>
 <body>
 
+
 <!-- NAVBAR -->
 <nav class="navbar">
   <div class="logo">PRO<span>WORLDZ</span></div>
 
-  <ul class="nav-links">
-    <li class="nav-item active">Courses</li>
-    <li class="nav-item">
-  <a href="about.html">About Us</a>
-</li>
-
-    <li class="nav-item">Contact</li>
-    <li class="nav-item">
-  <a href="dashboard.html">Dashboard</a>
-</li>
-  </ul>
-  
-
-  <div class="nav-btns">
-    <button class="login">Login</button>
-    <button class="signup">Sign Up</button>
+  <!-- HAMBURGER -->
+  <div class="menu-toggle" id="menuToggle">
+    <span></span>
+    <span></span>
+    <span></span>
   </div>
+
+  <ul class="nav-links" id="navLinks">
+    <li class="nav-item active"><a href="./index.html">Courses</a></li>
+    <li class="nav-item"><a href="about.html">About Us</a></li>
+    <li class="nav-item"><a href="./contact.html">Contact</a></li>
+    <li class="nav-item"><a href="dashboard.html">Dashboard</a></li>
+
+    <!-- MOBILE BUTTONS -->
+    <div class="mobile-btns">
+  <a href="login.html" class="btn login">Login</a>
+  <a href="signup.html" class="btn signup">Sign Up</a>
+</div>
+
+  </ul>
+
+  <!-- DESKTOP BUTTONS -->
+ <div class="nav-btns">
+  <a href="login.html" class="btn login">Login</a>
+  <a href="signup.html" class="btn signup">Sign Up</a>
+</div>
 </nav>
+
+
+
 
 
 <!-- HERO -->
@@ -262,6 +275,8 @@
 </div>
 
 </section>
+
+<script src="script.js"></script>
 
 </body>
 </html>
