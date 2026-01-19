@@ -894,7 +894,7 @@
 
 <!-- OPTIONAL FOOTER -->
 <footer class="footer">
-  <p>&copy; 2024 ProWorldz. All rights reserved. | Empowering the next generation of tech professionals</p>
+  <p>&copy; 2026 ProWorldz. All rights reserved. | Empowering the next generation of tech professionals</p>
 </footer>
 
 <script>

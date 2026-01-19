@@ -838,7 +838,7 @@
 <!-- HERO -->
 <section class="contact-hero">
   <div class="hero-content">
-    <h1>Contact <span>ProWorldz</span></h1>
+    <h1>Contact ProWorldz</h1>
     <p>Let's connect and build your future in tech</p>
   </div>
 </section>
@@ -890,7 +890,6 @@
 
 </div>
 
-<!-- CTA SECTION -->
 <section class="contact-cta">
   <h2>Ready to Start Your <span>Tech Journey</span>?</h2>
   <a href="index.php" class="cta-btn" style="display: inline-block; padding: 1rem 2.5rem; background: var(--gradient); color: white; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 1.1rem; transition: var(--transition); position: relative; z-index: 1; overflow: hidden;">
@@ -900,7 +899,7 @@
 
 <!-- FOOTER -->
 <footer class="footer">
-  <p>&copy; 2024 ProWorldz. All rights reserved.</p>
+  <p>&copy; 2026 ProWorldz. All rights reserved.</p>
 </footer>
 
 <script>

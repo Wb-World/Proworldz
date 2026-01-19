@@ -753,7 +753,7 @@
 <!-- HERO -->
 <section class="about-hero">
   <div class="hero-content">
-    <h1>About <span>ProWorldz</span></h1>
+    <h1>About ProWorldz</h1>
     <p>
       ProWorldz is a next-generation learning platform focused on empowering
       students with real-world, job-ready technology skills.
@@ -832,7 +832,7 @@
 
 <!-- OPTIONAL FOOTER -->
 <footer class="footer">
-  <p>&copy; 2024 ProWorldz. All rights reserved.</p>
+  <p>&copy; 2026 ProWorldz. All rights reserved.</p>
 </footer>
 
 <script>

@@ -350,126 +350,154 @@ body {
     <!-- COURSES GRID - 3 per row -->
     <section class="course-grid">
       
-      <!-- Course 1 -->
+      <!-- Course 1: Secure X -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="Python Course">
+          <img src="./pydesk.jpeg" alt="Secure X Course">
         </div>
         <div class="course-content">
-          <h3>Python Mastery</h3>
-          <p>Learn Python from basics to advanced, covering data science, automation, and web development with Django.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=python'">
+          <h3>Secure X</h3>
+          <p>Master advanced cybersecurity techniques, digital defense strategies, and learn to protect systems from sophisticated cyber threats and vulnerabilities.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=securex'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 2 -->
+      <!-- Course 2: AI Verse Web Labs -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="JavaScript Course">
+          <img src="./pydesk.jpeg" alt="AI Verse Web Labs">
         </div>
         <div class="course-content">
-          <h3>JavaScript Pro</h3>
-          <p>Master modern JavaScript, ES6+, React, Node.js and build dynamic web applications from scratch.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=javascript'">
+          <h3>AI Verse Web Labs</h3>
+          <p>Build intelligent web applications using AI-driven development, machine learning integration, and automated web engineering workflows.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=aiverse'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 3 -->
+      <!-- Course 3: Hunt Elite -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="Data Science Course">
+          <img src="./pydesk.jpeg" alt="Hunt Elite Course">
         </div>
         <div class="course-content">
-          <h3>Data Science</h3>
-          <p>Learn data analysis, machine learning, and visualization with Python, Pandas, and TensorFlow.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=datascience'">
+          <h3>Hunt Elite</h3>
+          <p>Professional bug bounty hunting and exploit analysis. Learn advanced penetration testing, vulnerability assessment, and ethical hacking techniques.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=huntelite'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 4 -->
+      <!-- Course 4: Creative Craft -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="Mobile Development">
+          <img src="./pydesk.jpeg" alt="Creative Craft">
         </div>
         <div class="course-content">
-          <h3>Mobile Development</h3>
-          <p>Build cross-platform mobile apps with React Native and Flutter. Learn app deployment to stores.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=mobile'">
+          <h3>Creative Craft</h3>
+          <p>Master strategic visual communication design, branding, UI/UX principles, and create compelling digital experiences that drive engagement.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=creativecraft'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 5 -->
+      <!-- Course 5: Py Desk Systems -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="Cyber Security">
+          <img src="./pydesk.jpeg" alt="Py Desk Systems">
         </div>
         <div class="course-content">
-          <h3>Cyber Security</h3>
-          <p>Learn ethical hacking, network security, cryptography, and how to protect systems from threats.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=cyber'">
+          <h3>Py Desk Systems</h3>
+          <p>Develop enterprise-grade desktop applications with Python. Master GUI frameworks, database integration, and system-level programming.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=pydesk'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 6 -->
+      <!-- Course 6: Biz Dev -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="UI/UX Design">
+          <img src="./pydesk.jpeg" alt="Biz Dev">
         </div>
         <div class="course-content">
-          <h3>UI/UX Design</h3>
-          <p>Master user interface and experience design principles, prototyping, and design tools like Figma.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=design'">
+          <h3>Biz Dev</h3>
+          <p>Combine business strategy with software development. Learn to build scalable tech solutions while understanding market needs and business models.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=bizdev'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 7 -->
+      <!-- Course 7: Code Foundry -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="Cloud Computing">
+          <img src="./pydesk.jpeg" alt="Code Foundry">
         </div>
         <div class="course-content">
-          <h3>Cloud Computing</h3>
-          <p>Learn AWS, Azure, and Google Cloud. Deploy, manage, and scale applications in the cloud.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=cloud'">
+          <h3>Code Foundry</h3>
+          <p>Professional programming language mastery. Deep dive into multiple languages, best practices, and advanced software engineering concepts.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=codefoundry'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 8 -->
+      <!-- Course 8: Startup Gene Labs -->
       <div class="course-card-full">
         <div class="course-img">
-          <img src="./pydesk.jpeg" alt="DevOps">
+          <img src="./pydesk.jpeg" alt="Startup Gene Labs">
         </div>
         <div class="course-content">
-          <h3>DevOps Engineering</h3>
-          <p>Master CI/CD, Docker, Kubernetes, and infrastructure as code. Automate deployment pipelines.</p>
-          <button class="course-btn" onclick="location.href='course-details.php?course=devops'">
+          <h3>Startup Gene Labs</h3>
+          <p>Venture creation and startup scaling. Learn to build, fund, and grow tech startups from idea to successful enterprise with proven methodologies.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=startupgene'">
             Course Details
           </button>
         </div>
       </div>
 
-      <!-- Course 9 -->
+      <!-- Course 9: CLI++ Systems -->
+      <div class="course-card-full">
+        <div class="course-img">
+          <img src="./pydesk.jpeg" alt="CLI++ Systems">
+        </div>
+        <div class="course-content">
+          <h3>CLI++ Systems</h3>
+          <p>C++ command-line tool engineering for Linux. Build powerful, efficient system tools and utilities using advanced C++ programming techniques.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=clipp'">
+            Course Details
+          </button>
+        </div>
+      </div>
+
+      <!-- Course 10: APMan -->
+      <div class="course-card-full">
+        <div class="course-img">
+          <img src="./pydesk.jpeg" alt="APMan">
+        </div>
+        <div class="course-content">
+          <h3>APMan</h3>
+          <p>Master API development, design, and management. Build RESTful and GraphQL APIs, implement security, and create scalable API architectures.</p>
+          <button class="course-btn" onclick="location.href='course-details.php?course=apman'">
+            Course Details
+          </button>
+        </div>
+      </div>
+
+      <!-- Course 11: WebCraft Full Stack -->
       <div class="course-card-full">
         <div class="course-img">
           <img src="./pydesk.jpeg" alt="WebCraft Full Stack">
         </div>
         <div class="course-content">
           <h3>WebCraft Full Stack</h3>
-          <p>From idea to launch — learn to build and deploy complete startup-grade web apps.</p>
+          <p>From idea to launch — learn to build and deploy complete startup-grade web applications using modern full-stack development technologies.</p>
           <button class="course-btn" onclick="location.href='course-details.php?course=webcraft'">
             Course Details
           </button>
