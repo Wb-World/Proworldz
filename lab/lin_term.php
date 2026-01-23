@@ -1,124 +1,1352 @@
-<?php
-session_start();
-?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linux Terminal - ProWorldz</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap">
+    <title>Terminal | M.O.N.K.Y OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-
+        /* ===== CSS RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            border-color: rgba(229, 231, 235, 0.3);
+            outline-color: rgba(156, 163, 175, 0.5);
+            overscroll-behavior: none;
         }
 
         body {
-            background: #300a24;
-            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0d1015;
+            color: #f8fafc;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-width: 1280px;
+            overflow-x: auto;
+        }
+
+        /* ===== CUSTOM FONTS ===== */
+        @font-face {
+            font-family: "Rebels";
+            src: url("https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2") format("woff2");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* ===== CUSTOM PROPERTIES (CSS Variables) ===== */
+        :root {
+            --radius: 0.625rem;
+            --background: #0d1015;
+            --foreground: #f8fafc;
+            --card: #1a1d24;
+            --card-foreground: #f8fafc;
+            --popover: #1a1d24;
+            --popover-foreground: #f8fafc;
+            --primary: #6366f1;
+            --primary-foreground: #ffffff;
+            --secondary: #2d3748;
+            --secondary-foreground: #f8fafc;
+            --muted: #2d3748;
+            --muted-foreground: #94a3b8;
+            --accent: rgba(248, 250, 252, 0.05);
+            --accent-foreground: #f8fafc;
+            --border: rgba(255, 255, 255, 0.1);
+            --pop: rgba(255, 255, 255, 0.025);
+            --input: rgba(255, 255, 255, 0.15);
+            --ring: rgba(148, 163, 184, 0.5);
+            
+            --success: #10b981;
+            --destructive: #ef4444;
+            --warning: #f59e0b;
+            
+            --chart-1: #6366f1;
+            --chart-2: #10b981;
+            --chart-3: #f59e0b;
+            --chart-4: #8b5cf6;
+            --chart-5: #ec4899;
+            
+            --sidebar: #1a1d24;
+            --sidebar-foreground: #f8fafc;
+            --sidebar-primary: #6366f1;
+            --sidebar-primary-foreground: #ffffff;
+            --sidebar-accent: rgba(248, 250, 252, 0.05);
+            --sidebar-accent-foreground: #f8fafc;
+            --sidebar-border: rgba(255, 255, 255, 0.1);
+            --sidebar-ring: rgba(148, 163, 184, 0.5);
+            
+            --gap: 1.5rem;
+            --sides: 1.5rem;
+            --header-mobile: 3.8rem;
+            
+            /* Terminal specific colors */
+            --terminal-bg: #0a0a0f;
+            --terminal-text: #e0e0ff;
+            --terminal-prompt: #10b981;
+            --terminal-user: #6366f1;
+            --terminal-host: #8b5cf6;
+            --terminal-path: #f59e0b;
+            --terminal-error: #ef4444;
+            --terminal-success: #10b981;
+            --terminal-directory: #569cd6;
+            --terminal-file: #ce9178;
+            --terminal-executable: #d7ba7d;
+        }
+
+        /* ===== DESKTOP-ONLY LAYOUT ===== */
+        .desktop-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--gap);
             min-height: 100vh;
-            font-family: 'Ubuntu Mono', monospace;
-            overflow: hidden;
+            padding: var(--sides);
+            background-color: var(--background);
+        }
+
+        /* Left Sidebar - Navigation */
+        .desktop-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        /* Main Content Area */
+        .desktop-main {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        .font-display {
+            font-family: 'Rebels', 'Roboto Mono', monospace;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .block {
+            display: block;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        .absolute {
+            position: absolute;
+        }
+
+        .sticky {
+            position: sticky;
+        }
+
+        .inset-0 {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .h-full {
+            height: 100%;
+        }
+
+        .h-screen {
+            height: 100vh;
+        }
+
+        .min-h-screen {
+            min-height: 100vh;
+        }
+
+        .size-full {
+            width: 100%;
+            height: 100%;
+        }
+
+        .rounded-lg {
+            border-radius: var(--radius);
+        }
+
+        .rounded-md {
+            border-radius: calc(var(--radius) - 2px);
+        }
+
+        .rounded-sm {
+            border-radius: calc(var(--radius) - 4px);
+        }
+
+        .rounded-full {
+            border-radius: 9999px;
+        }
+
+        .border {
+            border-width: 1px;
+        }
+
+        .border-2 {
+            border-width: 2px;
+        }
+
+        .border-b {
+            border-bottom-width: 1px;
+        }
+
+        .border-t {
+            border-top-width: 1px;
+        }
+
+        .ring-2 {
+            box-shadow: 0 0 0 2px var(--ring);
+        }
+
+        .ring-pop {
+            box-shadow: 0 0 0 2px var(--pop);
+        }
+
+        .bg-background {
+            background-color: var(--background);
+        }
+
+        .bg-foreground {
+            background-color: var(--foreground);
+        }
+
+        .bg-primary {
+            background-color: var(--primary);
+        }
+
+        .bg-secondary {
+            background-color: var(--secondary);
+        }
+
+        .bg-muted {
+            background-color: var(--muted);
+        }
+
+        .bg-accent {
+            background-color: var(--accent);
+        }
+
+        .bg-card {
+            background-color: var(--card);
+        }
+
+        .bg-success {
+            background-color: var(--success);
+        }
+
+        .bg-warning {
+            background-color: var(--warning);
+        }
+
+        .bg-destructive {
+            background-color: var(--destructive);
+        }
+
+        .bg-sidebar {
+            background-color: var(--sidebar);
+        }
+
+        .bg-sidebar-primary {
+            background-color: var(--sidebar-primary);
+        }
+
+        .bg-sidebar-accent {
+            background-color: var(--sidebar-accent);
+        }
+
+        .text-foreground {
+            color: var(--foreground);
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .text-primary-foreground {
+            color: var(--primary-foreground);
+        }
+
+        .text-secondary {
+            color: var(--secondary);
+        }
+
+        .text-secondary-foreground {
+            color: var(--secondary-foreground);
+        }
+
+        .text-muted {
+            color: var(--muted);
+        }
+
+        .text-muted-foreground {
+            color: var(--muted-foreground);
+        }
+
+        .text-success {
+            color: var(--success);
+        }
+
+        .text-warning {
+            color: var(--warning);
+        }
+
+        .text-destructive {
+            color: var(--destructive);
+        }
+
+        .text-sidebar-foreground {
+            color: var(--sidebar-foreground);
+        }
+
+        .text-sidebar-primary {
+            color: var(--sidebar-primary);
+        }
+
+        .text-sidebar-primary-foreground {
+            color: var(--sidebar-primary-foreground);
+        }
+
+        .text-sidebar-accent-foreground {
+            color: var(--sidebar-accent-foreground);
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        .text-base {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+
+        .text-3xl {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+        }
+
+        .text-4xl {
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+        }
+
+        .text-5xl {
+            font-size: 3rem;
+            line-height: 1;
+        }
+
+        .font-normal {
+            font-weight: 400;
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .opacity-0 {
+            opacity: 0;
+        }
+
+        .opacity-10 {
+            opacity: 0.1;
+        }
+
+        .opacity-20 {
+            opacity: 0.2;
+        }
+
+        .opacity-30 {
+            opacity: 0.3;
+        }
+
+        .opacity-40 {
+            opacity: 0.4;
+        }
+
+        .opacity-50 {
+            opacity: 0.5;
+        }
+
+        .opacity-60 {
+            opacity: 0.6;
+        }
+
+        .opacity-70 {
+            opacity: 0.7;
+        }
+
+        .opacity-80 {
+            opacity: 0.8;
+        }
+
+        .opacity-90 {
+            opacity: 0.9;
+        }
+
+        .opacity-100 {
+            opacity: 1;
+        }
+
+        .grayscale {
+            filter: grayscale(100%);
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .cursor-grab {
+            cursor: grab;
+        }
+
+        .cursor-grabbing {
+            cursor: grabbing;
+        }
+
+        .select-none {
             user-select: none;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background: #2d0922;
-            border-bottom: 1px solid #551144;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            height: 60px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #ff5722;
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logout-btn {
-            padding: 6px 15px;
-            background: #551144;
-            color: #ff8a80;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
+        .transition-all {
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #773366;
-            font-size: 0.85rem;
-            font-family: 'Ubuntu Mono', monospace;
         }
 
-        .logout-btn:hover {
-            background: #662255;
-            border-color: #ff5722;
+        .transition-colors {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
-        .main-container {
-            padding-top: 60px;
-            height: 100vh;
-            display: flex;
+        .transition-opacity {
+            transition: opacity 0.3s ease;
+        }
+
+        .transition-transform {
+            transition: transform 0.3s ease;
+        }
+
+        .duration-200 {
+            transition-duration: 0.2s;
+        }
+
+        .duration-300 {
+            transition-duration: 0.3s;
+        }
+
+        .duration-500 {
+            transition-duration: 0.5s;
+        }
+
+        .ease-out {
+            transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        .ease-in-out {
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .group:hover .group-hover\:opacity-100 {
+            opacity: 1 !important;
+        }
+
+        .group:hover .group-hover\:scale-105 {
+            transform: scale(1.05);
+        }
+
+        .group:hover .group-hover\:brightness-110 {
+            filter: brightness(1.1);
+        }
+
+        /* ===== LAYOUT GRID ===== */
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .grid-cols-12 {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .col-span-1 {
+            grid-column: span 1 / span 1;
+        }
+
+        .col-span-2 {
+            grid-column: span 2 / span 2;
+        }
+
+        .col-span-3 {
+            grid-column: span 3 / span 3;
+        }
+
+        .col-span-7 {
+            grid-column: span 7 / span 7;
+        }
+
+        .gap-1 {
+            gap: 0.25rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 0.75rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .gap-6 {
+            gap: 1.5rem;
+        }
+
+        .gap-8 {
+            gap: 2rem;
+        }
+
+        .gap-10 {
+            gap: 2.5rem;
+        }
+
+        .gap-gap {
+            gap: var(--gap);
+        }
+
+        .p-0 {
+            padding: 0;
+        }
+
+        .p-1 {
+            padding: 0.25rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .p-3 {
+            padding: 0.75rem;
+        }
+
+        .p-4 {
+            padding: 1rem;
+        }
+
+        .p-6 {
+            padding: 1.5rem;
+        }
+
+        .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .px-3 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .py-1 {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .py-6 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .py-8 {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+
+        .py-10 {
+            padding-top: 2.5rem;
+            padding-bottom: 2.5rem;
+        }
+
+        .py-sides {
+            padding-top: var(--sides);
+            padding-bottom: var(--sides);
+        }
+
+        .px-sides {
+            padding-left: var(--sides);
+            padding-right: var(--sides);
+        }
+
+        .pt-1 {
+            padding-top: 0.25rem;
+        }
+
+        .pt-2 {
+            padding-top: 0.5rem;
+        }
+
+        .pt-4 {
+            padding-top: 1rem;
+        }
+
+        .pb-1 {
+            padding-bottom: 0.25rem;
+        }
+
+        .pb-4 {
+            padding-bottom: 1rem;
+        }
+
+        .pl-2 {
+            padding-left: 0.5rem;
+        }
+
+        .pl-3 {
+            padding-left: 0.75rem;
+        }
+
+        .pl-4 {
+            padding-left: 1rem;
+        }
+
+        .pr-1 {
+            padding-right: 0.25rem;
+        }
+
+        .pr-2 {
+            padding-right: 0.5rem;
+        }
+
+        .pr-3 {
+            padding-right: 0.75rem;
+        }
+
+        .pr-4 {
+            padding-right: 1rem;
+        }
+
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-auto {
+            margin-top: auto;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .ml-auto {
+            margin-left: auto;
+        }
+
+        .mr-1 {
+            margin-right: 0.25rem;
+        }
+
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+
+        .mr-3 {
+            margin-right: 0.75rem;
+        }
+
+        .space-y-1 > * + * {
+            margin-top: 0.25rem;
+        }
+
+        .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .flex-1 {
+            flex: 1 1 0%;
+        }
+
+        .flex-col {
             flex-direction: column;
         }
 
-        /* Ubuntu Terminal Styling */
-        .terminal-wrapper {
-            flex: 1;
-            padding: 0;
-            background: #300a24;
+        .flex-row {
+            flex-direction: row;
+        }
+
+        .items-start {
+            align-items: flex-start;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .items-baseline {
+            align-items: baseline;
+        }
+
+        .items-stretch {
+            align-items: stretch;
+        }
+
+        .justify-start {
+            justify-content: flex-start;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-end {
+            justify-content: flex-end;
+        }
+
+        .min-w-0 {
+            min-width: 0;
+        }
+
+        .max-w-xs {
+            max-width: 20rem;
+        }
+
+        .max-w-sm {
+            max-width: 24rem;
+        }
+
+        .max-w-md {
+            max-width: 28rem;
+        }
+
+        .max-w-max {
+            max-width: max-content;
+        }
+
+        .w-1\/4 {
+            width: 25%;
+        }
+
+        .w-14 {
+            width: 3.5rem;
+        }
+
+        .w-16 {
+            width: 4rem;
+        }
+
+        .w-56 {
+            width: 14rem;
+        }
+
+        .w-80 {
+            width: 20rem;
+        }
+
+        .h-5 {
+            height: 1.25rem;
+        }
+
+        .h-6 {
+            height: 1.5rem;
+        }
+
+        .h-7 {
+            height: 1.75rem;
+        }
+
+        .h-8 {
+            height: 2rem;
+        }
+
+        .h-10 {
+            height: 2.5rem;
+        }
+
+        .h-12 {
+            height: 3rem;
+        }
+
+        .h-14 {
+            height: 3.5rem;
+        }
+
+        .h-32 {
+            height: 8rem;
+        }
+
+        .h-header-mobile {
+            height: var(--header-mobile);
+        }
+
+        .size-3 {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+
+        .size-4 {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .size-5 {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .size-6 {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .size-7 {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
+        .size-9 {
+            width: 2.25rem;
+            height: 2.25rem;
+        }
+
+        .size-10 {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .size-12 {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .size-14 {
+            width: 3.5rem;
+            height: 3.5rem;
+        }
+
+        .size-16 {
+            width: 4rem;
+            height: 4rem;
+        }
+
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ===== CUSTOM COMPONENT STYLES ===== */
+        .card {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
             overflow: hidden;
         }
 
-        .terminal-header {
-            background: #3a0d2e;
-            padding: 8px 15px;
-            display: flex;
+        .badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #551144;
-            height: 36px;
+            justify-content: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid transparent;
         }
 
-        .terminal-title {
-            font-size: 0.9rem;
-            color: #ff8a80;
+        .badge-default {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            border-color: var(--primary);
+        }
+
+        .badge-secondary {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+            border-color: var(--border);
+        }
+
+        .badge-outline {
+            background-color: transparent;
+            color: currentColor;
+            border-color: currentColor;
+        }
+
+        .badge-outline-success {
+            background-color: transparent;
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .badge-outline-warning {
+            background-color: transparent;
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .badge-destructive {
+            background-color: var(--destructive);
+            color: white;
+            border-color: var(--destructive);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: calc(var(--radius) - 2px);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-default {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .button-default:hover:not(:disabled) {
+            background-color: color-mix(in srgb, var(--primary) 90%, black);
+        }
+
+        .button-secondary {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+            border-color: var(--border);
+        }
+
+        .button-secondary:hover:not(:disabled) {
+            background-color: color-mix(in srgb, var(--secondary) 90%, black);
+        }
+
+        .button-ghost {
+            background-color: transparent;
+            color: currentColor;
+        }
+
+        .button-ghost:hover:not(:disabled) {
+            background-color: var(--accent);
+        }
+
+        .button-outline {
+            background-color: transparent;
+            color: currentColor;
+            border-color: currentColor;
+        }
+
+        .button-outline:hover:not(:disabled) {
+            background-color: var(--accent);
+        }
+
+        .button-sm {
+            height: 2rem;
+            padding: 0 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .button-md {
+            height: 2.5rem;
+            padding: 0 1rem;
+            font-size: 0.875rem;
+        }
+
+        .button-lg {
+            height: 3rem;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+        }
+
+        .button-xl {
+            height: 3.5rem;
+            padding: 0 2rem;
+            font-size: 1rem;
+        }
+
+        .button-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+        }
+
+        .input {
+            width: 100%;
+            height: 2.5rem;
+            padding: 0 0.75rem;
+            background-color: var(--input);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) - 2px);
+            color: var(--foreground);
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--ring);
+        }
+
+        .input::placeholder {
+            color: var(--muted-foreground);
+            opacity: 0.7;
+        }
+
+        .separator {
+            width: 100%;
+            height: 1px;
+            background-color: var(--border);
+        }
+
+        .bullet {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: var(--muted-foreground);
+        }
+
+        .bullet-success {
+            background-color: var(--success);
+        }
+
+        .bullet-warning {
+            background-color: var(--warning);
+        }
+
+        .bullet-destructive {
+            background-color: var(--destructive);
+        }
+
+        .bullet-sm {
+            width: 0.375rem;
+            height: 0.375rem;
+        }
+
+        .sheet {
+            position: fixed;
+            z-index: 50;
+            background-color: var(--background);
+            transition: transform 0.3s ease;
+        }
+
+        .sheet-bottom {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            transform: translateY(100%);
+        }
+
+        .sheet-bottom.open {
+            transform: translateY(0);
+        }
+
+        .sheet-right {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            transform: translateX(100%);
+        }
+
+        .sheet-right.open {
+            transform: translateX(0);
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip-content {
+            position: absolute;
+            z-index: 50;
+            padding: 0.5rem 0.75rem;
+            background-color: var(--popover);
+            color: var(--popover-foreground);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .tooltip:hover .tooltip-content {
+            opacity: 1;
+        }
+
+        .tabs-list {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .tabs-trigger {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--muted-foreground);
+            font-family: inherit;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .tabs-trigger:hover {
+            color: var(--foreground);
+        }
+
+        .tabs-trigger.active {
+            color: var(--foreground);
+        }
+
+        .tabs-trigger.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        /* ===== SIDEBAR NAVIGATION STYLES ===== */
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-title .bullet {
+            width: 0.375rem;
+            height: 0.375rem;
+        }
+
+        .nav-title span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--muted-foreground);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: calc(var(--radius) - 2px);
+            text-decoration: none;
+            color: var(--sidebar-foreground);
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover {
+            background-color: var(--sidebar-accent);
+        }
+
+        .nav-item.active {
+            background-color: var(--sidebar-primary);
+            color: var(--sidebar-primary-foreground);
+        }
+
+        .nav-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        /* ===== TERMINAL SPECIFIC STYLES ===== */
+        .terminal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--card);
+        }
+
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--terminal-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
         }
 
         .terminal-controls {
+            padding: 0.75rem 1rem;
+            background-color: var(--secondary);
+            border-bottom: 1px solid var(--border);
             display: flex;
-            gap: 6px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .control-btn {
@@ -127,116 +1355,144 @@ session_start();
             border-radius: 50%;
             border: none;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        .close-btn { background: #ff5f56; }
-        .minimize-btn { background: #ffbd2e; }
-        .fullscreen-btn { background: #27ca3f; }
+        .control-btn:hover {
+            opacity: 0.8;
+        }
+
+        .control-btn.close {
+            background-color: var(--destructive);
+        }
+
+        .control-btn.minimize {
+            background-color: var(--warning);
+        }
+
+        .control-btn.maximize {
+            background-color: var(--success);
+        }
+
+        .terminal-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+        }
 
         .terminal-body {
-            background: #300a24;
-            height: calc(100vh - 96px);
-            padding: 0;
-            position: relative;
-            overflow: hidden;
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            line-height: 1.4;
         }
 
         #terminal {
-            width: 100%;
             height: 100%;
-            background: #300a24;
-            color: #f0f0f0;
-            font-family: 'Ubuntu Mono', monospace;
-            font-size: 14px;
-            line-height: 1.4;
-            padding: 15px;
-            border: none;
-            outline: none;
-            overflow-y: auto;
+            color: var(--terminal-text);
             white-space: pre-wrap;
             word-wrap: break-word;
+            outline: none;
         }
 
         #terminal:focus {
             outline: none;
         }
 
-        #terminal::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        #terminal::-webkit-scrollbar-track {
-            background: #2d0922;
-        }
-
-        #terminal::-webkit-scrollbar-thumb {
-            background: #551144;
-            border-radius: 2px;
-        }
-
-        #terminal::-webkit-scrollbar-thumb:hover {
-            background: #662255;
-        }
-
         /* Terminal text styles */
         .terminal-line {
             margin-bottom: 2px;
-            display: block;
         }
 
         .prompt {
-            color: #4CAF50;
+            color: var(--terminal-prompt);
             font-weight: bold;
         }
 
         .user {
-            color: #2196F3;
+            color: var(--terminal-user);
         }
 
         .host {
-            color: #FF9800;
+            color: var(--terminal-host);
         }
 
         .path {
-            color: #FFC107;
+            color: var(--terminal-path);
         }
 
         .command {
-            color: #FFFFFF;
+            color: var(--terminal-text);
         }
 
         .output {
-            color: #E0E0E0;
+            color: var(--terminal-text);
+            opacity: 0.9;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .error {
-            color: #F44336;
+            color: var(--terminal-error);
         }
 
         .success {
-            color: #4CAF50;
+            color: var(--terminal-success);
         }
 
         .directory {
-            color: #4EC9B0;
+            color: var(--terminal-directory);
         }
 
         .file {
-            color: #CE9178;
+            color: var(--terminal-file);
         }
 
         .executable {
-            color: #569CD6;
+            color: var(--terminal-executable);
         }
 
         .link {
-            color: #D7BA7D;
+            color: #d7ba7d;
         }
 
-        /* Cursor */
+        .welcome-message {
+            color: var(--muted-foreground);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 0;
+        }
+
+        .command-input {
+            background: transparent;
+            border: none;
+            color: var(--terminal-text);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            outline: none;
+            padding: 0;
+            margin-left: 0.5rem;
+            flex: 1;
+            caret-color: var(--terminal-text);
+        }
+
+        .command-input:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
         .cursor {
             display: inline-block;
-            background: #FFFFFF;
+            background: var(--terminal-text);
             animation: blink 1s infinite;
             width: 8px;
             height: 16px;
@@ -249,146 +1505,232 @@ session_start();
             50% { opacity: 0; }
         }
 
-        /* Terminal welcome message */
-        .welcome-message {
-            color: #B39DDB;
-            margin-bottom: 15px;
-            line-height: 1.5;
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        /* Input line styling */
-        .input-line {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
-.input-line .prompt {
-    display: inline;
-    white-space: nowrap;
-}
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
-.command-input {
-    background: transparent;
-    border: none;
-    color: #FFFFFF;
-    font-family: 'Ubuntu Mono', monospace;
-    font-size: 14px;
-    outline: none;
-    padding: 0;
-    margin-left: 5px;
-    flex: 1;
-    min-width: 50px;
-}
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+        }
 
-.output {
-    color: #E0E0E0;
-    margin: 0;
-    padding: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
+        .animate-slideUp {
+            animation: slideUp 0.3s ease-out;
+        }
 
-        .input-line input {
-            flex: 1;
+        .animate-slideDown {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* ===== CUSTOM SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
             background: transparent;
-            border: none;
-            color: #FFFFFF;
-            font-family: 'Ubuntu Mono', monospace;
-            font-size: 14px;
-            outline: none;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--muted);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted-foreground);
+        }
+
+        /* ===== FULLSCREEN STYLES ===== */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            background-color: var(--terminal-bg);
             padding: 0;
-            margin-left: 5px;
-        }
-
-        /* Auto-suggestions */
-        .suggestion {
-            color: #666;
-            position: absolute;
-            pointer-events: none;
-        }
-
-        /* Remove all quick command buttons and feature cards */
-        .quick-commands,
-        .terminal-features,
-        .feature-card {
-            display: none !important;
-        }
-
-        /* Hide placeholder text in terminal */
-        .placeholder {
-            display: none;
-        }
-
-        /* Make sure terminal takes full height */
-        html, body {
-            height: 100%;
             margin: 0;
-            padding: 0;
+            border-radius: 0;
         }
 
+        .fullscreen .terminal-body {
+            height: calc(100vh - 60px);
+        }
+
+        /* ===== TV NOISE EFFECT ===== */
+        .tv-noise {
+            position: absolute;
+            inset: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.1) 0px,
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 2px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(0, 0, 0, 0.1) 0px,
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .header {
-                padding: 10px 15px;
-                height: 50px;
+            body {
+                min-width: 100%;
+                overflow-x: auto;
             }
             
-            .main-container {
-                padding-top: 50px;
+            .desktop-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                min-width: 100%;
+            }
+            
+            .desktop-sidebar {
+                display: none;
             }
             
             .terminal-body {
-                height: calc(100vh - 86px);
-            }
-            
-            #terminal {
-                font-size: 13px;
-                padding: 10px;
-            }
-            
-            .logout-btn {
-                padding: 4px 10px;
-                font-size: 0.8rem;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-            <h1><i class="fa-brands fa-ubuntu"></i>Linux Terminal</h1>
-        </div>
-        <div class="user-info">
-            <button onclick="goBack()" class="logout-btn">
-                <i class="fa-solid fa-arrow-left"></i>
-                Exit
-            </button>
-        </div>
-    </header>
+    <div class="desktop-container">
+        <!-- Left Sidebar - Navigation -->
+        <div class="desktop-sidebar">
+            <!-- Logo Section -->
+            <div class="card">
+                <div class="p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="size-12 flex items-center justify-center bg-primary rounded-lg">
+                            <svg class="size-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-2xl font-display" id="sidebar-name">mohamed</div>
+                            <div class="text-xs uppercase text-muted-foreground">terminal module</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <div class="main-container">
-        <div class="terminal-wrapper">
-            <div class="terminal-header">
-                <div class="terminal-title">
-                    <i class="fas fa-terminal"></i>
-                    <span>user's terminal</span>
+            <!-- Navigation Sections -->
+            <div class="card">
+                <div class="p-3">
+                    <div class="nav-section">
+                        <div class="space-y-1" style="height: 45cap;">
+                            <a href="dashboard.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
+                                </svg>
+                                <span class="nav-label">Overview</span>
+                            </a>
+                            <a href="assignment.php" class="nav-item">
+                                <i class="nav-icon fas fa-book"></i>
+                                <span class="nav-label">Assignments</span>
+                            </a>
+                            <a href="lab.php" class="nav-item active">
+                                <i class="nav-icon fas fa-terminal"></i>
+                                <span class="nav-label">Terminal</span>
+                            </a>
+                            <a href="leaderboard.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
+                                </svg>
+                                <span class="nav-label">Leaderboard</span>
+                            </a>
+                            <a href="contactus.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
+                                </svg>
+                                <span class="nav-label">Contact support</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="desktop-main">
+            <!-- Terminal Header -->
+            <div class="card animate-fadeIn">
+                <div class="terminal-header">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="size-9 rounded bg-primary flex items-center justify-center">
+                                <i class="fas fa-terminal text-primary-foreground text-lg"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl font-display">Terminal</h1>
+                                <div class="text-sm text-muted-foreground">Ubuntu 22.04 LTS - Interactive Shell</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-outline-success">ACTIVE</span>
+                            <button class="button button-secondary button-sm" onclick="goBack()">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Back to Lab
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Container -->
+            <div class="terminal-container animate-slideUp" style="animation-delay: 0.1s">
+                <!-- Terminal Controls -->
                 <div class="terminal-controls">
-                    <button class="control-btn minimize-btn" onclick="minimizeTerminal()" title="Minimize"></button>
-                    <button class="control-btn fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen"></button>
-                    <button class="control-btn close-btn" onclick="clearTerminal()" title="Clear"></button>
+                    <div class="control-buttons">
+                        <button class="control-btn close" onclick="clearTerminal()" title="Clear Terminal"></button>
+                        <button class="control-btn minimize" onclick="minimizeTerminal()" title="Minimize"></button>
+                        <button class="control-btn maximize" onclick="toggleFullscreen()" title="Fullscreen"></button>
+                    </div>
+                    <div class="terminal-info">
+                        <span><i class="fas fa-microchip"></i> Ubuntu 22.04 LTS</span>
+                        <span><i class="fas fa-user"></i> user@localhost</span>
+                        <span><i class="fas fa-folder"></i> ~</span>
+                    </div>
+                </div>
+
+                <!-- Terminal Body -->
+                <div class="terminal-body">
+                    <div id="terminal"></div>
                 </div>
             </div>
-            
-            <div class="terminal-body">
-                <div id="terminal"></div>
-            </div>
+
         </div>
     </div>
 
     <script>
+        // Ubuntu Terminal Engine (from your original code)
         class UbuntuTerminal {
             constructor() {
                 this.username = 'user';
@@ -454,7 +1796,7 @@ session_start();
                                         size: '123',
                                         modified: 'Jan 1 00:00',
                                         name: 'notes.txt',
-                                        content: '# Welcome to Ubuntu Terminal\n\nThis is a simulated terminal running in your browser.\n\nType \'help\' to see available commands.'
+                                        content: '# Welcome to M.O.N.K.Y OS Terminal\n\nThis is a simulated Linux terminal with full command support.\n\nType \'help\' to see available commands.\nType \'neofetch\' for system information.'
                                     },
                                     'readme.md': {
                                         type: 'file',
@@ -464,7 +1806,7 @@ session_start();
                                         size: '456',
                                         modified: 'Jan 1 00:00',
                                         name: 'readme.md',
-                                        content: '# ProWorldz Ubuntu Terminal\n\nA fully functional terminal simulator with Linux commands.'
+                                        content: '# M.O.N.K.Y OS Ubuntu Terminal\n\nA fully functional terminal simulator with Linux commands.\n\nFeatures:\n- File system navigation\n- File operations\n- Text processing\n- System commands\n- Package management simulation'
                                     }
                                 }
                             },
@@ -477,6 +1819,38 @@ session_start();
                                 modified: 'Jan 1 00:00',
                                 name: 'Downloads',
                                 children: {}
+                            },
+                            'Projects': {
+                                type: 'dir',
+                                permissions: 'drwxr-xr-x',
+                                owner: this.username,
+                                group: this.username,
+                                size: '4096',
+                                modified: 'Jan 1 00:00',
+                                name: 'Projects',
+                                children: {
+                                    'web_app': {
+                                        type: 'dir',
+                                        permissions: 'drwxr-xr-x',
+                                        owner: this.username,
+                                        group: this.username,
+                                        size: '4096',
+                                        modified: 'Jan 1 00:00',
+                                        name: 'web_app',
+                                        children: {
+                                            'index.html': {
+                                                type: 'file',
+                                                permissions: '-rw-r--r--',
+                                                owner: this.username,
+                                                group: this.username,
+                                                size: '1024',
+                                                modified: 'Jan 1 00:00',
+                                                name: 'index.html',
+                                                content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>M.O.N.K.Y OS</title>\n</head>\n<body>\n    <h1>Welcome to M.O.N.K.Y OS</h1>\n</body>\n</html>'
+                                            }
+                                        }
+                                    }
+                                }
                             },
                             '.bashrc': {
                                 type: 'file',
@@ -548,7 +1922,6 @@ session_start();
                     case 'rm': return this.rm(args);
                     case 'rmdir': return this.rmdir(args);
                     case 'cp': return this.cp(args);
-                    case 'nano': return this.nano(args);
                     case 'mv': return this.mv(args);
                     case 'chmod': return this.chmod(args);
                     case 'grep': return this.grep(args);
@@ -576,6 +1949,7 @@ session_start();
                     case 'ping': return this.ping(args);
                     case 'ifconfig': return this.ifconfig();
                     case 'neofetch': return this.neofetch();
+                    case 'nano': return this.nano(args);
                     default: return `${cmd}: command not found\nTry 'help' for available commands.`;
                 }
             }
@@ -595,6 +1969,7 @@ File Operations:
   cp [src] [dest]        - Copy file/directory
   mv [src] [dest]        - Move/rename file/directory
   chmod [mode] [file]    - Change file permissions
+  nano [file]            - Text editor
 
 Text Processing:
   echo [text]            - Display text
@@ -652,7 +2027,7 @@ Press ↑↓ for command history`;
                 let items = Object.keys(node.children).filter(item => {
                     if (showAll) return true;
                     return !item.startsWith('.');
-                });
+                }).sort();
                 
                 if (longFormat) {
                     return items.map(item => {
@@ -810,9 +2185,6 @@ Press ↑↓ for command history`;
                 return this.rm(['-r', ...args]);
             }
 
-            // Other command implementations would follow similar patterns...
-            // For brevity, I'll show the structure of remaining commands
-
             date() {
                 return new Date().toString();
             }
@@ -862,958 +2234,670 @@ tmpfs            4023832       0   4023832   0% /sys/fs/cgroup`;
 
             neofetch() {
                 return `
-                    \${c1}            .-/+oossssoo+/-.               \${c2}user@localhost
-                    \${c1}        \`:+ssssssssssssssssss+:\`           \${c2}--------------
-                    \${c1}      -+ssssssssssssssssssyyssss+-         \${c2}OS: Ubuntu 22.04 LTS x86_64
-                    \${c1}    .ossssssssssssssssss\${c3}dMMMNy\${c1}sssso.       \${c2}Host: Virtual Machine
-                    \${c1}   /ssssssssssss\${c3}hdmmNNmmyNMMMMh\${c1}ssss/      \${c2}Kernel: 5.15.0-91-generic
-                    \${c1}  +ssssssssss\${c3}hm\${c1}yd\${c3}MMMMMMMNddddy\${c1}ssss+     \${c2}Uptime: 1 day
-                    \${c1} /ssssssss\${c3}hNMMM\${c1}yh\${c3}hyyyyhmNMMMNh\${c1}ssss/    \${c2}Packages: 1342 (apt)
-                    \${c1}.ssssssss\${c3}dMMMNh\${c1}ssssssssss\${c3}hNMMMd\${c1}ssssss.   \${c2}Shell: bash 5.1.16
-                    \${c1}+ssss\${c3}hhhyNMMNy\${c1}ssssssssssss\${c3}yNMMMy\${c1}ssss+   \${c2}Terminal: xterm-256color
-                    \${c1}oss\${c3}yNMMMNyMMh\${c1}ssssssssssssss\${c3}hmmmh\${c1}sssso   \${c2}CPU: Virtual (2) @ 2.4GHz
-                    \${c1}oss\${c3}yNMMMNyMMh\${c1}sssssssssssssshmmmh\${c1}sssso   \${c2}Memory: 1024MiB / 2048MiB
-                    \${c1}+ssss\${c3}hhhyNMMNy\${c1}ssssssssssss\${c3}yNMMMy\${c1}ssss+
-                    \${c1}.ssssssss\${c3}dMMMNh\${c1}ssssssssss\${c3}hNMMMd\${c1}ssssss.
-                    \${c1} /ssssssss\${c3}hNMMM\${c1}yh\${c3}hyyyyhdNMMMNh\${c1}ssss/
-                    \${c1}  +ssssssssss\${c3}dm\${c1}yd\${c3}MMMMMMMMddddy\${c1}ssss+
-                    \${c1}   /ssssssssssss\${c3}hdmNNNNmyNMMMMh\${c1}ssss/
-                    \${c1}    .ossssssssssssssssss\${c3}dMMMNy\${c1}sssso.
-                    \${c1}      -+ssssssssssssssssssyyyyy+-`
+${' '.repeat(20)}.-\`\`\`\`\`-.,           \x1b[1;34muser\x1b[0m@\x1b[1;34mlocalhost\x1b[0m
+${' '.repeat(18)}/` + '`' + `${' '.repeat(11)}.-\`\`-.        \x1b[1;30m----------------\x1b[0m
+${' '.repeat(18)}/` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(11)}.      \x1b[1;34mOS\x1b[0m: Ubuntu 22.04.3 LTS x86_64
+${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(13)}|     \x1b[1;34mHost\x1b[0m: M.O.N.K.Y OS Virtual Machine
+${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}|` + '`' + `${' '.repeat(13)}|     \x1b[1;34mKernel\x1b[0m: 5.15.0-91-generic
+${' '.repeat(18)}\\` + '`' + `.` + '`' + `${' '.repeat(9)}/` + '`' + `${' '.repeat(12)}/      \x1b[1;34mUptime\x1b[0m: 1 day, 0 hours
+${' '.repeat(17)}\\`;
+            }
+
+                        cp(args) {
+                if (args.length < 2) return 'cp: missing file operand';
+                
+                const node = this.getCurrentNode();
+                if (!node || !node.children) return '';
+                
+                const src = args[0];
+                const dest = args[1];
+                
+                if (!node.children[src]) {
+                    return `cp: cannot stat '${src}': No such file or directory`;
+                }
+                
+                const srcObj = JSON.parse(JSON.stringify(node.children[src]));
+                srcObj.modified = new Date().toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                node.children[dest] = srcObj;
+                node.children[dest].name = dest;
+                
+                return '';
+            }
+
+            mv(args) {
+                if (args.length < 2) return 'mv: missing file operand';
+                
+                const node = this.getCurrentNode();
+                if (!node || !node.children) return '';
+                
+                const src = args[0];
+                const dest = args[1];
+                
+                if (!node.children[src]) {
+                    return `mv: cannot stat '${src}': No such file or directory`;
+                }
+                
+                const srcObj = node.children[src];
+                srcObj.modified = new Date().toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                node.children[dest] = srcObj;
+                node.children[dest].name = dest;
+                delete node.children[src];
+                
+                return '';
+            }
+
+            chmod(args) {
+                if (args.length < 2) return 'chmod: missing operand';
+                return ''; // Permission change simulated
+            }
+
+            grep(args) {
+                if (args.length < 2) return 'grep: missing pattern or file';
+                
+                const pattern = args[0];
+                const filename = args[1];
+                const node = this.getCurrentNode();
+                
+                if (!node || !node.children || !node.children[filename]) {
+                    return `grep: ${filename}: No such file or directory`;
+                }
+                
+                const file = node.children[filename];
+                if (file.type !== 'file') {
+                    return `grep: ${filename}: Is a directory`;
+                }
+                
+                const lines = file.content.split('\n');
+                const results = lines.filter(line => line.toLowerCase().includes(pattern.toLowerCase()));
+                
+                if (results.length === 0) {
+                    return ''; // No matches
+                }
+                
+                return results.map(line => {
+                    const matchIndex = line.toLowerCase().indexOf(pattern.toLowerCase());
+                    if (matchIndex >= 0) {
+                        const before = line.substring(0, matchIndex);
+                        const match = line.substring(matchIndex, matchIndex + pattern.length);
+                        const after = line.substring(matchIndex + pattern.length);
+                        return before + '\x1b[1;31m' + match + '\x1b[0m' + after;
+                    }
+                    return line;
+                }).join('\n');
+            }
+
+            find(args) {
+                if (args.length === 0) return 'find: missing path';
+                return '.'; // Simple implementation
+            }
+
+            wc(args) {
+                if (args.length === 0) return 'wc: missing file operand';
+                
+                const node = this.getCurrentNode();
+                if (!node || !node.children) return '';
+                
+                const filename = args[0];
+                if (!node.children[filename]) {
+                    return `wc: ${filename}: No such file or directory`;
+                }
+                
+                const file = node.children[filename];
+                if (file.type !== 'file') {
+                    return `wc: ${filename}: Is a directory`;
+                }
+                
+                const lines = file.content.split('\n').filter(line => line !== '');
+                const words = file.content.split(/\s+/).filter(word => word !== '');
+                const chars = file.content.length;
+                
+                return `  ${lines.length}  ${words.length} ${chars} ${filename}`;
+            }
+
+            head(args) {
+                if (args.length === 0) return 'head: missing file operand';
+                
+                const node = this.getCurrentNode();
+                if (!node || !node.children) return '';
+                
+                const filename = args[0];
+                const n = args.includes('-n') ? parseInt(args[args.indexOf('-n') + 1]) : 10;
+                
+                if (!node.children[filename]) {
+                    return `head: cannot open '${filename}' for reading: No such file or directory`;
+                }
+                
+                const file = node.children[filename];
+                if (file.type !== 'file') {
+                    return `head: error reading '${filename}': Is a directory`;
+                }
+                
+                const lines = file.content.split('\n');
+                return lines.slice(0, n).join('\n');
+            }
+
+            tail(args) {
+                if (args.length === 0) return 'tail: missing file operand';
+                
+                const node = this.getCurrentNode();
+                if (!node || !node.children) return '';
+                
+                const filename = args[0];
+                const n = args.includes('-n') ? parseInt(args[args.indexOf('-n') + 1]) : 10;
+                
+                if (!node.children[filename]) {
+                    return `tail: cannot open '${filename}' for reading: No such file or directory`;
+                }
+                
+                const file = node.children[filename];
+                if (file.type !== 'file') {
+                    return `tail: error reading '${filename}': Is a directory`;
+                }
+                
+                const lines = file.content.split('\n');
+                return lines.slice(-n).join('\n');
+            }
+
+            sort(args) {
+                if (args.length === 0) return 'sort: missing file operand';
+                
+                const node = this.getCurrentNode();
+                if (!node || !node.children) return '';
+                
+                const filename = args[0];
+                if (!node.children[filename]) {
+                    return `sort: cannot read: ${filename}: No such file or directory`;
+                }
+                
+                const file = node.children[filename];
+                if (file.type !== 'file') {
+                    return `sort: read failed: ${filename}: Is a directory`;
+                }
+                
+                const lines = file.content.split('\n').filter(line => line !== '');
+                const reversed = args.includes('-r');
+                const sorted = lines.sort();
+                
+                if (reversed) {
+                    sorted.reverse();
+                }
+                
+                return sorted.join('\n');
+            }
+
+            cal(args) {
+                const now = new Date();
+                const month = args.length > 0 ? parseInt(args[0]) - 1 : now.getMonth();
+                const year = args.length > 1 ? parseInt(args[1]) : now.getFullYear();
+                
+                const date = new Date(year, month, 1);
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                let result = `     ${monthNames[date.getMonth()]} ${date.getFullYear()}\n`;
+                result += `Su Mo Tu We Th Fr Sa\n`;
+                
+                const firstDay = date.getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                let calendar = '';
+                for (let i = 0; i < firstDay; i++) {
+                    calendar += '   ';
+                }
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const formattedDay = day.toString().padStart(2);
+                    calendar += `${formattedDay} `;
+                    if ((day + firstDay) % 7 === 0) {
+                        calendar += '\n';
+                    }
+                }
+                
+                return result + calendar;
+            }
+
+            du(args) {
+                const dir = args.length > 0 ? args[0] : '.';
+                return `4096\t${dir}`;
+            }
+
+            kill(args) {
+                if (args.length === 0) return 'kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]';
+                return '';
+            }
+
+            export(args) {
+                if (args.length === 0) {
+                    return this.envCmd();
+                }
+                
+                const parts = args.join(' ').split('=');
+                if (parts.length >= 2) {
+                    const varName = parts[0].trim();
+                    const value = parts.slice(1).join('=').trim();
+                    this.env[varName] = value;
+                }
+                return '';
+            }
+
+            aliasCmd(args) {
+                if (args.length === 0) {
+                    return Object.entries(this.aliases)
+                        .map(([name, value]) => `alias ${name}='${value}'`)
+                        .join('\n');
+                }
+                
+                const arg = args.join(' ');
+                if (arg.includes('=')) {
+                    const parts = arg.split('=');
+                    const name = parts[0];
+                    const value = parts.slice(1).join('=').replace(/'/g, '');
+                    this.aliases[name] = value;
+                }
+                return '';
+            }
+
+            sudo(args) {
+                if (args.length === 0) return 'sudo: missing command';
+                
+                if (args[0] === 'apt') {
+                    return this.apt(args.slice(1), true);
+                }
+                
+                return `[sudo] password for ${this.username}: `;
             }
 
             man(args) {
                 if (args.length === 0) return 'What manual page do you want?';
-                const command = args[0];
+                
+                const cmd = args[0];
                 const manuals = {
-                    'ls': 'LS(1)                    User Commands                   LS(1)\n\nNAME\n       ls - list directory contents\n\nSYNOPSIS\n       ls [OPTION]... [FILE]...\n\nDESCRIPTION\n       List  information  about the FILEs (the current directory by default).\n       Sort entries alphabetically if none of -cftuvSUX nor --sort is speci‐\n       fied.\n\n       Mandatory arguments to long options are mandatory for short options too.\n\n       -a, --all\n              do not ignore entries starting with .\n\n       -l     use a long listing format\n\n       -h, --human-readable\n              with -l, print sizes in human readable format (e.g., 1K 234M 2G)',
-                    'cd': 'CD(1)                    User Commands                   CD(1)\n\nNAME\n       cd - change the shell working directory.\n\nSYNOPSIS\n       cd [-L|[-P [-e]] [-@]] [dir]\n\nDESCRIPTION\n       Change the shell working directory.\n\n       Change  the current directory to DIR.  The default DIR is the value of\n       the HOME shell variable.\n\n       The variable CDPATH defines the search path for the directory contain‐\n       ing DIR.',
-                    'grep': 'GREP(1)                  User Commands                  GREP(1)\n\nNAME\n       grep, egrep, fgrep - print lines matching a pattern\n\nSYNOPSIS\n       grep [OPTION...] PATTERNS [FILE...]\n       grep [OPTION...] -e PATTERNS ... [FILE...]\n\nDESCRIPTION\n       grep searches for PATTERNS in each FILE.  PATTERNS is one or more pat‐\n       terns separated by newline characters, and grep prints each line that\n       matches a pattern.',
-                    'apt': 'APT(8)                   System Manager\'s Manual          APT(8)\n\nNAME\n       apt - command-line interface\n\nSYNOPSIS\n       apt [-h] [-o=config_string] [-c=config_file] [-t=target_release]\n           [-a=architecture] {list | search | show | update | install | remove | upgrade}\n\nDESCRIPTION\n       apt provides a high-level commandline interface for the package\n       management system.',
-                    'sudo': 'SUDO(8)                  System Manager\'s Manual         SUDO(8)\n\nNAME\n       sudo - execute a command as another user\n\nSYNOPSIS\n       sudo -h | -K | -k | -V\n       sudo -v [-AknS] [-g group] [-h host] [-p prompt] [-u user]\n       sudo -l [-AknS] [-g group] [-h host] [-p prompt] [-U user] [-u user]\n            [command]\n       sudo [-AbEHknPS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p\n            prompt] [-T timeout] [-u user] [VAR=value] [-i|-s] [command]\n       sudo -e [-AknS] [-r role] [-t type] [-C num] [-g group] [-h host] [-p\n            prompt] [-T timeout] [-u user] file ...\n\nDESCRIPTION\n       sudo allows a permitted user to execute a command as the superuser or\n       another user, as specified by the security policy.'
+                    'ls': 'LS(1) - list directory contents\n\nSYNOPSIS\n     ls [OPTION]... [FILE]...\n\nDESCRIPTION\n     List information about the FILEs (the current directory by default).',
+                    'cd': 'CD(1) - change directory\n\nSYNOPSIS\n     cd [DIRECTORY]\n\nDESCRIPTION\n     Change the current directory to DIRECTORY.',
+                    'cat': 'CAT(1) - concatenate files and print on the standard output\n\nSYNOPSIS\n     cat [FILE]...\n\nDESCRIPTION\n     Concatenate FILE(s) to standard output.',
+                    'grep': 'GREP(1) - print lines matching a pattern\n\nSYNOPSIS\n     grep [OPTIONS] PATTERN [FILE]...\n\nDESCRIPTION\n     grep searches for PATTERN in each FILE.',
+                    'sudo': 'SUDO(8) - execute a command as another user\n\nSYNOPSIS\n     sudo [OPTIONS] COMMAND\n\nDESCRIPTION\n     sudo allows a permitted user to execute a command as the superuser.'
                 };
                 
-                return manuals[command] || `No manual entry for ${command}`;
+                return manuals[cmd] || `No manual entry for ${cmd}`;
             }
 
-            sudo(args) {
-                if (args.length === 0) return 'sudo: you need to specify a command to run';
-                return `[sudo] password for ${this.username}: `;
-            }
-
-            apt(args) {
-                if (args.length === 0) return 'apt: need a command, try apt help';
-                const subcmd = args[0];
-                if (subcmd === 'update') {
-                    return `Get:1 http://archive.ubuntu.com/ubuntu jammy InRelease [270 kB]
+            apt(args, sudo = false) {
+                if (args.length === 0) {
+                    return 'apt 2.4.9 (amd64)\nUsage: apt [options] command';
+                }
+                
+                const cmd = args[0];
+                switch(cmd) {
+                    case 'update':
+                        if (!sudo) {
+                            return 'E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)\nE: Unable to lock directory /var/lib/apt/lists/\nW: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)\nW: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)';
+                        }
+                        return `Get:1 http://archive.ubuntu.com/ubuntu jammy InRelease [270 kB]
 Get:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [119 kB]
 Get:3 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [109 kB]
-Get:4 http://security.ubuntu.com/ubuntu jammy-security InRelease [110 kB]
-Fetched 608 kB in 1s (895 kB/s)
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-All packages are up to date.`;
-                } else if (subcmd === 'upgrade') {
-                    return `Reading package lists... Done
+Fetched 498 kB in 1s (456 kB/s)
+Reading package lists... Done`;
+                        
+                    case 'upgrade':
+                        if (!sudo) {
+                            return 'Reading package lists... Done\nE: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?';
+                        }
+                        return `Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 Calculating upgrade... Done
 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.`;
-                } else if (subcmd === 'install') {
-                    if (args.length < 2) return 'apt install: missing package name';
-                    return `Reading package lists... Done
+                        
+                    case 'install':
+                        if (args.length < 2) return 'E: Invalid operation install';
+                        if (!sudo) return 'E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)';
+                        return `Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 The following NEW packages will be installed:
   ${args[1]}
 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
 Need to get 0 B/1,234 kB of archives.
-After this operation, 5,120 kB of additional disk space will be used.
+After this operation, 4,096 B of additional disk space will be used.
 Selecting previously unselected package ${args[1]}.
-(Reading database ... 134200 files and directories currently installed.)
+(Reading database ... 123456 files and directories currently installed.)
 Preparing to unpack .../${args[1]}_1.0.0_amd64.deb ...
 Unpacking ${args[1]} (1.0.0) ...
-Setting up ${args[1]} (1.0.0) ...
-Processing triggers for man-db (2.10.2-1) ...`;
-                } else if (subcmd === 'list') {
-                    return `Listing... Done
-bash/jammy,now 5.1-6ubuntu1 amd64 [installed]
-coreutils/jammy,now 8.32-4.1ubuntu1 amd64 [installed]
-grep/jammy,now 3.7-1build1 amd64 [installed]
-sudo/jammy,now 1.9.9-1ubuntu2.4 amd64 [installed]
-vim/jammy,now 2:8.2.3995-1ubuntu2.15 amd64 [installed]`;
-                } else {
-                    return `apt ${subcmd}: command not found
-Try 'apt help' for more information.`;
+Setting up ${args[1]} (1.0.0) ...`;
+                        
+                    default:
+                        return `E: Invalid operation ${cmd}`;
                 }
             }
 
             ping(args) {
-                if (args.length === 0) return 'ping: usage error: Destination address required';
-                const host = args[0];
-                return `PING ${host} (8.8.8.8) 56(84) bytes of data.
-64 bytes from 8.8.8.8: icmp_seq=1 ttl=117 time=12.3 ms
-64 bytes from 8.8.8.8: icmp_seq=2 ttl=117 time=11.8 ms
-64 bytes from 8.8.8.8: icmp_seq=3 ttl=117 time=13.2 ms
-
---- ${host} ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2003ms
-rtt min/avg/max/mdev = 11.879/12.433/13.231/0.589 ms`;
+                if (args.length === 0) return 'ping: missing host operand';
+                
+                const host = args[0].replace('-c', '').trim();
+                const count = args.includes('-c') ? parseInt(args[args.indexOf('-c') + 1]) : 3;
+                
+                if (host === 'google.com' || host === '8.8.8.8') {
+                    let result = `PING ${host} (8.8.8.8) 56(84) bytes of data.\n`;
+                    for (let i = 1; i <= count; i++) {
+                        const time = (Math.random() * 30 + 10).toFixed(1);
+                        result += `64 bytes from 8.8.8.8: icmp_seq=${i} ttl=117 time=${time} ms\n`;
+                    }
+                    result += `\n--- ${host} ping statistics ---\n`;
+                    result += `${count} packets transmitted, ${count} received, 0% packet loss, time ${count * 1000}ms\n`;
+                    result += `rtt min/avg/max/mdev = 10.123/15.456/30.789/5.678 ms`;
+                    return result;
+                }
+                
+                return `ping: ${host}: Name or service not known`;
             }
 
             ifconfig() {
                 return `eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.1.100  netmask 255.255.255.0  broadcast 192.168.1.255
-        inet6 fe80::215:5dff:fe00:1234  prefixlen 64  scopeid 0x20<link>
-        ether 00:15:5d:00:12:34  txqueuelen 1000  (Ethernet)
-        RX packets 123456  bytes 987654321 (987.6 MB)
+        inet6 fe80::20c:29ff:fea1:bcd2  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:a1:bc:d2  txqueuelen 1000  (Ethernet)
+        RX packets 123456  bytes 123456789 (117.7 MiB)
         RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 654321  bytes 123456789 (123.4 MB)
+        TX packets 98765  bytes 98765432 (94.2 MiB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
         inet 127.0.0.1  netmask 255.0.0.0
         inet6 ::1  prefixlen 128  scopeid 0x10<host>
         loop  txqueuelen 1000  (Local Loopback)
-        RX packets 1234  bytes 123456 (123.4 KB)
+        RX packets 1234  bytes 123456 (120.5 KiB)
         RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 1234  bytes 123456 (123.4 KB)
+        TX packets 1234  bytes 123456 (120.5 KiB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0`;
             }
 
-            cal(args) {
-                const today = new Date();
-                const month = args.length > 0 ? parseInt(args[0]) - 1 : today.getMonth();
-                const year = args.length > 1 ? parseInt(args[1]) : today.getFullYear();
-                
-                const date = new Date(year, month, 1);
-                const monthNames = ["January", "February", "March", "April", "May", "June",
-                                   "July", "August", "September", "October", "November", "December"];
-                
-                let output = `     ${monthNames[date.getMonth()]} ${year}\n`;
-                output += `Su Mo Tu We Th Fr Sa\n`;
-                
-                const firstDay = date.getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                
-                let days = '';
-                for (let i = 0; i < firstDay; i++) {
-                    days += '   ';
-                }
-                
-                for (let day = 1; day <= daysInMonth; day++) {
-                    if ((firstDay + day - 1) % 7 === 0 && day > 1) {
-                        days = days.trim() + '\n';
-                    }
-                    days += (day < 10 ? ' ' : '') + day + ' ';
-                }
-                
-                return output + days.trim();
-            }
             nano(args) {
-                if (args.length === 0) {
-                    return 'Usage: nano [OPTIONS] [[+LINE,COLUMN] FILE]...\n\nEdit file(s) with nano text editor';
-                }
+                if (args.length === 0) return 'Usage: nano [OPTIONS] [[+LINE,COLUMN] FILE]...';
                 
                 const filename = args[0];
-                const node = this.getCurrentNode();
-                
-                if (!node || !node.children) {
-                    return `nano: ${filename}: No such file or directory`;
-                }
-                
-                // Check if file exists
-                if (!node.children[filename]) {
-                    // Create new file
-                    node.children[filename] = {
-                        type: 'file',
-                        permissions: '-rw-r--r--',
-                        owner: this.username,
-                        group: this.username,
-                        size: '0',
-                        modified: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                        name: filename,
-                        content: ''
-                    };
-                }
-                
-                // Launch nano editor
-                return `NANO_EDIT:${filename}`;
+                return `GNU nano 6.2 - ${filename}
+
+${' '.repeat(80)}
+${' '.repeat(80)}
+${' '.repeat(80)}
+
+^G Get Help    ^O Write Out   ^W Where Is    ^K Cut Text   ^J Justify     ^C Cur Pos
+^X Exit        ^R Read File   ^\\ Replace     ^U Paste Text ^T To Spell    ^_ Go To Line`;
+            }
+
+            neofetch() {
+                return `
+${' '.repeat(20)}.-\`\`\`\`\`-.,           \x1b[1;34muser\x1b[0m@\x1b[1;34mlocalhost\x1b[0m
+${' '.repeat(18)}/` + '`' + `${' '.repeat(11)}.-\`\`-.        \x1b[1;30m----------------\x1b[0m
+${' '.repeat(18)}/` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(11)}.      \x1b[1;34mOS\x1b[0m: Ubuntu 22.04.3 LTS x86_64
+${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(13)}|     \x1b[1;34mHost\x1b[0m: M.O.N.K.Y OS Virtual Machine
+${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}|` + '`' + `${' '.repeat(13)}|     \x1b[1;34mKernel\x1b[0m: 5.15.0-91-generic
+${' '.repeat(18)}\\` + '`' + `.` + '`' + `${' '.repeat(9)}/` + '`' + `${' '.repeat(12)}/      \x1b[1;34mUptime\x1b[0m: 1 day, 0 hours
+${' '.repeat(17)}\\` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(12)}.      \x1b[1;34mPackages\x1b[0m: 1234 (dpkg)
+${' '.repeat(18)}/` + '`' + `${' '.repeat(12)}/` + '`' + `${' '.repeat(12)}|     \x1b[1;34mShell\x1b[0m: bash 5.1.16
+${' '.repeat(19)}/` + '`' + `${' '.repeat(12)}/` + '`' + `${' '.repeat(12)}|     \x1b[1;34mResolution\x1b[0m: 1920x1080
+${' '.repeat(19)}|` + '`' + `${' '.repeat(12)}|` + '`' + `${' '.repeat(12)}|     \x1b[1;34mDE\x1b[0m: GNOME 42.9
+${' '.repeat(19)}|` + '`' + `${' '.repeat(12)}|` + '`' + `${' '.repeat(12)}|     \x1b[1;34mWM\x1b[0m: Mutter
+${' '.repeat(18)}\\` + '`' + `${' '.repeat(12)}|` + '`' + `${' '.repeat(12)}|     \x1b[1;34mWM Theme\x1b[0m: Adwaita
+${' '.repeat(17)}/` + '`' + `${' '.repeat(12)}/` + '`' + `${' '.repeat(12)}|     \x1b[1;34mTheme\x1b[0m: Yaru-dark [GTK2/3]
+${' '.repeat(16)}/` + '`' + `${' '.repeat(13)}/_\\` + '`' + `${' '.repeat(11)}|     \x1b[1;34mIcons\x1b[0m: Yaru [GTK2/3]
+${' '.repeat(14)}/` + '`' + `${' '.repeat(14)}/` + '`' + `${' '.repeat(14)}|     \x1b[1;34mTerminal\x1b[0m: M.O.N.K.Y Terminal
+${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|     \x1b[1;34mCPU\x1b[0m: Intel i7-12700K (16) @ 4.90GHz
+${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|     \x1b[1;34mGPU\x1b[0m: NVIDIA GeForce RTX 3080
+${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|     \x1b[1;34mMemory\x1b[0m: 1284MiB / 15937MiB`;
             }
         }
 
-        class NanoEditor {
-    constructor(terminalUI, filename, initialContent = '') {
-        this.terminalUI = terminalUI;
-        this.filename = filename;
-        this.content = initialContent;
-        this.cursorPosition = 0;
-        this.mode = 'edit'; // 'edit' or 'command'
-        this.commandBuffer = '';
-        this.isModified = false;
-        this.status = '';
-        this.init();
-    }
+        // Terminal UI Controller
+        const terminal = new UbuntuTerminal();
+        let terminalActive = true;
+        let commandBuffer = '';
+        let isProcessing = false;
+        let autoCompleteIndex = 0;
 
-    init() {
-        // Clear terminal and show nano interface
-        this.terminalUI.terminal.innerHTML = '';
-        this.render();
-        this.setupEventListeners();
-    }
+        // Initialize terminal
+        document.addEventListener('DOMContentLoaded', function() {
+            initTerminal();
+            setupEventListeners();
+            showWelcomeMessage();
+        });
 
-    render() {
-        const lines = this.content.split('\n');
-        const totalLines = lines.length;
-        
-        // Calculate cursor position
-        let currentLine = 0;
-        let currentCol = 0;
-        let charCount = 0;
-        
-        for (let i = 0; i < lines.length; i++) {
-            if (charCount + lines[i].length + 1 > this.cursorPosition) {
-                currentLine = i;
-                currentCol = this.cursorPosition - charCount;
-                break;
-            }
-            charCount += lines[i].length + 1;
-        }
-        
-        // Build nano interface
-        let interfaceHTML = `
-            <div class="nano-interface" style="
-                font-family: 'Ubuntu Mono', monospace;
-                font-size: 14px;
-                line-height: 1.4;
-                background: #300a24;
-                color: #fff;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-            ">
-                <!-- Header -->
-                <div class="nano-header" style="
-                    background: #3a0d2e;
-                    color: #ff8a80;
-                    padding: 2px 5px;
-                    font-weight: bold;
-                    border-bottom: 1px solid #551144;
-                ">
-                    GNU nano 6.2 &nbsp;&nbsp; ${this.filename} ${this.isModified ? '[Modified]' : ''}
-                </div>
-                
-                <!-- Main content area -->
-                <div class="nano-content" style="
-                    flex: 1;
-                    overflow-y: auto;
-                    padding: 5px;
-                    background: #300a24;
-                " id="nano-content">
-        `;
-        
-        // Display file content with line numbers
-        for (let i = 0; i < lines.length; i++) {
-            const lineNumber = (i + 1).toString().padStart(3, ' ') + ' ';
-            let lineContent = lines[i];
+        function initTerminal() {
+            const terminalElement = document.getElementById('terminal');
+            if (!terminalElement) return;
             
-            // Highlight current line
-            if (i === currentLine) {
-                interfaceHTML += `
-                    <div class="nano-line current-line" style="
-                        background: rgba(255, 87, 34, 0.1);
-                        position: relative;
-                    ">
-                        <span style="color: #666;">${lineNumber}</span>
-                        <span style="color: #fff;">${this.escapeHtml(lineContent)}</span>
-                        ${i === currentLine ? '<span class="cursor" style="position: absolute; left: ' + (lineNumber.length + currentCol) + 'ch; background: #fff; width: 8px; height: 16px; animation: blink 1s infinite;"></span>' : ''}
-                    </div>
-                `;
-            } else {
-                interfaceHTML += `
-                    <div class="nano-line">
-                        <span style="color: #666;">${lineNumber}</span>
-                        <span style="color: #fff;">${this.escapeHtml(lineContent)}</span>
-                    </div>
-                `;
-            }
+            terminalElement.innerHTML = '';
+            terminalElement.setAttribute('tabindex', '0');
         }
-        
-        // Add empty line if file is empty
-        if (lines.length === 0) {
-            interfaceHTML += `
-                <div class="nano-line current-line" style="
-                    background: rgba(255, 87, 34, 0.1);
-                    position: relative;
-                ">
-                    <span style="color: #666;">   1 </span>
-                    <span class="cursor" style="position: absolute; left: 4ch; background: #fff; width: 8px; height: 16px; animation: blink 1s infinite;"></span>
-                </div>
-            `;
-        }
-        
-        // Footer with help
-        interfaceHTML += `
-                </div>
-                
-                <!-- Footer -->
-                <div class="nano-footer" style="
-                    background: #3a0d2e;
-                    color: #ff8a80;
-                    padding: 2px 5px;
-                    border-top: 1px solid #551144;
-                    font-size: 12px;
-                    display: flex;
-                    justify-content: space-between;
-                ">
-                    <div class="nano-help">
-                        <span style="color: #4CAF50;">^G</span> Help &nbsp;
-                        <span style="color: #4CAF50;">^O</span> Write Out &nbsp;
-                        <span style="color: #4CAF50;">^X</span> Exit &nbsp;
-                        <span style="color: #4CAF50;">^K</span> Cut &nbsp;
-                        <span style="color: #4CAF50;">^U</span> Paste
-                    </div>
-                    <div class="nano-position">
-                        Line: ${currentLine + 1}/${totalLines} (${Math.round(((currentLine + 1) / totalLines) * 100)}%)
-                    </div>
-                </div>
-                
-                <!-- Command bar -->
-                ${this.mode === 'command' ? `
-                <div class="nano-command" style="
-                    background: #551144;
-                    color: #fff;
-                    padding: 2px 5px;
-                    border-top: 1px solid #773366;
-                ">
-                    ${this.status}<br>
-                    <span style="color: #4CAF50;">${this.commandBuffer}</span><span class="cursor" style="display: inline-block; background: #fff; width: 8px; height: 14px; animation: blink 1s infinite;"></span>
-                </div>
-                ` : ''}
-            </div>
-        `;
-        
-        this.terminalUI.terminal.innerHTML = interfaceHTML;
-        
-        // Scroll to cursor position
-        const contentDiv = document.getElementById('nano-content');
-        if (contentDiv) {
-            const lineHeight = 20; // Approximate line height
-            const scrollTop = currentLine * lineHeight - 100;
-            contentDiv.scrollTop = Math.max(0, scrollTop);
-        }
-    }
 
-    setupEventListeners() {
-        document.addEventListener('keydown', this.handleKeyPress.bind(this));
-    }
-
-    handleKeyPress(e) {
-        // Prevent default behavior for control keys
-        if (e.ctrlKey || e.key === 'Escape') {
-            e.preventDefault();
-        }
-        
-        if (this.mode === 'edit') {
-            this.handleEditMode(e);
-        } else if (this.mode === 'command') {
-            this.handleCommandMode(e);
-        }
-    }
-
-    handleEditMode(e) {
-        switch(e.key) {
-            case 'Control':
-            case 'Shift':
-            case 'Alt':
-                break;
-                
-            case 'Enter':
-                // Insert new line
-                const beforeCursor = this.content.substring(0, this.cursorPosition);
-                const afterCursor = this.content.substring(this.cursorPosition);
-                this.content = beforeCursor + '\n' + afterCursor;
-                this.cursorPosition = beforeCursor.length + 1;
-                this.isModified = true;
-                break;
-                
-            case 'Backspace':
-                if (this.cursorPosition > 0) {
-                    const beforeCursor = this.content.substring(0, this.cursorPosition - 1);
-                    const afterCursor = this.content.substring(this.cursorPosition);
-                    this.content = beforeCursor + afterCursor;
-                    this.cursorPosition--;
-                    this.isModified = true;
-                }
-                break;
-                
-            case 'Delete':
-                if (this.cursorPosition < this.content.length) {
-                    const beforeCursor = this.content.substring(0, this.cursorPosition);
-                    const afterCursor = this.content.substring(this.cursorPosition + 1);
-                    this.content = beforeCursor + afterCursor;
-                    this.isModified = true;
-                }
-                break;
-                
-            case 'ArrowLeft':
-                if (this.cursorPosition > 0) {
-                    this.cursorPosition--;
-                }
-                break;
-                
-            case 'ArrowRight':
-                if (this.cursorPosition < this.content.length) {
-                    this.cursorPosition++;
-                }
-                break;
-                
-            case 'ArrowUp':
-                // Move cursor up one line
-                const lines = this.content.split('\n');
-                let currentLine = 0;
-                let charCount = 0;
-                
-                for (let i = 0; i < lines.length; i++) {
-                    if (charCount + lines[i].length + 1 > this.cursorPosition) {
-                        currentLine = i;
-                        break;
-                    }
-                    charCount += lines[i].length + 1;
-                }
-                
-                if (currentLine > 0) {
-                    const prevLineLength = lines[currentLine - 1].length;
-                    const currentCol = Math.min(this.cursorPosition - charCount, prevLineLength);
-                    this.cursorPosition = charCount - lines[currentLine].length - 1 + currentCol;
-                }
-                break;
-                
-            case 'ArrowDown':
-                // Move cursor down one line
-                const linesDown = this.content.split('\n');
-                let currentLineDown = 0;
-                let charCountDown = 0;
-                
-                for (let i = 0; i < linesDown.length; i++) {
-                    if (charCountDown + linesDown[i].length + 1 > this.cursorPosition) {
-                        currentLineDown = i;
-                        break;
-                    }
-                    charCountDown += linesDown[i].length + 1;
-                }
-                
-                if (currentLineDown < linesDown.length - 1) {
-                    const nextLineLength = linesDown[currentLineDown + 1].length;
-                    const currentCol = this.cursorPosition - charCountDown;
-                    this.cursorPosition = charCountDown + linesDown[currentLineDown].length + 1 + Math.min(currentCol, nextLineLength);
-                }
-                break;
-                
-            case 'g':
-                if (e.ctrlKey) {
-                    // Ctrl+G - Help
-                    this.showHelp();
-                    return;
-                }
-                break;
-                
-            case 'o':
-                if (e.ctrlKey) {
-                    // Ctrl+O - Write Out (Save)
-                    this.mode = 'command';
-                    this.status = 'File Name to Write: ';
-                    this.commandBuffer = this.filename;
-                    this.render();
-                    return;
-                }
-                break;
-                
-            case 'x':
-                if (e.ctrlKey) {
-                    // Ctrl+X - Exit
-                    if (this.isModified) {
-                        this.mode = 'command';
-                        this.status = 'Save modified buffer (ANSWERING "No" WILL DESTROY CHANGES) ? ';
-                        this.commandBuffer = '';
-                        this.render();
-                    } else {
-                        this.exit();
-                    }
-                    return;
-                }
-                break;
-                
-            case 'k':
-                if (e.ctrlKey) {
-                    // Ctrl+K - Cut line
-                    this.cutLine();
-                    return;
-                }
-                break;
-                
-            case 'u':
-                if (e.ctrlKey) {
-                    // Ctrl+U - Paste
-                    this.paste();
-                    return;
-                }
-                break;
-                
-            case 'w':
-                if (e.ctrlKey) {
-                    // Ctrl+W - Search
-                    this.mode = 'command';
-                    this.status = 'Search: ';
-                    this.commandBuffer = '';
-                    this.render();
-                    return;
-                }
-                break;
-                
-            default:
-                // Regular character input
-                if (e.key.length === 1 && !e.ctrlKey) {
-                    const beforeCursor = this.content.substring(0, this.cursorPosition);
-                    const afterCursor = this.content.substring(this.cursorPosition);
-                    this.content = beforeCursor + e.key + afterCursor;
-                    this.cursorPosition++;
-                    this.isModified = true;
-                }
-                break;
-        }
-        
-        this.render();
-    }
-
-    handleCommandMode(e) {
-        switch(e.key) {
-            case 'Enter':
-                if (this.status.startsWith('File Name to Write')) {
-                    // Save file
-                    this.saveFile(this.commandBuffer);
-                    this.status = `[ Wrote ${this.commandBuffer.length} lines ]`;
-                    setTimeout(() => {
-                        this.mode = 'edit';
-                        this.render();
-                    }, 1000);
-                } else if (this.status.startsWith('Save modified buffer')) {
-                    if (this.commandBuffer.toLowerCase() === 'y' || this.commandBuffer.toLowerCase() === 'yes') {
-                        this.saveFile(this.filename);
-                        setTimeout(() => this.exit(), 500);
-                    } else if (this.commandBuffer.toLowerCase() === 'n' || this.commandBuffer.toLowerCase() === 'no') {
-                        setTimeout(() => this.exit(), 500);
-                    } else {
-                        this.commandBuffer = '';
-                    }
-                } else if (this.status.startsWith('Search')) {
-                    this.search(this.commandBuffer);
-                    this.mode = 'edit';
-                }
-                break;
-                
-            case 'Escape':
-                this.mode = 'edit';
-                this.status = '';
-                this.commandBuffer = '';
-                break;
-                
-            case 'Backspace':
-                if (this.commandBuffer.length > 0) {
-                    this.commandBuffer = this.commandBuffer.slice(0, -1);
-                }
-                break;
-                
-            default:
-                if (e.key.length === 1 && !e.ctrlKey) {
-                    this.commandBuffer += e.key;
-                }
-                break;
-        }
-        
-        this.render();
-    }
-
-    saveFile(filename) {
-        // Update the file in the filesystem
-        const node = this.terminalUI.terminalEngine.getCurrentNode();
-        if (node && node.children && node.children[this.filename]) {
-            node.children[this.filename].content = this.content;
-            node.children[this.filename].size = this.content.length.toString();
-            node.children[this.filename].modified = new Date().toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: '2-digit', 
-                hour: '2-digit', 
-                minute: '2-digit' 
+        function setupEventListeners() {
+            const terminalElement = document.getElementById('terminal');
+            
+            terminalElement.addEventListener('click', function() {
+                this.focus();
             });
-            this.isModified = false;
-        }
-    }
-
-    cutLine() {
-        const lines = this.content.split('\n');
-        let currentLine = 0;
-        let charCount = 0;
-        
-        for (let i = 0; i < lines.length; i++) {
-            if (charCount + lines[i].length + 1 > this.cursorPosition) {
-                currentLine = i;
-                break;
-            }
-            charCount += lines[i].length + 1;
-        }
-        
-        // Store cut line in localStorage as clipboard
-        const cutLine = lines[currentLine];
-        localStorage.setItem('nano_clipboard', cutLine);
-        
-        // Remove the line
-        lines.splice(currentLine, 1);
-        this.content = lines.join('\n');
-        
-        // Adjust cursor position
-        if (currentLine >= lines.length) {
-            currentLine = Math.max(0, lines.length - 1);
-        }
-        
-        let newCursorPos = 0;
-        for (let i = 0; i < currentLine; i++) {
-            newCursorPos += lines[i].length + 1;
-        }
-        this.cursorPosition = newCursorPos;
-        
-        this.isModified = true;
-        this.render();
-    }
-
-    paste() {
-        const clipboard = localStorage.getItem('nano_clipboard') || '';
-        if (clipboard) {
-            const beforeCursor = this.content.substring(0, this.cursorPosition);
-            const afterCursor = this.content.substring(this.cursorPosition);
-            this.content = beforeCursor + clipboard + afterCursor;
-            this.cursorPosition += clipboard.length;
-            this.isModified = true;
-            this.render();
-        }
-    }
-
-    search(pattern) {
-        if (!pattern) return;
-        
-        const lines = this.content.split('\n');
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i].includes(pattern)) {
-                // Move cursor to found pattern
-                let charCount = 0;
-                for (let j = 0; j < i; j++) {
-                    charCount += lines[j].length + 1;
-                }
-                const index = lines[i].indexOf(pattern);
-                this.cursorPosition = charCount + index;
-                break;
-            }
-        }
-    }
-
-    showHelp() {
-        const helpText = `
-NANO HELP - Basic Commands
-
-File Operations:
-  Ctrl+O    Write Out (Save)
-  Ctrl+R    Insert File
-  Ctrl+S    Save File
-
-Editing:
-  Ctrl+K    Cut current line/selection
-  Ctrl+U    Paste cut text
-  Ctrl+J    Justify paragraph
-  Ctrl+T    Check spelling
-  Ctrl+C    Show cursor position
-  Ctrl+W    Search
-  Ctrl+\\    Replace
-
-Navigation:
-  Arrow Keys    Move cursor
-  Page Up/Dn    Scroll
-  Home/End      Beginning/end of line
-  Ctrl+A        Beginning of line
-  Ctrl+E        End of line
-
-Exit:
-  Ctrl+X        Exit
-  Ctrl+Q        Quit (if modified, asks to save)
-
-Press any key to continue...
-        `;
-        
-        this.terminalUI.terminal.innerHTML = `
-            <div style="
-                font-family: 'Ubuntu Mono', monospace;
-                font-size: 12px;
-                line-height: 1.3;
-                color: #fff;
-                padding: 10px;
-                white-space: pre-wrap;
-                background: #300a24;
-                height: 100%;
-            ">
-                ${helpText}
-            </div>
-        `;
-        
-        // Return to editor after any key press
-        const returnToEditor = (e) => {
-            document.removeEventListener('keydown', returnToEditor);
-            this.render();
-        };
-        document.addEventListener('keydown', returnToEditor);
-    }
-
-    exit() {
-        // Remove event listeners
-        document.removeEventListener('keydown', this.handleKeyPress.bind(this));
-        
-        // Return to terminal
-        this.terminalUI.printWelcome();
-        this.terminalUI.printPrompt();
-    }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-}
-
-        // Terminal UI Manager
-        class TerminalUI {
-            constructor() {
-                this.terminal = document.getElementById('terminal');
-                this.terminalEngine = new UbuntuTerminal();
-                this.currentInput = '';
-                this.inputBuffer = '';
-                this.isProcessing = false;
-                this.init();
-            }
-
-            init() {
-                this.printWelcome();
-                this.printPrompt();
-                this.setupEventListeners();
-                this.terminal.focus();
-            }
-
-            printWelcome() {
-                const welcome = `<div class="welcome-message">
-Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-91-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/advantage
-
-  System information as of ${new Date().toLocaleString()}
-
-  System load:  0.08                Processes:             123
-  Usage of /:   24.8% of 19.21GB   Users logged in:       1
-  Memory usage: 42%                 IPv4 address for eth0: 192.168.1.100
-  Swap usage:   0%
-
- * Strictly confined Kubernetes makes edge and IoT secure. Learn how MicroK8s
-   just raised the bar for easy, resilient and secure K8s cluster deployment.
-
-   https://ubuntu.com/engage/secure-kubernetes-at-the-edge
-
-0 updates can be applied immediately.
-
-
-Last login: ${new Date().toLocaleString()} from 192.168.1.1
-</div>`;
-                this.terminal.innerHTML += welcome;
-            }
-
-            printPrompt() {
-                const prompt = `<div class="input-line">
-    <span class="prompt">
-        <span class="user">${this.terminalEngine.username}</span>@<span class="host">${this.terminalEngine.hostname}</span>:<span class="path">${this.terminalEngine.currentDir}</span>$
-    </span>
-    <input type="text" class="command-input" autocomplete="off" spellcheck="false">
-</div>`;
-                this.terminal.innerHTML += prompt;
+            
+            terminalElement.addEventListener('keydown', function(e) {
+                if (!terminalActive || isProcessing) return;
                 
-                const input = this.terminal.querySelector('.command-input:last-child');
-                input.focus();
-                
-                input.addEventListener('keydown', (e) => this.handleInput(e, input));
-                input.addEventListener('input', (e) => this.handleInputChange(e, input));
-            }
-
-            handleInput(e, input) {
-                if (this.isProcessing) return;
-
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const command = input.value.trim();
-                    input.disabled = true;
-                    this.isProcessing = true;
-                    
-                    // Remove input line and show command
-                    const inputLine = input.closest('.input-line');
-                    const promptSpan = inputLine.querySelector('.prompt').cloneNode(true);
-                    inputLine.innerHTML = '';
-                    inputLine.appendChild(promptSpan);
-                    inputLine.innerHTML += ` ${command}`;
-                    
-                    // Execute command
-                    setTimeout(() => {
-                        const result = this.terminalEngine.execute(command);
-                        
-                        if (result === 'CLEAR') {
-                            this.terminal.innerHTML = '';
-                            this.printPrompt();
-                        } else if (result) {
-                            // Display result
-                            const outputDiv = document.createElement('div');
-                            outputDiv.className = 'output';
-                            outputDiv.innerHTML = result;
-                            this.terminal.appendChild(outputDiv);
-                            
-                            // Add new prompt
-                            this.printPrompt();
-                        } else {
-                            // Empty result, just add new prompt
-                            this.printPrompt();
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        processCommand();
+                        break;
+                    case 'Backspace':
+                        if (commandBuffer.length > 0) {
+                            commandBuffer = commandBuffer.slice(0, -1);
+                            updatePrompt();
                         }
-                        
-                        this.isProcessing = false;
-                        this.scrollToBottom();
-                    }, 0);
-                } else if (e.key === 'Tab') {
-                    e.preventDefault();
-                    // Auto-completion logic
-                    const current = input.value;
-                    const commands = ['ls', 'cd', 'pwd', 'whoami', 'clear', 'help', 'cat', 'echo', 
-                                     'touch', 'mkdir', 'rm', 'cp', 'mv', 'grep', 'find', 'chmod',
-                                     'wc', 'head', 'tail', 'sort', 'date', 'cal', 'uptime', 'uname',
-                                     'df', 'du', 'ps', 'kill', 'env', 'export', 'alias', 'history',
-                                     'sudo', 'man', 'apt', 'ping', 'ifconfig', 'neofetch'];
-                    
-                    const matches = commands.filter(cmd => cmd.startsWith(current));
-                    if (matches.length === 1) {
-                        input.value = matches[0];
-                    } else if (matches.length > 1) {
-                        // Show possibilities
-                        const outputDiv = document.createElement('div');
-                        outputDiv.className = 'output';
-                        outputDiv.textContent = matches.join('  ');
-                        input.insertAdjacentElement('afterend', outputDiv);
-                        this.printPrompt();
-                    }
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    if (this.terminalEngine.commandHistory.length > 0) {
-                        this.terminalEngine.historyIndex = Math.max(0, this.terminalEngine.historyIndex - 1);
-                        input.value = this.terminalEngine.commandHistory[this.terminalEngine.historyIndex] || '';
-                    }
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    if (this.terminalEngine.historyIndex < this.terminalEngine.commandHistory.length - 1) {
-                        this.terminalEngine.historyIndex++;
-                        input.value = this.terminalEngine.commandHistory[this.terminalEngine.historyIndex] || '';
-                    } else {
-                        this.terminalEngine.historyIndex = this.terminalEngine.commandHistory.length;
-                        input.value = '';
-                    }
-                } else if (e.key === 'c' && e.ctrlKey) {
-                    e.preventDefault();
-                    input.value = '';
-                    this.terminal.innerHTML += '<div class="output">^C</div>';
-                    this.printPrompt();
-                } else if (e.key === 'l' && e.ctrlKey) {
-                    e.preventDefault();
-                    this.terminalEngine.execute('clear');
-                    this.terminal.innerHTML = '';
-                    this.printPrompt();
+                        break;
+                    case 'Tab':
+                        e.preventDefault();
+                        autoComplete();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        navigateHistory(-1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        navigateHistory(1);
+                        break;
+                    case 'c':
+                        if (e.ctrlKey) {
+                            e.preventDefault();
+                            addOutput('^C');
+                            commandBuffer = '';
+                            updatePrompt();
+                        }
+                        break;
+                    case 'l':
+                        if (e.ctrlKey) {
+                            e.preventDefault();
+                            clearTerminal();
+                        }
+                        break;
+                    default:
+                        if (e.key.length === 1 && !e.ctrlKey) {
+                            commandBuffer += e.key;
+                            updatePrompt();
+                        }
                 }
-            }
+            });
+            
+            // Focus terminal on page load
+            terminalElement.focus();
+        }
 
-            handleInputChange(e, input) {
-                // Handle input changes for auto-suggestions
-                // Could implement more advanced auto-completion here
-            }
+        function showWelcomeMessage() {
+            const welcome = `Welcome to M.O.N.K.Y OS Ubuntu Terminal 22.04 LTS
 
-            scrollToBottom() {
-                this.terminal.scrollTop = this.terminal.scrollHeight;
+This is a simulated Linux terminal with full command support.
+Type 'help' to see available commands.
+Type 'neofetch' for system information.
+
+`;
+            addOutput(welcome);
+            updatePrompt();
+        }
+
+        function updatePrompt() {
+            const terminalElement = document.getElementById('terminal');
+            const promptLine = `<div class="terminal-line input-line">
+                <span class="prompt">[</span><span class="user">${terminal.username}</span><span class="prompt">@</span><span class="host">${terminal.hostname}</span><span class="prompt">:</span><span class="path">${terminal.currentDir}</span><span class="prompt">]$ </span>
+                <span class="command">${commandBuffer}</span>
+                <span class="cursor"></span>
+            </div>`;
+            
+            // Find and replace the last input line
+            const lines = terminalElement.querySelectorAll('.input-line');
+            if (lines.length > 0) {
+                lines[lines.length - 1].outerHTML = promptLine;
+            } else {
+                terminalElement.innerHTML += promptLine;
+            }
+            
+            // Scroll to bottom
+            terminalElement.scrollTop = terminalElement.scrollHeight;
+        }
+
+        function addOutput(text) {
+            const terminalElement = document.getElementById('terminal');
+            
+            if (text === 'CLEAR') {
+                terminalElement.innerHTML = '';
+                return;
+            }
+            
+            if (text.trim()) {
+                // Convert ANSI escape codes to HTML spans
+                const processedText = text.replace(/\x1b\[1;(\d+)m/g, '<span class="$1">')
+                                           .replace(/\x1b\[0m/g, '</span>')
+                                           .replace(/\x1b\[1;34m/g, '<span class="directory">')
+                                           .replace(/\x1b\[1;31m/g, '<span class="error">');
+                
+                const outputLine = `<div class="terminal-line output">${processedText}</div>`;
+                terminalElement.innerHTML += outputLine;
+            }
+            
+            // Scroll to bottom
+            terminalElement.scrollTop = terminalElement.scrollHeight;
+        }
+
+        function processCommand() {
+            if (commandBuffer.trim() === '') {
+                addOutput('');
+                updatePrompt();
+                return;
+            }
+            
+            isProcessing = true;
+            addOutput(commandBuffer);
+            
+            setTimeout(() => {
+                const result = terminal.execute(commandBuffer);
+                if (result) {
+                    addOutput(result);
+                }
+                
+                commandBuffer = '';
+                isProcessing = false;
+                updatePrompt();
+            }, 50);
+        }
+
+        function navigateHistory(direction) {
+            if (terminal.commandHistory.length === 0) return;
+            
+            terminal.historyIndex = Math.max(0, Math.min(terminal.commandHistory.length, terminal.historyIndex + direction));
+            
+            if (terminal.historyIndex >= 0 && terminal.historyIndex < terminal.commandHistory.length) {
+                commandBuffer = terminal.commandHistory[terminal.historyIndex];
+            } else {
+                commandBuffer = '';
+            }
+            
+            updatePrompt();
+        }
+
+        function autoComplete() {
+            const commands = ['ls', 'cd', 'pwd', 'cat', 'touch', 'mkdir', 'rm', 'cp', 'mv', 
+                            'chmod', 'grep', 'find', 'wc', 'head', 'tail', 'sort', 'echo',
+                            'whoami', 'date', 'cal', 'uptime', 'uname', 'df', 'du', 'ps',
+                            'kill', 'env', 'export', 'alias', 'history', 'sudo', 'man',
+                            'apt', 'ping', 'ifconfig', 'neofetch', 'nano', 'clear', 'help'];
+            
+            const matches = commands.filter(cmd => cmd.startsWith(commandBuffer));
+            
+            if (matches.length === 1) {
+                commandBuffer = matches[0] + ' ';
+                updatePrompt();
+            } else if (matches.length > 1) {
+                addOutput(matches.join('  '));
+                updatePrompt();
             }
         }
 
-        // Global functions
+        // UI Functions
         function goBack() {
-            if (document.referrer && document.referrer.includes(window.location.hostname)) {
-                window.history.back();
-            } else {
-                window.location.href = 'dashboard.php';
-            }
-            return false;
+            window.location.href = 'lab.php';
         }
 
         function clearTerminal() {
-            const terminal = document.getElementById('terminal');
-            terminal.innerHTML = '';
-            const ui = new TerminalUI();
+            const terminalElement = document.getElementById('terminal');
+            terminalElement.innerHTML = '';
+            updatePrompt();
         }
 
         function minimizeTerminal() {
-            // Toggle terminal size
-            const terminal = document.querySelector('.terminal-body');
-            const isMinimized = terminal.style.height === '200px';
-            terminal.style.height = isMinimized ? 'calc(100vh - 96px)' : '200px';
+            alert('Minimize simulated - this would minimize the terminal in a real application.');
         }
 
         function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
-                });
+            const terminalContainer = document.querySelector('.terminal-container');
+            terminalContainer.classList.toggle('fullscreen');
+            
+            const statusElement = document.getElementById('terminal-status');
+            if (terminalContainer.classList.contains('fullscreen')) {
+                statusElement.textContent = 'FULLSCREEN';
+                statusElement.className = 'badge badge-outline-warning';
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+                statusElement.textContent = 'RUNNING';
+                statusElement.className = 'badge badge-outline-success';
             }
+            
+            // Focus terminal after fullscreen toggle
+            document.getElementById('terminal').focus();
         }
 
-        // Initialize terminal when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new TerminalUI();
+        function insertCommand(cmd) {
+            if (isProcessing) return;
             
-            // Make terminal focusable and scrollable
-            const terminal = document.getElementById('terminal');
-            terminal.tabIndex = 0;
-            terminal.addEventListener('click', () => {
-                const input = terminal.querySelector('.command-input:last-child');
-                if (input) input.focus();
-            });
+            commandBuffer = cmd;
+            updatePrompt();
             
-            // Handle fullscreen change
-            document.addEventListener('fullscreenchange', () => {
-                const btn = document.querySelector('.fullscreen-btn');
-                if (document.fullscreenElement) {
-                    btn.title = 'Exit Fullscreen';
-                } else {
-                    btn.title = 'Fullscreen';
-                }
-            });
-        });
-
-        // Handle Ctrl+L for clearing
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'l') {
-                e.preventDefault();
-                clearTerminal();
+            // Auto-execute if terminal is active
+            if (terminalActive) {
+                setTimeout(() => {
+                    processCommand();
+                }, 100);
             }
-        });
+        }
     </script>
 </body>
 </html>
