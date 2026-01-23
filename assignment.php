@@ -6,11 +6,258 @@
 <title>Assignments | ProWorldz</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assignment.css">
+<!-- <link rel="stylesheet" href="assignment.css"> -->
 <link rel="stylesheet" href="dashboard.css">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
+<style>
+  /* ================= RESET ================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+/* ================= THEME ================= */
+:root{
+  --bg-main:#0b0f1a;
+  --bg-sidebar:#0f1429;
+  --bg-card:#171d36;
+
+  --primary:#6aa9ff;
+  --accent:#5eead4;
+
+  --text-main:#ffffff;
+  --text-muted:#9aa4bf;
+
+  --border:rgba(255,255,255,0.08);
+  --shadow:0 15px 40px rgba(0,0,0,0.6);
+
+  --gradient:linear-gradient(135deg,#6aa9ff,#5eead4);
+}
+
+/* ================= BODY ================= */
+body{
+  background:
+    radial-gradient(circle at 20% 20%, rgba(106,169,255,0.08), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(94,234,212,0.08), transparent 45%),
+    linear-gradient(180deg,#070a14,#0b0f1a);
+  color:var(--text-main);
+  min-height:100vh;
+}
+
+/* ================= DASHBOARD ================= */
+.dashboard{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+  width:240px;
+  background:linear-gradient(180deg,#0f1429,#0b1020);
+  padding:20px;
+  position:fixed;
+  inset:0 auto 0 0;
+  border-right:1px solid var(--border);
+  z-index:1000;
+  transition:.4s ease;
+}
+
+.menu{list-style:none;padding-top:40px}
+
+.menu li{margin-bottom:10px}
+
+.menu li a{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:14px 16px;
+  border-radius:12px;
+  color:var(--text-muted);
+  text-decoration:none;
+  transition:.3s;
+}
+
+.menu li a i{font-size:18px}
+
+.menu li.active a,
+.menu li a:hover{
+  background:rgba(106,169,255,0.15);
+  color:var(--text-main);
+  box-shadow:inset 0 0 0 1px rgba(106,169,255,.35);
+}
+
+.menu li.active i,
+.menu li a:hover i{color:var(--primary)}
+
+.close-btn{display:none;color:#fff}
+
+/* ================= MAIN ================= */
+.main{
+  margin-left:240px;
+  padding:30px;
+  width:calc(100% - 240px);
+}
+
+/* ================= HEADER ================= */
+.assignment-header h1{
+  font-size:2.4rem;
+  background:var(--gradient);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.assignment-header p{
+  color:var(--text-muted);
+  margin-top:6px;
+}
+
+/* ================= STATS ================= */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin:35px 0;
+}
+
+.stat-card{
+  background:linear-gradient(180deg,rgba(23,29,54,.95),rgba(15,20,40,.95));
+  padding:22px;
+  border-radius:18px;
+  display:flex;
+  gap:16px;
+  align-items:center;
+  border:1px solid var(--border);
+}
+
+.stat-card i{
+  font-size:28px;
+  color:var(--primary);
+}
+
+.stat-card.success i{color:#22c55e}
+
+/* ================= ASSIGNMENT LIST ================= */
+.assignment-list{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.assignment-card{
+  background:linear-gradient(180deg,rgba(23,29,54,.95),rgba(15,20,40,.95));
+  padding:24px;
+  border-radius:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border:1px solid var(--border);
+  transition:.35s;
+}
+
+.assignment-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--primary);
+  box-shadow:var(--shadow);
+}
+
+/* LEFT */
+.left{
+  display:flex;
+  gap:16px;
+}
+
+.icon{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:var(--gradient);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.left h3{font-size:1.2rem}
+.left p{color:var(--text-muted);font-size:.95rem}
+.left span{font-size:.85rem;color:var(--text-muted)}
+
+/* RIGHT */
+.right{display:flex;gap:15px}
+
+/* ================= BUTTON ================= */
+.btn{
+  padding:12px 22px;
+  border:none;
+  border-radius:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.btn.submit{
+  background:var(--gradient);
+  color:#fff;
+}
+
+.btn.submit:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 30px rgba(106,169,255,.45);
+}
+
+/* ================= NO ASSIGNMENT ================= */
+.no-assignment-container{
+  background:linear-gradient(180deg,rgba(23,29,54,.95),rgba(15,20,40,.95));
+  border:1px dashed var(--border);
+  border-radius:22px;
+  padding:60px 30px;
+}
+
+/* ================= MODAL ================= */
+.modal-content{
+  background:linear-gradient(180deg,#0f1429,#0b1020)!important;
+  color:#fff;
+  border-radius:18px;
+}
+
+.modal-content h2{
+  background:var(--gradient);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+#githubLink{
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  color:#fff;
+}
+
+#githubLink:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(106,169,255,.3);
+}
+
+#confirmSubmit{
+  background:var(--gradient)!important;
+}
+
+#cancelSubmit{
+  background:#1f243a!important;
+  color:#fff!important;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:768px){
+  .sidebar{left:-100%;width:280px}
+  .sidebar.active{left:0}
+  .close-btn{display:block}
+  .main{margin-left:0;width:100%}
+}
+
+</style>
 <body>
 
 <div class="dashboard">

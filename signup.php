@@ -6,189 +6,263 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #0a0a0a;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    
-    .auth-container {
-      width: 100%;
-      max-width: 500px;
-    }
-    
-    .auth-box {
-      background: #121212;
-      padding: 40px;
-      border-radius: 20px;
-      border: 1px solid #333;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-      position: relative;
-    }
-    
-    .auth-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #ff5722, #ff005d);
-    }
-    
-    h2 {
-      color: #fff;
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
-    
-    p {
-      color: #b0b0b0;
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
-    
-    .input-group {
-      position: relative;
-      margin-bottom: 25px;
-    }
-    
-    .input-group input {
-      width: 100%;
-      padding: 16px;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    
-    .input-group input:focus {
-      border-color: #ff5722;
-      box-shadow: 0 0 0 2px rgba(255, 87, 34, 0.2);
-    }
-    
-    .input-group label {
-      position: absolute;
-      left: 16px;
-      top: 16px;
-      color: #888;
-      pointer-events: none;
-      transition: all 0.2s ease;
-      font-size: 16px;
-    }
-    
-    .input-group input:focus + label,
-    .input-group input:not(:placeholder-shown) + label {
-      top: -10px;
-      left: 12px;
-      font-size: 13px;
-      color: #ff5722;
-      background: #121212;
-      padding: 0 8px;
-    }
-    
-    button {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #ff5722 0%, #ff005d 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      margin-top: 10px;
-      margin-bottom: 25px;
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-    }
-    
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .switch {
-      display: block;
-      text-align: center;
-      color: #b0b0b0;
-      font-size: 14px;
-    }
-    
-    .switch a {
-      color: #ff5722;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    
-    .switch a:hover {
-      text-decoration: underline;
-    }
-    
-    .error {
-      color: #ff4444;
-      font-size: 14px;
-      margin-top: 5px;
-      display: none;
-    }
-    
-    .loading {
-      display: none;
-      text-align: center;
-      color: #ff5722;
-      margin: 10px 0;
-    }
-    
-    .success {
-      color: #4CAF50;
-      font-size: 14px;
-      text-align: center;
-      margin: 10px 0;
-      display: none;
-    }
-    
-    .gender-group {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    
-    .gender-option {
-      flex: 1;
-      padding: 16px;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      color: #888;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .gender-option.selected {
-      border-color: #ff5722;
-      color: #ff5722;
-      background: rgba(255, 87, 34, 0.1);
-    }
+    /* ================= RESET ================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+/* ================= THEME VARIABLES ================= */
+:root{
+  --bg-main:#0b0f1a;
+  --bg-card:#121833;
+
+  --primary:#6aa9ff;
+  --accent:#5eead4;
+
+  --text-main:#ffffff;
+  --text-muted:#9aa4bf;
+
+  --border:rgba(255,255,255,0.12);
+  --shadow:0 20px 50px rgba(0,0,0,.6);
+
+  --gradient:linear-gradient(135deg,#6aa9ff,#5eead4);
+}
+
+/* ================= BODY ================= */
+body{
+  background:
+    radial-gradient(circle at 20% 20%, rgba(106,169,255,.08), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(94,234,212,.08), transparent 45%),
+    linear-gradient(180deg,#070a14,#0b0f1a);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  color:var(--text-main);
+}
+
+/* ================= CONTAINER ================= */
+.auth-container{
+  width:100%;
+  max-width:520px;
+}
+
+/* ================= CARD ================= */
+.auth-box{
+  background:linear-gradient(180deg,rgba(18,24,51,.96),rgba(12,18,40,.98));
+  padding:42px 40px;
+  border-radius:26px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+
+.auth-box::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.06),transparent 70%);
+  animation:shine 4s infinite;
+}
+
+@keyframes shine{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(100%)}
+}
+
+/* ================= TITLE ================= */
+h2{
+  text-align:center;
+  font-size:28px;
+  font-weight:700;
+  margin-bottom:8px;
+  background:var(--gradient);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  position:relative;
+  z-index:1;
+}
+
+p{
+  text-align:center;
+  color:var(--text-muted);
+  font-size:14px;
+  margin-bottom:30px;
+  position:relative;
+  z-index:1;
+}
+
+/* ================= INPUT ================= */
+.input-group{
+  position:relative;
+  margin-bottom:24px;
+  z-index:1;
+}
+
+.input-group input{
+  width:100%;
+  padding:16px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:#fff;
+  font-size:15px;
+  outline:none;
+  transition:.3s;
+}
+
+.input-group input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(106,169,255,.25);
+}
+
+.input-group label{
+  position:absolute;
+  top:16px;
+  left:16px;
+  color:var(--text-muted);
+  pointer-events:none;
+  transition:.25s;
+  background:transparent;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label{
+  top:-9px;
+  left:12px;
+  font-size:12px;
+  color:var(--primary);
+  background:#121833;
+  padding:0 8px;
+}
+
+/* ================= GENDER ================= */
+.gender-group{
+  display:flex;
+  gap:14px;
+  margin-bottom:26px;
+  z-index:1;
+}
+
+.gender-option{
+  flex:1;
+  padding:14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:var(--text-muted);
+  text-align:center;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.gender-option:hover{
+  border-color:var(--primary);
+  color:#fff;
+}
+
+.gender-option.selected{
+  background:rgba(106,169,255,.15);
+  border-color:var(--primary);
+  color:#fff;
+  box-shadow:0 0 18px rgba(106,169,255,.35);
+}
+
+/* ================= BUTTON ================= */
+button{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:16px;
+  background:var(--gradient);
+  color:#fff;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:10px;
+  margin-bottom:22px;
+  transition:.3s;
+  z-index:1;
+  position:relative;
+}
+
+button:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 40px rgba(106,169,255,.45);
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  transform:none;
+}
+
+/* ================= STATUS ================= */
+.error{
+  color:#ff6b6b;
+  font-size:14px;
+  margin-top:6px;
+  display:none;
+}
+
+.success{
+  color:#4ade80;
+  font-size:14px;
+  text-align:center;
+  display:none;
+}
+
+.loading{
+  text-align:center;
+  color:var(--primary);
+  margin:10px 0;
+  display:none;
+}
+
+/* ================= SWITCH ================= */
+.switch{
+  display:block;
+  text-align:center;
+  font-size:14px;
+  color:var(--text-muted);
+  position:relative;
+  z-index:1;
+}
+
+.switch a{
+  color:var(--primary);
+  font-weight:600;
+  text-decoration:none;
+}
+
+.switch a:hover{
+  text-decoration:underline;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:768px){
+  .auth-box{padding:34px 30px}
+  h2{font-size:24px}
+  .gender-group{flex-direction:column}
+}
+
+@media(max-width:480px){
+  .auth-box{padding:28px 22px;border-radius:20px}
+  h2{font-size:22px}
+  p{font-size:13px}
+  button{padding:14px;font-size:15px}
+}
+
+@media(max-width:360px){
+  .auth-box{padding:22px 18px}
+  h2{font-size:20px}
+}
+
     
     /* Responsive Design */
     @media (max-width: 768px) {

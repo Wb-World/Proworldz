@@ -14,23 +14,50 @@
   <style>
     /* ====== GLOBAL STYLES ====== */
     :root {
-      --primary: #ff5722;
-      --primary-dark: #e64a19;
-      --primary-light: #ff8a65;
-      --secondary: #2196f3;
-      --secondary-dark: #1976d2;
-      --dark-bg: #0a0a0a;
-      --dark-card: #161616;
-      --dark-hover: #1e1e1e;
-      --light-text: #ffffff;
-      --light-text-secondary: #b0b0b0;
-      --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      --gradient-hover: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      --shadow-hover: 0 20px 40px rgba(255, 87, 34, 0.2);
-      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-      --border-radius: 16px;
-    }
+  /* ===== CORE BACKGROUND ===== */
+  --dark-bg: #0b0e14;
+  --dark-card: rgba(20, 24, 35, 0.85);
+  --dark-hover: rgba(28, 33, 48, 0.95);
+
+  /* ===== PRIMARY NEON THEME ===== */
+  --primary: #7c7cff;        /* Neon Blue/Violet */
+  --primary-dark: #5a5aff;
+  --primary-light: #a5a5ff;
+
+  /* ===== SECONDARY ACCENTS ===== */
+  --secondary: #2dd4bf;      /* Soft Neon Green */
+  --danger: #ff4d4d;         /* Alerts / Rank */
+
+  /* ===== TEXT ===== */
+  --light-text: #ffffff;
+  --light-text-secondary: #9aa4bf;
+
+  /* ===== GRADIENTS ===== */
+  --gradient: linear-gradient(
+    135deg,
+    #7c7cff 0%,
+    #5eead4 100%
+  );
+
+  --gradient-hover: linear-gradient(
+    135deg,
+    #5eead4 0%,
+    #7c7cff 100%
+  );
+
+  /* ===== EFFECTS ===== */
+  --border-radius: 18px;
+
+  --shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  --shadow-hover:
+    0 25px 60px rgba(124, 124, 255, 0.25);
+
+  --transition: all 0.35s ease;
+}
+
 
     * {
       margin: 0;
@@ -390,6 +417,12 @@
       opacity: 0;
       transform: translateY(30px);
       animation: fadeIn 0.6s ease-out forwards;
+      backdrop-filter: blur(16px);
+  background: linear-gradient(
+    180deg,
+    rgba(25, 30, 45, 0.9),
+    rgba(15, 18, 30, 0.95)
+  );
     }
 
     .course-card-full:nth-child(1) { animation-delay: 0.1s; }
