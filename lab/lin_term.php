@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal | M.O.N.K.Y OS</title>
+    <title>Terminal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1653,7 +1653,7 @@
                                 <i class="nav-icon fas fa-book"></i>
                                 <span class="nav-label">Assignments</span>
                             </a>
-                            <a href="lab.php" class="nav-item active">
+                            <a href="lab.php" class="nav-item">
                                 <i class="nav-icon fas fa-terminal"></i>
                                 <span class="nav-label">Terminal</span>
                             </a>

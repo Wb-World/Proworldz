@@ -4,11 +4,6 @@
 // $db_pass = "HDm584vG4kZDnt";
 // $db_name = "if0_40322633_students";
 class DBconfig {
-    // protected $db_host = "sql204.infinityfree.com";
-    // protected $db_user = "if0_40322633";
-    // protected $db_pass = "HDm584vG4kZDnt";
-    // protected $db_name = "if0_40322633_students";
-
     protected $db_host = "localhost";
     protected $db_user = "root";
     protected $db_pass = "mypass123";
@@ -25,40 +20,181 @@ class DBconfig {
         else return $this->con;
     }
 
-    public function getUserInfo($userId, $requestedFields = []) {
+    // Get ID by Name
+    public function getIdbyName($name){
+        $sql = "SELECT id FROM users WHERE name = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $name);
+        $stmt->execute();
 
-    if (empty($requestedFields)) {
-        return null;
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['id'] : null;
     }
 
-    $allowedFields = [
-        'id', 'name', 'gender', 'phone', 'email',
-        'IPADDR', 'eagle_coins', 'assignments', 'course'
-    ];
+    // Get Name by ID
+    public function getNamebyId($id){
+        $sql = "SELECT name FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
 
-    $validFields = array_intersect($requestedFields, $allowedFields);
-
-    if (empty($validFields)) {
-        return null;
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['name'] : null;
     }
 
-    $columns = implode(", ", $validFields);
+    // Get Eagle Coins by ID
+    public function getEagleCoinsbyId($id){
+        $sql = "SELECT eagle_coins FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
 
-    // 🔥 IF userId == 'all' → no WHERE clause
-    if ($userId === 'all') {
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['eagle_coins'] : null;
+    }
+
+    // Get Gender by ID
+    public function getGenderbyId($id){
+        $sql = "SELECT gender FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['gender'] : null;
+    }
+
+    // Get Phone by ID
+    public function getPhonebyId($id){
+        $sql = "SELECT phone FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['phone'] : null;
+    }
+
+    // Get Email by ID
+    public function getEmailbyId($id){
+        $sql = "SELECT email FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['email'] : null;
+    }
+
+    // Get IP Address by ID
+    public function getIPAddressbyId($id){
+        $sql = "SELECT IPADDR FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['IPADDR'] : null;
+    }
+
+    // Get Assignments by ID
+    public function getAssignmentsbyId($id){
+        $sql = "SELECT assignments FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['assignments'] : null;
+    }
+
+    // Get Course by ID
+    public function getCoursebyId($id){
+        $sql = "SELECT course FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result['course'] : null;
+    }
+
+    // Get All Users Data
+    public function getAllUsersData($fields = []){
+        if (empty($fields)) {
+            $fields = ['id', 'name', 'gender', 'phone', 'email', 'IPADDR', 'eagle_coins', 'assignments', 'course'];
+        }
+        
+        $allowedFields = [
+            'id', 'name', 'gender', 'phone', 'email',
+            'IPADDR', 'eagle_coins', 'assignments', 'course'
+        ];
+        
+        $validFields = array_intersect($fields, $allowedFields);
+        
+        if (empty($validFields)) {
+            return null;
+        }
+        
+        $columns = implode(", ", $validFields);
         $sql = "SELECT $columns FROM users";
         $stmt = $this->con->prepare($sql);
         $stmt->execute();
+        
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    // 🔥 normal single-user query
-    $sql = "SELECT $columns FROM users WHERE id = ? LIMIT 1";
-    $stmt = $this->con->prepare($sql);
-    $stmt->bind_param("s", $userId);
-    $stmt->execute();
+    // Generic method to get any single field by ID
+    public function getFieldbyId($id, $field){
+        $allowedFields = [
+            'id', 'name', 'gender', 'phone', 'email',
+            'IPADDR', 'eagle_coins', 'assignments', 'course'
+        ];
+        
+        if (!in_array($field, $allowedFields)) {
+            return null;
+        }
+        
+        $sql = "SELECT $field FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
 
-    return $stmt->get_result()->fetch_assoc();
-}
+        $result = $stmt->get_result()->fetch_assoc();
+        return $result ? $result[$field] : null;
+    }
 
+    // Original getUserInfo method (kept for backward compatibility)
+    public function getUserInfo($userId, $requestedFields = []) {
+        if (empty($requestedFields)) {
+            return null;
+        }
+
+        $allowedFields = [
+            'id', 'name', 'gender', 'phone', 'email',
+            'IPADDR', 'eagle_coins', 'assignments', 'course'
+        ];
+
+        $validFields = array_intersect($requestedFields, $allowedFields);
+
+        if (empty($validFields)) {
+            return null;
+        }
+
+        $columns = implode(", ", $validFields);
+
+        if ($userId === 'all') {
+            $sql = "SELECT $columns FROM users";
+            $stmt = $this->con->prepare($sql);
+            $stmt->execute();
+            return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        }
+
+        $sql = "SELECT $columns FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("s", $userId);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_assoc();
+    }
 }
