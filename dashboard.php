@@ -1677,6 +1677,17 @@ $totalUsers = count($allUsers);
                                 </svg>
                                 <span class="nav-label">Courses</span>
                             </a>
+                            <a href="assignment.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                    <!-- Book -->
+                                    <path stroke-width="1.5" d="M16.667 16.667V5a2.5 2.5 0 0 0-2.5-2.5H6.667a2.5 2.5 0 0 0-2.5 2.5v11.667"/>
+                                    <path stroke-width="1.5" d="M6.667 2.5v15"/>
+                                    <!-- Pencil -->
+                                    <path stroke-width="1.5" d="M11.667 4.167l4.166 4.166" stroke-linecap="round"/>
+                                    <path stroke-width="1.5" d="M13.333 8.333l-2.5 2.5-2.5-2.5 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="nav-label">Assignments</span>
+                            </a>
                             <a href="#" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
