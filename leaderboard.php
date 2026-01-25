@@ -31,14 +31,14 @@ foreach ($allUsersData as $index => $user) {
 // Store data in JavaScript accessible format
 $allUsersJSON = json_encode($allUsersData);
 $currentUserId = $userId;
-echo $allUsersJSON;
 ?>
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard</title>
+    <title>Leaderboard | Proworldz</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ echo $allUsersJSON;
 
         .desktop-container {
             display: grid;
-            grid-template-columns: 280px 1fr 380px;
+            grid-template-columns: 280px 1fr;
             gap: var(--gap);
             min-height: 100vh;
             padding: var(--sides);
@@ -122,12 +122,6 @@ echo $allUsersJSON;
         }
 
         .desktop-main {
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap);
-        }
-
-        .desktop-right-sidebar {
             display: flex;
             flex-direction: column;
             gap: var(--gap);
@@ -177,6 +171,12 @@ echo $allUsersJSON;
             border-color: currentColor;
         }
 
+        .badge-outline-success {
+            background-color: transparent;
+            color: var(--success);
+            border-color: var(--success);
+        }
+
         .badge-outline-warning {
             background-color: transparent;
             color: var(--warning);
@@ -196,8 +196,25 @@ echo $allUsersJSON;
             background-color: var(--muted-foreground);
         }
 
+        .bullet-success {
+            background-color: var(--success);
+        }
+
+        .bullet-sm {
+            width: 0.375rem;
+            height: 0.375rem;
+        }
+
         .nav-section {
             margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .nav-item {
@@ -263,16 +280,13 @@ echo $allUsersJSON;
             font-size: 0.875rem;
         }
 
+        /* Utility Classes */
         .flex { display: flex; }
         .grid { display: grid; }
         .relative { position: relative; }
         .absolute { position: absolute; }
-        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-        .z-10 { z-index: 10; }
-        .z-20 { z-index: 20; }
         .w-full { width: 100%; }
         .h-full { height: 100%; }
-        .size-full { width: 100%; height: 100%; }
         .size-12 { width: 3rem; height: 3rem; }
         .size-16 { width: 4rem; height: 4rem; }
         .size-20 { width: 5rem; height: 5rem; }
@@ -292,10 +306,6 @@ echo $allUsersJSON;
         .bg-card { background-color: var(--card); }
         .bg-accent { background-color: var(--accent); }
         .bg-background { background-color: var(--background); }
-        .bg-accent\/30 { background-color: rgba(248, 250, 252, 0.05); opacity: 0.3; }
-        .bg-card\/90 { background-color: rgba(26, 29, 36, 0.9); }
-        .bg-card\/80 { background-color: rgba(26, 29, 36, 0.8); }
-        .bg-background\/50 { background-color: rgba(13, 16, 21, 0.5); }
         .text-primary { color: var(--primary); }
         .text-secondary { color: var(--secondary); }
         .text-primary-foreground { color: var(--primary-foreground); }
@@ -405,41 +415,96 @@ echo $allUsersJSON;
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .tv-noise {
-            position: absolute;
-            inset: 0;
-            background: 
-                repeating-linear-gradient(
-                    0deg,
-                    rgba(0, 0, 0, 0.1) 0px,
-                    rgba(0, 0, 0, 0.1) 1px,
-                    transparent 1px,
-                    transparent 2px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    rgba(0, 0, 0, 0.1) 0px,
-                    rgba(0, 0, 0, 0.1) 1px,
-                    transparent 1px,
-                    transparent 2px
-                );
-            opacity: 0.3;
-            pointer-events: none;
-            z-index: 10;
-            animation: tvNoise 0.1s infinite;
+        /* Leaderboard specific styles */
+        .rank-badge {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
         }
 
-        @keyframes tvNoise {
-            0%, 100% { background-position: 0 0; }
-            10% { background-position: -5% -10%; }
-            20% { background-position: -15% 5%; }
-            30% { background-position: 7% -25%; }
-            40% { background-position: 20% 25%; }
-            50% { background-position: -25% 10%; }
-            60% { background-position: 15% 5%; }
-            70% { background-position: 0 15%; }
-            80% { background-position: 25% 35%; }
-            90% { background-position: -10% 10%; }
+        .rank-badge.gold {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .rank-badge.silver {
+            background: linear-gradient(45deg, #C0C0C0, #A0A0A0);
+            color: #000;
+        }
+
+        .rank-badge.bronze {
+            background: linear-gradient(45deg, #CD7F32, #8B4513);
+            color: #fff;
+        }
+
+        .rank-badge.other {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        .user-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--border);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .coins-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 9999px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .coins-badge img {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--muted-foreground);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .leaderboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .leaderboard-table tr.current-user {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
         }
 
         ::-webkit-scrollbar {
@@ -463,7 +528,9 @@ echo $allUsersJSON;
 </head>
 <body>
     <div class="desktop-container">
+        <!-- Left Sidebar - Navigation -->
         <div class="desktop-sidebar">
+            <!-- Logo Section -->
             <div class="card">
                 <div class="p-4">
                     <div class="flex items-center gap-3">
@@ -473,40 +540,37 @@ echo $allUsersJSON;
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <div class="text-2xl font-display" id="username"><?= $user?></div>
-                            <!-- <div class="text-xs uppercase text-muted-foreground">paranthe aagurom</div> -->
+                            <div class="text-2xl font-display" id="username"><?php echo htmlspecialchars($userName ?? 'User'); ?></div>
+                            <div class="text-xs uppercase text-muted-foreground">Rank #<?php echo $userRank; ?></div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Navigation Sections -->
             <div class="card">
                 <div class="p-3">
-                    <!-- Tools Section -->
+                    <!-- Navigation Section -->
                     <div class="nav-section">
-
-                        <div class="space-y-1" style="height: 45cap;">
+                        <div class="nav-title">
+                            <div class="bullet bullet-sm"></div>
+                            <span>Navigation</span>
+                        </div>
+                        <div class="space-y-1">
                             <a href="dashboard.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
                                 </svg>
                                 <span class="nav-label">Overview</span>
                             </a>
-                            <a href="lab.php" class="nav-item disabled">
+                            <a href="lab.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-width="1.667" d="M16.228 3.772c1.31 1.31-.416 5.16-3.856 8.6-3.44 3.44-7.29 5.167-8.6 3.856-1.31-1.31.415-5.16 3.855-8.6 3.44-3.44 7.29-5.167 8.6-3.856Z"/>
                                     <path stroke="currentColor" stroke-width="1.667" d="M16.228 16.228c-1.31 1.31-5.161-.416-8.601-3.855-3.44-3.44-5.166-7.29-3.856-8.601 1.31-1.31 5.162.416 8.601 3.855 3.44 3.44 5.166 7.29 3.856 8.601Z"/>
                                 </svg>
                                 <span class="nav-label">Laboratory</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
-                                </svg>
-                                <span class="nav-label">Devices</span>
-                            </a>
-                          
-                            <a href="leaderboard.php" class="nav-item">
+                            <a href="leaderboard.php" class="nav-item active">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
                                     <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
@@ -515,63 +579,58 @@ echo $allUsersJSON;
                                 </svg>
                                 <span class="nav-label">Leaderboard</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
+                            <a href="logout.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
+                                    <path d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z"/>
                                 </svg>
-                                <span class="nav-label">Security status</span>
-                            </a>
-                            <a href="contactus.php" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
-                                </svg>
-                                <span class="nav-label">Contact support</span>
-                            </a>
-                            <a href="#" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
-                                    <!-- Font Awesome Dragon (simpler) -->
-                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
-                                </svg>
-                                <span class="nav-label">Dragon Tool</span>
+                                <span class="nav-label">Logout</span>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
+        <!-- Main Content Area -->
         <div class="desktop-main">
+            <!-- Header -->
             <div class="card">
                 <div class="p-4 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="size-9 rounded bg-primary flex items-center justify-center">
                             <svg class="size-5 text-primary-foreground" viewBox="0 0 20 20" fill="none">
-                                <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
                             </svg>
                         </div>
                         <div>
                             <h1 class="text-3xl font-display">Leaderboard</h1>
-                            <div class="text-sm text-muted-foreground">Current Ranking System</div>
+                            <div class="text-sm text-muted-foreground">Global ranking based on Eagle Coins</div>
                         </div>
                     </div>
+                    <div class="badge badge-outline-warning">LIVE</div>
                 </div>
             </div>
 
+            <!-- Your Stats -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="card animate-fadeIn">
                     <div class="p-4 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <div class="bullet"></div>
-                            <span class="text-sm font-medium uppercase">YOUR CURRENT RANK</span>
+                            <span class="text-sm font-medium uppercase">YOUR RANK</span>
                         </div>
                     </div>
-                    <div class="bg-accent p-4 relative overflow-hidden">
+                    <div class="bg-accent p-4">
                         <div class="flex items-center">
-                            <span class="text-5xl font-display text-destructive" id="user-rank">#10</span>
+                            <span class="text-5xl font-display text-destructive" id="user-rank">#<?php echo $userRank; ?></span>
                         </div>
                         <div class="mt-2">
-                            <p class="text-sm font-medium text-muted-foreground tracking-wide">IN THE GLOBAL RANKING</p>
+                            <p class="text-sm font-medium text-muted-foreground tracking-wide">
+                                OUT OF <?php echo count($allUsersData); ?> USERS
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -579,339 +638,208 @@ echo $allUsersJSON;
                 <div class="card animate-fadeIn" style="animation-delay: 0.1s">
                     <div class="p-4 flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <!-- <div class="bullet"></div> -->
-                            <span class="text-sm font-medium uppercase">EAGLE COINS</span>
+                            <div class="bullet bullet-success"></div>
+                            <span class="text-sm font-medium uppercase">YOUR COINS</span>
                         </div>
-                        <!-- <svg class="size-4 text-muted-foreground" viewBox="0 0 20 20" fill="none">
-                            <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
-                        </svg> -->
                     </div>
-                    <div class="bg-accent p-4 relative overflow-hidden">
+                    <div class="bg-accent p-4">
                         <div class="flex items-center">
-                            <span class="text-5xl font-display text-success" id="user-coins"><?= $_SESSION['e-coins']; ?></span>
+                            <span class="text-5xl font-display text-success" id="user-coins"><?php echo $userCoins; ?></span>
+                            <span class="ml-3">
+                                <img src="images/coin.png" alt="Eagle Coin" style="width: 40px; height: 40px;">
+                            </span>
                         </div>
                         <div class="mt-2">
-                            <p class="text-sm font-medium text-muted-foreground tracking-wide">TOTAL EARNED POINTS</p>
+                            <p class="text-sm font-medium text-muted-foreground tracking-wide">
+                                TOTAL EAGLE COINS
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Leaderboard Table -->
             <div class="card animate-slideUp" style="animation-delay: 0.3s">
                 <div class="p-4 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="bullet"></div>
                         <span class="text-sm font-medium uppercase">GLOBAL LEADERBOARD</span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="badge badge-outline-warning">LIVE</span>
-                        <span class="text-sm text-muted-foreground">Updated every 5 minutes</span>
+                    <div class="text-sm text-muted-foreground">
+                        <span id="last-updated">Updated just now</span>
                     </div>
                 </div>
-                <div class="bg-accent p-6 space-y-4">
-                    <!-- Top 3 will be populated by JavaScript -->
-                    <div class="grid grid-cols-3 gap-4 mb-6" id="top-3-container">
-                        <!-- Top 3 will be dynamically inserted here -->
-                    </div>
-
-                    <!-- Other Rankings will be populated by JavaScript -->
-                    <div class="space-y-3" id="rankings-container">
-                        <!-- Rankings 4-10 will be dynamically inserted here -->
-                    </div>
+                <div class="bg-accent p-6">
+                    <?php if (empty($allUsersData)): ?>
+                        <div class="text-center py-10 text-muted-foreground">
+                            No users found
+                        </div>
+                    <?php else: ?>
+                        <div class="overflow-x-auto">
+                            <table class="leaderboard-table">
+                                <thead>
+                                    <tr>
+                                        <th class="pl-4">RANK</th>
+                                        <th>USER</th>
+                                        <th class="text-right pr-4">EAGLE COINS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($allUsersData as $index => $user): ?>
+                                        <?php 
+                                        $rank = $index + 1;
+                                        $isCurrentUser = $user['id'] == $userId;
+                                        $coins = $user['eagle_coins'] ?? 0;
+                                        
+                                        // Determine rank badge class
+                                        $badgeClass = 'other';
+                                        if ($rank === 1) $badgeClass = 'gold';
+                                        elseif ($rank === 2) $badgeClass = 'silver';
+                                        elseif ($rank === 3) $badgeClass = 'bronze';
+                                        ?>
+                                        <tr class="<?php echo $isCurrentUser ? 'current-user' : ''; ?>">
+                                            <td class="pl-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="rank-badge <?php echo $badgeClass; ?>">
+                                                        <?php echo $rank; ?>
+                                                    </div>
+                                                    <?php if ($rank <= 3): ?>
+                                                        <div class="text-sm font-medium">
+                                                            <?php 
+                                                            if ($rank === 1) echo '🥇';
+                                                            elseif ($rank === 2) echo '🥈';
+                                                            elseif ($rank === 3) echo '🥉';
+                                                            ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="user-avatar">
+                                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($user['name']); ?>" alt="<?php echo htmlspecialchars($user['name']); ?>">
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-medium"><?php echo htmlspecialchars($user['name']); ?></div>
+                                                        <?php if ($isCurrentUser): ?>
+                                                            <div class="text-xs text-primary">(You)</div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-right pr-4">
+                                                <div class="flex items-center justify-end gap-2">
+                                                    <span class="font-bold text-lg"><?php echo $coins; ?></span>
+                                                    <img src="images/coin.png" alt="Coin" style="width: 20px; height: 20px;">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
-        </div>
 
-        <div class="desktop-right-sidebar">
-            <div class="card">
-                <div class="tv-noise"></div>
-                <div class="bg-accent/30 flex flex-col justify-between p-4 relative z-20">
-                    <div class="flex justify-between items-center text-sm font-medium uppercase">
-                        <span class="opacity-50" id="day-of-week">Wednesday</span>
-                        <br>
-                        <span id="full-date">July 10th, 2025</span>
-                    </div>
-                    <br>
-                    <div class="text-center my-6">
-                        <div id="current-time" class="text-5xl font-display">15:42</div>
-                    </div>
-                    <br>
-                </div>
-            </div>
-
-            <div class="card">
+            <!-- Info Card -->
+            <div class="card animate-fadeIn" style="animation-delay: 0.5s">
                 <div class="p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-sm font-medium uppercase">
-                        <span>Notifications</span><br><br>
-                        <span class="badge badge-destructive">3</span>
+                    <div class="flex items-center gap-2">
+                        <div class="bullet"></div>
+                        <span class="text-sm font-medium uppercase">HOW IT WORKS</span>
                     </div>
-                    <!-- <button class="button button-ghost button-sm opacity-50 hover:opacity-100 uppercase">Clear All</button> -->
                 </div>
-                <div class="bg-accent p-3 space-y-2">
-                    
-                    <div class="group p-3 rounded-lg border border-border bg-background cursor-pointer">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-success"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-semibold">PAYMENT RECEIVED</h4>
-                                        <span class="badge badge-secondary text-xs">MED</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    Your payment to Rampant Studio has been processed successfully.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">39m ago</span>
-                                </div>
-                            </div>
+                <div class="bg-accent p-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center p-4 border border-border rounded-lg">
+                            <div class="text-2xl font-bold text-primary mb-2">Complete Assignments</div>
+                            <div class="text-sm text-muted-foreground">Earn coins by completing lab assignments</div>
+                        </div>
+                        <div class="text-center p-4 border border-border rounded-lg">
+                            <div class="text-2xl font-bold text-primary mb-2">Participate in Labs</div>
+                            <div class="text-sm text-muted-foreground">Active participation earns bonus coins</div>
+                        </div>
+                        <div class="text-center p-4 border border-border rounded-lg">
+                            <div class="text-2xl font-bold text-primary mb-2">Weekly Challenges</div>
+                            <div class="text-sm text-muted-foreground">Complete challenges for extra rewards</div>
                         </div>
                     </div>
-
-                 
-                    <div class="group p-3 rounded-lg border border-border bg-background cursor-pointer">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-semibold">INTRO: JOYCO STUDIO AND V0</h4>
-                                        <span class="badge badge-secondary text-xs">LOW</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    About us - We're a healthcare company focused on accessibility and innovation.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">45m ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                   
-                    <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-medium">SYSTEM UPDATE</h4>
-                                        <span class="badge badge-secondary text-xs">MED</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    Security patches have been applied to all guard bots.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">2h ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-medium">SYSTEM UPDATE</h4>
-                                        <span class="badge badge-secondary text-xs">MED</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    Security patches have been applied to all guard bots.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">2h ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-
-                    <!-- <button class="button button-ghost button-sm w-full mt-2">Show All (4)</button> -->
                 </div>
             </div>
         </div>
     </div>
-    <script>
-// Pass PHP data to JavaScript
-const allUsersData = <?php echo $allUsersJSON; ?>;
-const YOUR_USER_ID = <?php echo $currentUserId; ?>;
-const userCoins = <?php echo $userCoins; ?>;
-const userName = "<?php echo addslashes($userName ?? 'User'); ?>";
 
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // Update all UI elements
-    function updateUI() {
-        // Update your stats
-        document.getElementById('user-rank').innerText = `#<?php echo $userRank; ?>`;
-        document.getElementById('user-coins').textContent = userCoins;
-        document.getElementById('username').textContent = userName;
-        
-        // Show top 3
-        showTop3(allUsersData.slice(0, 3));
-        
-        // Show rankings 4-10
-        showRankings(allUsersData.slice(3, 10));
-        
-        // Update time
-        updateLastUpdatedTime();
-    }
-    
-    // Show top 3 users
-    function showTop3(topUsers) {
-        const container = document.getElementById('top-3-container');
-        
-        if (topUsers.length === 0) {
-            container.innerHTML = '<div class="col-span-3 text-center py-10 text-muted-foreground">No data available</div>';
-            return;
-        }
-        
-        container.innerHTML = '';
-        
-        // Create positions array (2nd, 1st, 3rd)
-        const positions = [
-            { rank: 2, index: 1 },
-            { rank: 1, index: 0 },
-            { rank: 3, index: 2 }
-        ];
-        
-        positions.forEach(pos => {
-            const user = topUsers[pos.index];
-            
-            if (user) {
-                const isFirstPlace = pos.rank === 1;
-                const coins = user.eagle_coins || 0;
-                const borderClass = isFirstPlace ? 'border-primary' : 'border-secondary';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update last updated time
+            function updateLastUpdatedTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
                 
-                const card = document.createElement('div');
-                card.className = `relative bg-card rounded-lg p-4 border-2 ${borderClass} ${isFirstPlace ? 'shadow-lg' : ''}`;
-                card.innerHTML = `
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <div class="${isFirstPlace ? 'size-12' : 'size-10'} rounded-full ${isFirstPlace ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'} flex items-center justify-center font-bold ${isFirstPlace ? 'text-xl' : 'text-lg'} shadow-lg">
-                            ${pos.rank}
-                        </div>
-                    </div>
-                    <div class="text-center ${isFirstPlace ? 'pt-6' : 'pt-4'}">
-                        <div class="${isFirstPlace ? 'size-20' : 'size-16'} rounded-full overflow-hidden mx-auto ${isFirstPlace ? 'mb-4' : 'mb-3'} border-2 ${borderClass}">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}" alt="${user.name}" class="size-full object-cover">
-                        </div>
-                        <h3 class="${isFirstPlace ? 'text-2xl' : 'text-xl'} font-display mb-2">${user.name}</h3>
-                        <div class="flex items-center justify-center gap-1">
-                            <span class="${isFirstPlace ? 'text-3xl' : 'text-2xl'} font-bold ${isFirstPlace ? 'text-primary' : 'text-secondary'}">${coins}</span>
-                            <span class="text-sm text-muted-foreground">🦅</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            } else {
-                // Empty spot if no user for this position
-                container.appendChild(document.createElement('div'));
-            }
-        });
-    }
-    
-    // Show rankings 4-10
-    function showRankings(users) {
-        const container = document.getElementById('rankings-container');
-        
-        if (users.length === 0) {
-            container.innerHTML = '<div class="text-center py-6 text-muted-foreground">No more users to show</div>';
-            return;
-        }
-        
-        container.innerHTML = '';
-        
-        users.forEach((user, index) => {
-            const rank = index + 4; // Starting from rank 4
-            const isCurrentUser = user.id == YOUR_USER_ID;
-            const coins = user.eagle_coins || 0;
-            
-            const card = document.createElement('div');
-            card.className = `flex items-center gap-4 p-3 rounded-lg border ${isCurrentUser ? 'border-2 border-primary bg-card/90' : 'border-border bg-card hover:bg-card/80'} transition-colors`;
-            card.innerHTML = `
-                <div class="size-10 rounded ${isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'} flex items-center justify-center font-bold text-lg">
-                    ${rank}
-                </div>
-                <div class="size-12 rounded-lg overflow-hidden">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}" alt="${user.name}" class="size-full object-cover">
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-lg font-display">${user.name}</h3>
-                </div>
-                <div class="flex items-center gap-1">
-                    <span class="badge ${isCurrentUser ? 'badge-default' : 'badge-secondary'}">${coins}</span>
-                    <div class="size-6">
-                        <img src="images/coin.png" alt="Coin" class="size-full object-contain" style="height:80px;">
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-    
-    // Update last updated time
-    function updateLastUpdatedTime() {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        const updateText = document.querySelector('.text-sm.text-muted-foreground');
-        if (updateText) {
-            updateText.textContent = `Last updated ${timeString}`;
-        }
-    }
-    
-    // Date/Time display
-    function updateDateTime() {
-        const now = new Date();
-        document.getElementById('current-time').textContent = 
-            now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-        
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        
-        const dayName = days[now.getDay()];
-        const month = months[now.getMonth()];
-        const day = now.getDate();
-        const year = now.getFullYear();
-        
-        document.getElementById('day-of-week').textContent = dayName.toUpperCase();
-        document.getElementById('full-date').textContent = `${month} ${day}, ${year}`;
-    }
-    
-    // Load data immediately
-    updateUI();
-    
-    // Update date/time
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-    
-    // Clear notifications
-    document.querySelectorAll('.button-ghost.button-sm').forEach(button => {
-        if (button.textContent.trim().toLowerCase() === 'clear') {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const notification = this.closest('.group');
-                if (notification) {
-                    notification.style.opacity = '0';
-                    setTimeout(() => notification.remove(), 300);
+                const updateElement = document.getElementById('last-updated');
+                if (updateElement) {
+                    updateElement.textContent = `Updated ${timeString}`;
                 }
+            }
+            
+            // Update time initially and every minute
+            updateLastUpdatedTime();
+            setInterval(updateLastUpdatedTime, 60000);
+            
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('.leaderboard-table tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('current-user')) {
+                        this.style.backgroundColor = '';
+                    }
+                });
             });
-        }
-    });
-});
-</script>
+            
+            // Animate elements on load
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (!entry.target.classList.contains('animate-fadeIn') && 
+                            !entry.target.classList.contains('animate-slideUp')) {
+                            entry.target.classList.add('animate-fadeIn');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards for animation
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => observer.observe(card));
+            
+            // Navigation active states
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (!this.classList.contains('disabled')) {
+                        // Remove active class from all items
+                        navItems.forEach(i => i.classList.remove('active'));
+                        // Add active class to clicked item
+                        this.classList.add('active');
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
