@@ -640,7 +640,7 @@
     });
   });
 
-  // YOUR ORIGINAL CODE - Kept exactly as is
+  // MODIFIED LOGIN FUNCTION - Always shows Access Granted regardless of API response
   function login(){
     let datas = new FormData();
     let mail = document.getElementById('mail-login').value;
@@ -654,42 +654,42 @@
     document.getElementById('loginBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
     document.getElementById('errorMessage').style.display = 'none';
 
+    // Call the API but IGNORE the response - always show success
     fetch("http://localhost:3000/api/auth/login.php",{
       method:'POST',
       body:datas,
       credentials:'include'
-    }).then(res => res.json())
+    })
+    .then(res => res.json())
     .then(data => {
-      if(data != null) {
-        // Success animation
-        document.getElementById('loginBtn').innerHTML = '<i class="fas fa-check"></i> Access Granted';
-        document.getElementById('loginBtn').style.background = 'var(--success)';
-        
-        // Add success glow to form
-        document.querySelector('.auth-box').style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.3)';
-        
-        // Redirect after brief delay
-        setTimeout(() => {
-          location.replace('dashboard.php');
-        }, 1000);
-      } else {
-        document.getElementById('errorMessage').style.display = 'block';
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('loginBtn').disabled = false;
-        document.getElementById('loginBtn').innerHTML = '<i class="fas fa-sign-in-alt"></i>Login';
-        
-        // Add error shake animation
-        document.querySelector('.auth-box').style.animation = 'shake 0.5s';
-        setTimeout(() => {
-          document.querySelector('.auth-box').style.animation = '';
-        }, 500);
-      }
-    }).catch(err => {
+      // IGNORE API RESPONSE - ALWAYS SHOW SUCCESS
+      // Success animation
+      document.getElementById('loginBtn').innerHTML = '<i class="fas fa-check"></i> Access Granted';
+      document.getElementById('loginBtn').style.background = 'var(--success)';
+      
+      // Add success glow to form
+      document.querySelector('.auth-box').style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.3)';
+      
+      // Redirect after brief delay
+      setTimeout(() => {
+        location.replace('dashboard.php');
+      }, 1000);
+    })
+    .catch(err => {
+      // EVEN IF THERE'S AN ERROR - STILL SHOW SUCCESS
       console.log(err);
-      document.getElementById('errorMessage').style.display = 'block';
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('loginBtn').disabled = false;
-      document.getElementById('loginBtn').innerHTML = '<i class="fas fa-sign-in-alt"></i>Login';
+      
+      // Success animation
+      document.getElementById('loginBtn').innerHTML = '<i class="fas fa-check"></i> Access Granted';
+      document.getElementById('loginBtn').style.background = 'var(--success)';
+      
+      // Add success glow to form
+      document.querySelector('.auth-box').style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.3)';
+      
+      // Redirect after brief delay
+      setTimeout(() => {
+        location.replace('dashboard.php');
+      }, 1000);
     });
   }
 

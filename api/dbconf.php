@@ -197,4 +197,48 @@ class DBconfig {
 
         return $stmt->get_result()->fetch_assoc();
     }
+
+    // Add this method to your DBconfig class
+public function updateUserEagleCoins($userId, $newCoins) {
+    $sql = "UPDATE users SET eagle_coins = ? WHERE id = ?";
+    $stmt = $this->con->prepare($sql);
+    
+    // Check if it's a decimal number and bind accordingly
+    if (is_float($newCoins)) {
+        $stmt->bind_param("di", $newCoins, $userId); // 'd' for double/float
+    } else {
+        $stmt->bind_param("ii", $newCoins, $userId); // 'i' for integer
+    }
+    
+    $result = $stmt->execute();
+    
+    // Check if update was successful
+    if ($result && $stmt->affected_rows > 0) {
+        return true;
+    } else {
+        // Log error for debugging
+        error_log("Failed to update eagle coins for user ID: $userId");
+        return false;
+    }
+}
+
+// Alternatively, if you want a function that adds to existing coins:
+public function addEagleCoins($userId, $amountToAdd) {
+    // Get current coins first
+    $currentCoins = $this->getEagleCoinsbyId($userId);
+    if ($currentCoins === null) {
+        return false;
+    }
+    
+    // Calculate new total
+    $newCoins = $currentCoins + $amountToAdd;
+    
+    // Update in database
+    return $this->updateUserEagleCoins($userId, $newCoins);
+}
+
+// Simple increment function (for 0.50 coins)
+public function incrementEagleCoins($userId) {
+    return $this->addEagleCoins($userId, 0.50);
+}
 }

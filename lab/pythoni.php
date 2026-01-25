@@ -1,6 +1,35 @@
 <?php
+session_start();
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
+    exit();
+}
+
+// Include DB config
+require_once 'api/dbconf.php'; // Adjust path as needed
+
+$userId = $_SESSION['id'];
+$db = new DBconfig();
+
+// Function to update eagle coins
+function updateEagleCoins($userId, $db) {
+    // Get current eagle coins
+    $userInfo = $db->getUserInfo($userId, ['eagle_coins']);
+    $currentCoins = isset($userInfo['eagle_coins']) ? $userInfo['eagle_coins'] : 0;
+    
+    // Add 0.50 eagle coins
+    $newCoins = $currentCoins + 0.50;
+    
+    // Update in database
+    $db->updateUserEagleCoins($userId, $newCoins);
+    
+    return $newCoins;
+}
+
+// If this is a periodic update request
+if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
+    $newCoins = updateEagleCoins($userId, $db);
+    echo json_encode(['success' => true, 'new_coins' => $newCoins]);
     exit();
 }
 ?>

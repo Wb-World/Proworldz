@@ -20,8 +20,10 @@ if(!is_string($conn)){
 
         if($getres->num_rows > 0){
             $datas = $getres->fetch_assoc();
-            $_SESSION['id'] = $datas['id'];
-            echo json_encode(['result' => $datas['id']]);
+            if(isset($datas)){
+                $_SESSION['id'] = $datas['id'];
+                echo json_encode(['result' => $datas['id']]);
+            }
         } else echo json_encode(['result' => null]);
     }
 } else echo json_encode(['result' => null]);

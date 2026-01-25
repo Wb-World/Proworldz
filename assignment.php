@@ -1,604 +1,613 @@
+<?php
+session_start();
+require_once 'api/dbconf.php'; // Your DBconfig class
+
+// Check if user is logged in
+if (!isset($_SESSION['id'])) {
+    echo "<script>window.location.href = 'login.php';</script>";
+    exit();
+}
+
+$userId = $_SESSION['id'];
+
+// Create database connection
+$db = new DBconfig();
+
+// Check connection
+if (!$db->check_con()) {
+    die("Database connection failed");
+}
+
+// Get user information
+$userInfo = $db->getUserInfo($userId, ['name', 'course', 'assignments', 'eagle_coins']);
+$userName = isset($userInfo['name']) ? $userInfo['name'] : 'User';
+$course = isset($userInfo['course']) ? $userInfo['course'] : 'Not enrolled';
+$assignmentsData = isset($userInfo['assignments']) ? $userInfo['assignments'] : '';
+
+// Parse assignments
+$assignmentsArray = !empty($assignmentsData) ? explode(',', $assignmentsData) : [];
+$assignmentsArray = array_filter($assignmentsArray); // Remove empty values
+$hasAssignments = !empty($assignmentsArray);
+
+// Get assignment titles based on course
+$assignmentTitles = [];
+if ($course !== "Not enrolled") {
+    // Course-specific assignments
+    if ($course === "Secure X") {
+        $assignmentTitles = ["Network Security Audit Report", "Penetration Testing Lab", "Firewall Configuration"];
+    } else if ($course === "AI Verse Web Labs") {
+        $assignmentTitles = ["AI-Powered Web Application", "Machine Learning Model Deployment", "Neural Network Implementation"];
+    } else if ($course === "Code Foundry") {
+        $assignmentTitles = ["Multi-language Coding Project", "Algorithm Optimization", "Data Structures Implementation"];
+    } else if ($course === "CLI++ Systems") {
+        $assignmentTitles = ["C++ Command Line Tool", "System Utility Development", "Memory Management Project"];
+    } else if ($course === "APMan") {
+        $assignmentTitles = ["REST API Development", "GraphQL Implementation", "API Security Audit"];
+    } else {
+        $assignmentTitles = ["Make portfolio website for you", "Project Documentation", "Final Project Submission"];
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Assignments | ProWorldz</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- <link rel="stylesheet" href="assignment.css"> -->
-<link rel="stylesheet" href="dashboard.css">
-
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
-
 <style>
-  /* ================= RESET ================= */
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
+/* ===== CSS RESET & BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border-color: rgba(229, 231, 235, 0.3);
+    outline-color: rgba(156, 163, 175, 0.5);
 }
 
-/* ================= THEME ================= */
-:root{
-  --bg-main:#0b0f1a;
-  --bg-sidebar:#0f1429;
-  --bg-card:#171d36;
-
-  --primary:#6aa9ff;
-  --accent:#5eead4;
-
-  --text-main:#ffffff;
-  --text-muted:#9aa4bf;
-
-  --border:rgba(255,255,255,0.08);
-  --shadow:0 15px 40px rgba(0,0,0,0.6);
-
-  --gradient:linear-gradient(135deg,#6aa9ff,#5eead4);
+body {
+    font-family: 'Roboto Mono', monospace;
+    background-color: #0d1015;
+    color: #f8fafc;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-/* ================= BODY ================= */
-body{
-  background:
-    radial-gradient(circle at 20% 20%, rgba(106,169,255,0.08), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(94,234,212,0.08), transparent 45%),
-    linear-gradient(180deg,#070a14,#0b0f1a);
-  color:var(--text-main);
-  min-height:100vh;
+/* ===== CUSTOM FONTS ===== */
+@font-face {
+    font-family: "Rebels";
+    src: url("https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
-/* ================= DASHBOARD ================= */
-.dashboard{
-  display:flex;
-  min-height:100vh;
+/* ===== CUSTOM PROPERTIES ===== */
+:root {
+    --radius: 0.625rem;
+    --background: #0d1015;
+    --foreground: #f8fafc;
+    --card: #1a1d24;
+    --border: rgba(255, 255, 255, 0.1);
+    --primary: #6366f1;
+    --primary-light: #8183f4;
+    --primary-foreground: #ffffff;
+    --muted-foreground: #94a3b8;
+    --success: #10b981;
+    
+    --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    --gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 131, 244, 0.1) 100%);
+    
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* ================= SIDEBAR ================= */
-.sidebar{
-  width:240px;
-  background:linear-gradient(180deg,#0f1429,#0b1020);
-  padding:20px;
-  position:fixed;
-  inset:0 auto 0 0;
-  border-right:1px solid var(--border);
-  z-index:1000;
-  transition:.4s ease;
+/* ===== DESKTOP LAYOUT ===== */
+.desktop-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    min-height: 100vh;
+    padding: 1.5rem;
+    background-color: var(--background);
 }
 
-.menu{list-style:none;padding-top:40px}
-
-.menu li{margin-bottom:10px}
-
-.menu li a{
-  display:flex;
-  align-items:center;
-  gap:15px;
-  padding:14px 16px;
-  border-radius:12px;
-  color:var(--text-muted);
-  text-decoration:none;
-  transition:.3s;
+/* ===== SIDEBAR STYLES ===== */
+.desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.menu li a i{font-size:18px}
-
-.menu li.active a,
-.menu li a:hover{
-  background:rgba(106,169,255,0.15);
-  color:var(--text-main);
-  box-shadow:inset 0 0 0 1px rgba(106,169,255,.35);
+.card {
+    background-color: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
 }
 
-.menu li.active i,
-.menu li a:hover i{color:var(--primary)}
+.p-4 { padding: 1rem; }
+.p-3 { padding: 0.75rem; }
 
-.close-btn{display:none;color:#fff}
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-3 { gap: 0.75rem; }
+.size-12 { width: 3rem; height: 3rem; }
+.bg-primary { background-color: var(--primary); }
+.rounded-lg { border-radius: var(--radius); }
+.text-primary-foreground { color: var(--primary-foreground); }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.font-display { font-family: 'Rebels', monospace; font-weight: 700; }
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-muted-foreground { color: var(--muted-foreground); }
+.uppercase { text-transform: uppercase; }
+.flex-1 { flex: 1 1 0%; }
+.flex-shrink-0 { flex-shrink: 0; }
 
-/* ================= MAIN ================= */
-.main{
-  margin-left:240px;
-  padding:30px;
-  width:calc(100% - 240px);
+/* Navigation Styles */
+.nav-section {
+    margin-bottom: 1.5rem;
 }
 
-/* ================= HEADER ================= */
-.assignment-header h1{
-  font-size:2.4rem;
-  background:var(--gradient);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+.space-y-1 > * + * {
+    margin-top: 0.25rem;
 }
 
-.assignment-header p{
-  color:var(--text-muted);
-  margin-top:6px;
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    text-decoration: none;
+    color: var(--foreground);
+    transition: all 0.2s;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
 }
 
-/* ================= STATS ================= */
-.stats{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-  margin:35px 0;
+.nav-item:hover {
+    background-color: rgba(248, 250, 252, 0.05);
 }
 
-.stat-card{
-  background:linear-gradient(180deg,rgba(23,29,54,.95),rgba(15,20,40,.95));
-  padding:22px;
-  border-radius:18px;
-  display:flex;
-  gap:16px;
-  align-items:center;
-  border:1px solid var(--border);
+.nav-item.active {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
 }
 
-.stat-card i{
-  font-size:28px;
-  color:var(--primary);
+.nav-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.stat-card.success i{color:#22c55e}
-
-/* ================= ASSIGNMENT LIST ================= */
-.assignment-list{
-  display:flex;
-  flex-direction:column;
-  gap:22px;
+.nav-item.disabled:hover {
+    background-color: transparent;
 }
 
-.assignment-card{
-  background:linear-gradient(180deg,rgba(23,29,54,.95),rgba(15,20,40,.95));
-  padding:24px;
-  border-radius:20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border:1px solid var(--border);
-  transition:.35s;
+.nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
 }
 
-.assignment-card:hover{
-  transform:translateY(-6px);
-  border-color:var(--primary);
-  box-shadow:var(--shadow);
+.nav-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
 }
 
-/* LEFT */
-.left{
-  display:flex;
-  gap:16px;
+/* ===== MAIN CONTENT ===== */
+.desktop-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 3rem);
+    padding-right: 0.5rem;
 }
 
-.icon{
-  width:48px;
-  height:48px;
-  border-radius:14px;
-  background:var(--gradient);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* Page Header */
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
 }
 
-.left h3{font-size:1.2rem}
-.left p{color:var(--text-muted);font-size:.95rem}
-.left span{font-size:.85rem;color:var(--text-muted)}
-
-/* RIGHT */
-.right{display:flex;gap:15px}
-
-/* ================= BUTTON ================= */
-.btn{
-  padding:12px 22px;
-  border:none;
-  border-radius:14px;
-  font-weight:600;
-  cursor:pointer;
-  transition:.3s;
+.page-header h1 {
+    font-family: 'Rebels', monospace;
+    font-size: 3rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
 }
 
-.btn.submit{
-  background:var(--gradient);
-  color:#fff;
+.page-header p {
+    color: var(--muted-foreground);
+    font-size: 1.125rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
 }
 
-.btn.submit:hover{
-  transform:translateY(-2px);
-  box-shadow:0 12px 30px rgba(106,169,255,.45);
+/* ===== ASSIGNMENT LIST ===== */
+.assignment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-/* ================= NO ASSIGNMENT ================= */
-.no-assignment-container{
-  background:linear-gradient(180deg,rgba(23,29,54,.95),rgba(15,20,40,.95));
-  border:1px dashed var(--border);
-  border-radius:22px;
-  padding:60px 30px;
+.assignment-card {
+    background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-/* ================= MODAL ================= */
-.modal-content{
-  background:linear-gradient(180deg,#0f1429,#0b1020)!important;
-  color:#fff;
-  border-radius:18px;
+.assignment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.modal-content h2{
-  background:var(--gradient);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+.assignment-card:hover::before {
+    opacity: 1;
 }
 
-#githubLink{
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--border);
-  color:#fff;
+.assignment-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-xl);
 }
 
-#githubLink:focus{
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(106,169,255,.3);
+/* Assignment Left Content */
+.assignment-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 
-#confirmSubmit{
-  background:var(--gradient)!important;
+.assignment-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-#cancelSubmit{
-  background:#1f243a!important;
-  color:#fff!important;
+.assignment-icon i {
+    font-size: 1.5rem;
+    color: var(--primary-foreground);
 }
 
-/* ================= RESPONSIVE ================= */
-@media(max-width:768px){
-  .sidebar{left:-100%;width:280px}
-  .sidebar.active{left:0}
-  .close-btn{display:block}
-  .main{margin-left:0;width:100%}
+.assignment-details h3 {
+    font-family: 'Rebels', monospace;
+    font-size: 1.5rem;
+    color: var(--foreground);
+    margin-bottom: 0.5rem;
 }
 
+.assignment-details p {
+    color: var(--muted-foreground);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.assignment-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Assignment Right Content */
+.assignment-right {
+    display: flex;
+    gap: 1rem;
+}
+
+/* ===== BUTTONS ===== */
+.submit-btn {
+    padding: 0.875rem 2rem;
+    background: var(--gradient-primary);
+    color: var(--primary-foreground);
+    border: none;
+    border-radius: calc(var(--radius) - 4px);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.submit-btn.completed {
+    background: var(--success);
+    cursor: default;
+}
+
+.submit-btn.completed:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* ===== NO ASSIGNMENT PAGE ===== */
+.no-assignment-container {
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.assignment-image {
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 2rem;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
+}
+
+.no-assignment-container h2 {
+    font-family: 'Rebels', monospace;
+    font-size: 2.5rem;
+    color: var(--foreground);
+    margin-bottom: 1rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.no-assignment-container p {
+    color: var(--muted-foreground);
+    font-size: 1.125rem;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .desktop-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .desktop-sidebar {
+        display: none;
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .page-header p {
+        font-size: 1rem;
+        padding: 0 1rem;
+    }
+    
+    .assignment-card {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+    
+    .assignment-left {
+        width: 100%;
+    }
+    
+    .assignment-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .desktop-container {
+        padding: 0.75rem;
+    }
+    
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .assignment-card {
+        padding: 1.5rem;
+    }
+    
+    .submit-btn {
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .assignment-image {
+        width: 200px;
+        height: 200px;
+    }
+}
+
+/* Custom Scrollbar */
+.desktop-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.desktop-main::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.desktop-main::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+    border-radius: 3px;
+}
 </style>
+</head>
 <body>
+<div class="desktop-container">
+    <!-- Left Sidebar - Navigation -->
+    <div class="desktop-sidebar">
+        <!-- Logo Section -->
+        <div class="card">
+            <div class="p-4">
+                <div class="flex items-center gap-3">
+                    <div class="size-12 flex items-center justify-center bg-primary rounded-lg">
+                        <svg class="size-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-2xl font-display"><?php echo htmlspecialchars($userName); ?></div>
+                        <div class="text-xs uppercase text-muted-foreground"><?php echo htmlspecialchars($course); ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="dashboard">
-  <aside class="sidebar">
-      <div class="close-btn" id="closeBtn">
-          <i class="fa-solid fa-xmark"></i>
-      </div>
-      <ul class="menu">
-          <li class="active">
-              <a href="dashboard.php" style="color: inherit; text-decoration: none;">
-                  <i class="fa-solid fa-house"></i>
-                  <span>Dashboard</span>
-              </a>
-          </li>
-          <li>
-              <a href="assignment.php" style="color: inherit; text-decoration: none;">
-                  <i class="fa-solid fa-book"></i>
-                  <span>Assignment</span>
-              </a>
-          </li>
-         
-          <li>
-              <a href="ourcourse.php" style="color: inherit; text-decoration: none;">
-                  <i class="fa-solid fa-graduation-cap"></i>
-                  <span>Courses</span>
-              </a>
-          </li>
-      </ul>
-  </aside>
-  <!-- MAIN -->
-  <main class="main" id="main-content">
-    <!-- This content will be dynamically loaded based on course availability -->
-  </main>
-</div>
+        <!-- Navigation Sections -->
+        <div class="card">
+            <div class="p-3">
+                <!-- Tools Section -->
+                <div class="nav-section">
+                    <div class="space-y-1" style="height: 45cap;">
+                        <a href="dashboard.php" class="nav-item disabled">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
+                            </svg>
+                            <span class="nav-label">Dashboard</span>
+                        </a>
+                        <a href="assignment.php" class="nav-item active">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
+                            </svg>
+                            <span class="nav-label">Assignments</span>
+                        </a>
+                        <a href="ourcourse.php" class="nav-item disabled">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-width="1.667" d="M16.228 3.772c1.31 1.31-.416 5.16-3.856 8.6-3.44 3.44-7.29 5.167-8.6 3.856-1.31-1.31.415-5.16 3.855-8.6 3.44-3.44 7.29-5.167 8.6-3.856Z"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M16.228 16.228c-1.31 1.31-5.161-.416-8.601-3.855-3.44-3.44-5.166-7.29-3.856-8.601 1.31-1.31 5.162.416 8.601 3.855 3.44 3.44 5.166 7.29 3.856 8.601Z"/>
+                            </svg>
+                            <span class="nav-label">Courses</span>
+                        </a>
+                        <a href="contact.php" class="nav-item disabled">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
+                            </svg>
+                            <span class="nav-label">Contact Us</span>
+                        </a>
+                        <a href="logout.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
+                                <path d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96C43 64 0 107 0 160v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z"/>
+                            </svg>
+                            <span class="nav-label">Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Modal for GitHub Link Submission -->
-<div id="submitModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-  <div class="modal-content" style="background-color: white; margin: 15% auto; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="color: #333; font-size: 24px;">Submit Assignment</h2>
-      <span class="close-modal" style="cursor: pointer; font-size: 28px; color: #999;">&times;</span>
-    </div>
-    <div class="modal-body">
-      <p style="margin-bottom: 20px; color: #666;">Please provide your GitHub repository link for this assignment:</p>
-      <div class="form-group">
-        <label for="githubLink" style="display: block; margin-bottom: 8px; font-weight: 600; color: #444;">GitHub Repository Link</label>
-        <input type="url" id="githubLink" placeholder="https://github.com/username/repository" style="width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border 0.3s;">
-      </div>
-      <div class="modal-actions" style="display: flex; gap: 15px; margin-top: 30px;">
-        <button id="cancelSubmit" class="btn" style="background-color: #f5f5f5; color: #666; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; flex: 1;">Cancel</button>
-        <button id="confirmSubmit" class="btn" style="background-color: #4361ee; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; flex: 1;">Submit Assignment</button>
-      </div>
-    </div>
-  </div>
+    <!-- Main Content Area -->
+    <main class="desktop-main">
+        <div class="page-header">
+            <h1>Assignments - <?php echo htmlspecialchars($course); ?></h1>
+            <p>Track and submit your course assignments</p>
+        </div>
+
+        <?php if (!$hasAssignments || empty($assignmentTitles)): ?>
+            <!-- NO ASSIGNMENTS FOUND -->
+            <div class="no-assignment-container">
+                <img src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png" alt="No Assignments" class="assignment-image">
+                <h2>No Assignments Found</h2>
+                <p>
+                    You haven't enrolled in any course yet. Please enroll in a course to access assignments.
+                </p>
+            </div>
+        <?php else: ?>
+            <!-- ASSIGNMENT LIST -->
+            <div class="assignment-list">
+                <?php foreach ($assignmentTitles as $index => $assignmentTitle): 
+                    $isSubmitted = in_array($assignmentTitle, $assignmentsArray);
+                ?>
+                    <div class="assignment-card" id="assignment-card-<?php echo $index + 1; ?>">
+                        <div class="assignment-left">
+                            <div class="assignment-icon">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                            <div class="assignment-details">
+                                <h3><?php echo htmlspecialchars($assignmentTitle); ?></h3>
+                                <p><?php echo htmlspecialchars($course); ?></p>
+                                <div class="assignment-meta">
+                                    <span><i class="fa-regular fa-calendar"></i> Dec 28, 2024</span>
+                                    <span><i class="fa-solid fa-star"></i> 100 pts</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="assignment-right">
+                            <?php if ($isSubmitted): ?>
+                                <button class="submit-btn completed" disabled>
+                                    <i class="fa-solid fa-circle-check"></i> Submitted
+                                </button>
+                            <?php else: ?>
+                                <button class="submit-btn" onclick="openSubmitModal('<?php echo addslashes($assignmentTitle); ?>')">
+                                    Submit
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </main>
 </div>
 
 <script>
-  // Global variables
-  let currentCourseData = null;
-  let currentAssignmentTitle = null;
-
-  // Function to show normal page content
-  function showNormalPage(courseData) {
-    const mainContent = document.getElementById('main-content');
-    currentCourseData = courseData;
-    
-    // Get assignment based on course
-    let assignmentTitle = "Make portfolio website for you";
-    if (courseData.course_name === "Secure X") {
-      assignmentTitle = "Network Security Audit Report";
-    } else if (courseData.course_name === "AI Verse Web Labs") {
-      assignmentTitle = "AI-Powered Web Application";
-    } else if (courseData.course_name === "Code Foundry") {
-      assignmentTitle = "Multi-language Coding Project";
-    } else if (courseData.course_name === "CLI++ Systems") {
-      assignmentTitle = "C++ Command Line Tool";
-    } else if (courseData.course_name === "APMan") {
-      assignmentTitle = "REST API Development";
-    }
-    
-    currentAssignmentTitle = assignmentTitle;
-    
-    mainContent.innerHTML = `
-      <!-- HEADER -->
-      <div class="assignment-header">
-        <h1>Assignments - ${courseData.course_name}</h1>
-        <p>Track and submit your course assignments</p>
-      </div>
-
-      <!-- STATS -->
-      <div class="stats">
-        <div class="stat-card">
-          <i class="fa-solid fa-file"></i>
-          <div>
-            <h2 id="show-assigns">${courseData.total_assigns}</h2>
-            <span>Total Assignments</span>
-          </div>
-        </div>
-
-        <div class="stat-card success">
-          <i class="fa-solid fa-circle-check"></i>
-          <div>
-            <h2 id="fine-assigns">${courseData.assignment_completion}</h2>
-            <span>Submitted</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ASSIGNMENT LIST -->
-      <div class="assignment-list">
-        <div class="assignment-card" id="assignment-card-1">
-          <div class="left">
-            <div class="icon"><i class="fa-solid fa-file-lines"></i></div>
-            <div>
-              <h3>${assignmentTitle}</h3>
-              <p>${courseData.course_name}</p>
-              <span><i class="fa-regular fa-calendar"></i> Dec 28, 2024 • 100 pts</span>
-            </div>
-          </div>
-          <div class="right">
-            <button class="btn submit" onclick="openSubmitModal()">Submit</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  // Function to show "no assignment found" page
-  function showNoAssignmentPage() {
-    const mainContent = document.getElementById('main-content');
-    
-    mainContent.innerHTML = `
-      <div class="no-assignment-container" style="text-align: center; padding: 50px 20px;">
-        <div class="icon-container" style="font-size: 80px; color: #6c757d; margin-bottom: 20px;">
-          <i class="fa-solid fa-book-open-reader"></i>
-        </div>
-        <h2 style="color: #495057; margin-bottom: 15px;">No Course Found</h2>
-        <p style="color: #6c757d; font-size: 16px; max-width: 500px; margin: 0 auto 30px;">
-          You haven't enrolled in any course yet. Please enroll in a course to access assignments.
-        </p>
-        <a href="ourcourse.php" class="btn" style="background-color:  #ff5722; color: white; padding: 12px 30px; 
-           border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 600;">
-          <i class="fa-solid fa-graduation-cap"></i> Browse Courses
-        </a>
-      </div>
-    `;
-  }
-
-  // Modal functions
-  function openSubmitModal() {
-    document.getElementById('submitModal').style.display = 'block';
-    document.getElementById('githubLink').value = '';
-  }
-
-  function closeSubmitModal() {
-    document.getElementById('submitModal').style.display = 'none';
-  }
-
-  // Function to submit assignment
-  async function submitAssignment(githubLink) {
-    try {
-      // 1. Update database - set assignment_completion to 1
-      const updateResponse = await fetch('update_assignment.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          course_id: currentCourseData.id,
-          assignment_completion: 1
-        })
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error('Failed to update database');
-      }
-
-      // 2. Send WhatsApp notification
-      const whatsappData = {
-        phone: "9944994778", // Replace with your WhatsApp number
-        message: `New Assignment Submission!\n\nStudent: ${currentCourseData.username || 'Unknown'}\nCourse: ${currentCourseData.course_name}\nAssignment: ${currentAssignmentTitle}\nGitHub: ${githubLink}\nSubmitted at: ${new Date().toLocaleString()}`
-      };
-
-      // Call WhatsApp API (replace with your actual WhatsApp API endpoint)
-      const whatsappResponse = await fetch('YOUR_WHATSAPP_API_ENDPOINT', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(whatsappData)
-      });
-
-      if (whatsappResponse.ok) {
-        // Update UI to show "Submitted" status
-        updateAssignmentStatus();
-        
-        // Show success message
-        alert('Assignment submitted successfully! You will receive confirmation shortly.');
-        closeSubmitModal();
-        
-        // Refresh page after 2 seconds to show updated stats
-        setTimeout(() => {
-          location.reload();
-        }, 2000);
-      } else {
-        throw new Error('WhatsApp notification failed, but assignment was recorded');
-      }
-
-    } catch (error) {
-      console.error('Submission error:', error);
-      alert('Error submitting assignment. Please try again or contact support.');
-    }
-  }
-
-  // Function to update UI after submission
-  function updateAssignmentStatus() {
-    const submitButton = document.querySelector('.btn.submit');
-    if (submitButton) {
-      submitButton.innerHTML = '<i class="fa-solid fa-circle-check"></i> Submitted';
-      submitButton.style.backgroundColor = '#4CAF50';
-      submitButton.style.cursor = 'default';
-      submitButton.disabled = true;
-      submitButton.onclick = null;
-      
-      // Update stats
-      const fineAssigns = document.getElementById('fine-assigns');
-      if (fineAssigns) {
-        const current = parseInt(fineAssigns.textContent) || 0;
-        fineAssigns.textContent = current + 1;
-      }
-    }
-  }
-
-  // Event listeners for modal
-  document.addEventListener('DOMContentLoaded', function() {
-    // Close modal when clicking X
-    document.querySelector('.close-modal').addEventListener('click', closeSubmitModal);
-    
-    // Close modal when clicking cancel
-    document.getElementById('cancelSubmit').addEventListener('click', closeSubmitModal);
-    
-    // Handle form submission
-    document.getElementById('confirmSubmit').addEventListener('click', function() {
-      const githubLink = document.getElementById('githubLink').value.trim();
-      
-      // Validate GitHub link
-      if (!githubLink) {
-        alert('Please enter your GitHub repository link');
-        return;
-      }
-      
-      if (!githubLink.startsWith('https://github.com/')) {
-        alert('Please enter a valid GitHub repository URL');
-        return;
-      }
-      
-      // Show loading state
-      this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
-      this.disabled = true;
-      
-      // Submit assignment
-      submitAssignment(githubLink);
-    });
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-      const modal = document.getElementById('submitModal');
-      if (event.target === modal) {
-        closeSubmitModal();
-      }
-    });
-  });
-
-  // Fetch course data and render appropriate content
-  fetch('https://proworldz.page.gd/api/get_courses.php', {
-    method: 'GET',
-    credentials: 'include'
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      console.error('Error:', data.error);
-      showNoAssignmentPage();
-    } else if (data.result === 'No Course found' || !data.result) {
-      showNoAssignmentPage();
-    } else {
-      // If result is an array, take the first course
-      let courseData;
-      if (Array.isArray(data.result)) {
-        if (data.result.length === 0) {
-          showNoAssignmentPage();
-          return;
-        }
-        courseData = data.result[0]; // Take the first course
-      } else {
-        courseData = data.result; // Single course object
-      }
-      
-      // Check if course_name exists
-      if (courseData.course_name) {
-        showNormalPage(courseData);
-      } else {
-        showNoAssignmentPage();
-      }
-    }
-  })
-  .catch(error => {
-    console.error('Fetch error:', error);
-    showNoAssignmentPage();
-  });
+function openSubmitModal(assignmentTitle) {
+    alert('Submit assignment: ' + assignmentTitle);
+    // You can implement modal functionality here if needed
+}
 </script>
-
-<style>
-  /* Modal styles */
-  .modal-content {
-    animation: modalFadeIn 0.3s;
-  }
-  
-  @keyframes modalFadeIn {
-    from { opacity: 0; transform: translateY(-50px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  #githubLink:focus {
-    border-color: #4361ee;
-    outline: none;
-  }
-  
-  #confirmSubmit:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
-  .btn.submit {
-    transition: all 0.3s ease;
-  }
-  
-  .btn.submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-  }
-</style>
 </body>
 </html>

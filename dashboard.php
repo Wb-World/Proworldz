@@ -1,13 +1,13 @@
 <?php
 session_start();
-
+print_r($_SESSION);
+echo count($_SESSION);
 // Include your DBconfig class
 require_once 'api/dbconf.php'; // Adjust the path if needed
 
 // Check if user is logged in
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
-    exit();
 }
 
 $userId = $_SESSION['id'];
@@ -2021,78 +2021,18 @@ $totalUsers = count($allUsers);
             </div>
 
             <!-- Notifications -->
+           <!-- In the Notifications section (around line ~1800), update the badge section: -->
             <div class="card">
                 <div class="p-4 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-sm font-medium uppercase">
                         <span>Notifications</span><br><br>
-                        <span class="badge badge-destructive">1</span>
+                        <span class="badge badge-destructive" id="notify-count">0</span> <!-- Changed this line -->
                     </div>
                 </div>
-                <div class="bg-accent p-3 space-y-2">
-                    <!-- <div class="group p-3 rounded-lg border border-border bg-background cursor-pointer">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-success"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-semibold">PAYMENT RECEIVED</h4>
-                                        <span class="badge badge-secondary text-xs">MED</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    Your payment to Rampant Studio has been processed successfully.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">39m ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="group p-3 rounded-lg border border-border bg-background cursor-pointer">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-semibold">INTRO: JOYCO STUDIO AND V0</h4>
-                                        <span class="badge badge-secondary text-xs">LOW</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    About us - We're a healthcare company focused on accessibility and innovation.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">45m ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-medium">SYSTEM UPDATE</h4>
-                                        <span class="badge badge-secondary text-xs">MED</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
-                                </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    Security patches have been applied to all guard bots.
-                                </p>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">2h ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                    
-                    <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
+                <div class="bg-accent p-3 space-y-2" id="notification-list">
+                    <!-- Existing notifications here -->
+                    <!-- Add this default notification at the top: -->
+                    <!-- <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
                         <div class="flex items-start gap-3">
                             <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
                             <div class="flex-1">
@@ -2101,183 +2041,334 @@ $totalUsers = count($allUsers);
                                         <h4 class="text-sm font-medium">WELCOME <?php echo strtoupper(htmlspecialchars($userName)); ?></h4>
                                         <span class="badge badge-secondary text-xs">INFO</span>
                                     </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
+                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 clear-notify">clear</button>
                                 </div>
                                 <div class="flex items-center justify-between mt-2">
                                     <span class="text-xs text-muted-foreground">Just now</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
+                    <!-- Existing notifications end -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== UTILITY FUNCTIONS =====
-        function formatTime(date) {
-            return date.toLocaleTimeString('en-US', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+                // ===== NOTIFICATION SYSTEM =====
+class NotificationSystem {
+    constructor() {
+        this.notifications = [];
+        this.loadNotifications();
+        this.setupEventListeners();
+        // Removed startSimulation() to prevent duplicate notifications
+    }
+    
+    loadNotifications() {
+        // Load from localStorage or initialize with default
+        const saved = localStorage.getItem('user_notifications');
+        if (saved) {
+            this.notifications = JSON.parse(saved);
+        } else {
+            // Initial welcome notification
+            this.notifications = [{
+                id: Date.now(),
+                title: 'WELCOME TO PROWORLDZ',
+                message: 'Your academic journey begins now!',
+                type: 'info',
+                time: 'Just now',
+                read: false
+            }];
+            this.saveNotifications();
         }
-
-        function formatDate(date) {
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            
-            const dayName = days[date.getDay()];
-            const month = months[date.getMonth()];
-            const day = date.getDate();
-            const year = date.getFullYear();
-            
-            // Add ordinal suffix to day
-            const dayWithSuffix = day + (day % 10 === 1 && day !== 11 ? 'st' : 
-                                       day % 10 === 2 && day !== 12 ? 'nd' : 
-                                       day % 10 === 3 && day !== 13 ? 'rd' : 'th');
-            
-            return {
-                dayOfWeek: dayName.toUpperCase(),
-                fullDate: `${month} ${dayWithSuffix}, ${year}`
-            };
+        this.renderNotifications();
+        this.updateCount();
+    }
+    
+    saveNotifications() {
+        localStorage.setItem('user_notifications', JSON.stringify(this.notifications));
+    }
+    
+    addNotification(title, message, type = 'info') {
+        const notification = {
+            id: Date.now(),
+            title: title,
+            message: message,
+            type: type,
+            time: 'Just now',
+            read: false
+        };
+        
+        this.notifications.unshift(notification); // Add to beginning
+        if (this.notifications.length > 50) {
+            this.notifications.pop(); // Keep only last 50
         }
-
-        // ===== INITIALIZE ON DOM LOAD =====
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update time and date
-            function updateDateTime() {
-                const now = new Date();
-
-const indiaTime = new Intl.DateTimeFormat('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-}).format(now);
-
-document.getElementById('current-time').textContent = indiaTime;
-
-                // Update date
-                const dateInfo = formatDate(now);
-                document.getElementById('day-of-week').textContent = dateInfo.dayOfWeek;
-                document.getElementById('full-date').textContent = dateInfo.fullDate;
-            }
-
-            // Update immediately and every second
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-
-            // Chart tabs functionality
-            const tabTriggers = document.querySelectorAll('.tabs-trigger');
-            tabTriggers.forEach(trigger => {
-                trigger.addEventListener('click', function() {
-                    // Remove active class from all tabs
-                    tabTriggers.forEach(t => t.classList.remove('active'));
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-                    
-                    // Log tab change (in real app, you'd update chart data)
-                    console.log('Switched to tab:', this.dataset.tab);
-                });
-            });
-
-            // Clear notification buttons
-            const clearButtons = document.querySelectorAll('.button-ghost.button-sm');
-            clearButtons.forEach(button => {
-                if (button.textContent.trim().toLowerCase() === 'clear') {
-                    button.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const notification = this.closest('.group');
-                        if (notification) {
-                            notification.style.opacity = '0';
-                            notification.style.transform = 'translateX(-100%)';
-                            setTimeout(() => {
-                                notification.remove();
-                                updateNotificationCount();
-                            }, 300);
-                        }
-                    });
-                }
-            });
-
-            // Update notification count
-            function updateNotificationCount() {
-                const notifications = document.querySelectorAll('.group.bg-background');
-                const unreadCount = notifications.length;
-                
-                // Update badge in header
-                const badge = document.querySelector('.badge-destructive');
-                if (badge) {
-                    badge.textContent = unreadCount;
-                    if (unreadCount === 0) {
-                        badge.style.display = 'none';
-                    }
-                }
-            }
-
-            // Mark notifications as read on click
-            const notificationItems = document.querySelectorAll('.group.bg-background');
-            notificationItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    if (!this.classList.contains('read')) {
-                        this.classList.add('read');
-                        this.style.opacity = '0.7';
-                        updateNotificationCount();
-                    }
-                });
-            });
-
-            // Navigation active states
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (!this.classList.contains('disabled')) {
-                        // Remove active class from all items
-                        navItems.forEach(i => i.classList.remove('active'));
-                        // Add active class to clicked item
-                        this.classList.add('active');
-                        e.preventDefault();
-                    }
-                });
-            });
-
-            // Animate elements on load
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        if (!entry.target.classList.contains('animate-fadeIn') && 
-                            !entry.target.classList.contains('animate-slideUp')) {
-                            entry.target.classList.add('animate-fadeIn');
-                        }
-                    }
-                });
-            }, observerOptions);
-
-            // Observe all cards for animation
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => observer.observe(card));
-
-            // Simulate live data updates
-            setInterval(() => {
-                // Randomly update time ago for notifications
-                const timeAgoElements = document.querySelectorAll('.text-muted-foreground.text-xs');
-                timeAgoElements.forEach(el => {
-                    if (el.textContent.includes('ago') && Math.random() > 0.8) {
-                        const times = ['just now', '1m ago', '5m ago', '10m ago', '30m ago', '1h ago'];
-                        const randomTime = times[Math.floor(Math.random() * times.length)];
-                        el.textContent = randomTime;
-                    }
-                });
-            }, 10000);
+        
+        this.saveNotifications();
+        this.renderNotifications();
+        this.updateCount();
+        this.showNotificationToast(notification);
+    }
+    
+    showNotificationToast(notification) {
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 z-50 bg-card border border-border rounded-lg p-4 shadow-lg animate-slideDown';
+        toast.style.minWidth = '300px';
+        toast.style.maxWidth = '350px';
+        toast.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-${notification.type === 'info' ? 'primary' : notification.type === 'success' ? 'success' : 'warning'}"></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <h4 class="text-sm font-semibold">${notification.title}</h4>
+                        <span class="badge badge-secondary text-xs">${notification.type.toUpperCase()}</span>
+                    </div>
+                    <p class="text-xs text-muted-foreground">${notification.message}</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xs text-muted-foreground">${notification.time}</span>
+                    </div>
+                </div>
+                <button class="button button-ghost button-sm text-xs h-6 px-2 close-toast">&times;</button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Close button
+        toast.querySelector('.close-toast').addEventListener('click', () => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px)';
+            setTimeout(() => toast.remove(), 300);
         });
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+    
+    markAsRead(id) {
+        const notification = this.notifications.find(n => n.id === id);
+        if (notification && !notification.read) {
+            notification.read = true;
+            this.saveNotifications();
+            this.updateCount();
+        }
+    }
+    
+    removeNotification(id) {
+        this.notifications = this.notifications.filter(n => n.id !== id);
+        this.saveNotifications();
+        this.renderNotifications();
+        this.updateCount();
+    }
+    
+    clearAll() {
+        this.notifications = [];
+        this.saveNotifications();
+        this.renderNotifications();
+        this.updateCount();
+    }
+    
+    renderNotifications() {
+        const container = document.getElementById('notification-list');
+        if (!container) return;
+        
+        // Clear all content
+        container.innerHTML = '';
+        
+        // Add dynamic notifications
+        this.notifications.forEach(notification => {
+            const notice = document.createElement('div');
+            notice.className = 'group p-3 rounded-lg border border-border bg-background cursor-pointer';
+            notice.setAttribute('data-notification-id', notification.id);
+            
+            // Determine color based on type
+            let dotColor = 'bg-primary';
+            let badgeType = 'badge-secondary';
+            
+            switch(notification.type) {
+                case 'success':
+                    dotColor = 'bg-success';
+                    badgeType = 'badge-outline-success';
+                    break;
+                case 'warning':
+                    dotColor = 'bg-warning';
+                    badgeType = 'badge-outline-warning';
+                    break;
+                case 'error':
+                    dotColor = 'bg-destructive';
+                    badgeType = 'badge-destructive';
+                    break;
+            }
+            
+            notice.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 ${dotColor}"></div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <div class="flex items-center gap-2 flex-1">
+                                <h4 class="text-sm font-semibold">${notification.title}</h4>
+                                <span class="badge ${badgeType} text-xs">${notification.type.toUpperCase()}</span>
+                            </div>
+                            <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 clear-notify">clear</button>
+                        </div>
+                        <p class="text-xs text-muted-foreground line-clamp-2">${notification.message}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-xs text-muted-foreground">${notification.time}</span>
+                            ${!notification.read ? '<span class="text-xs text-primary">NEW</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(notice);
+        });
+        
+        // Add clear all button if there are notifications
+        if (this.notifications.length > 0) {
+            const clearAllBtn = document.createElement('div');
+            clearAllBtn.className = 'text-center mt-3';
+            clearAllBtn.innerHTML = '<button class="button button-ghost button-sm text-xs" id="clear-all-notify">Clear All</button>';
+            container.appendChild(clearAllBtn);
+        }
+    }
+    
+    updateCount() {
+        const unreadCount = this.notifications.filter(n => !n.read).length;
+        const countElement = document.getElementById('notify-count');
+        if (countElement) {
+            countElement.textContent = unreadCount;
+            countElement.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+        }
+    }
+    
+    setupEventListeners() {
+        // Delegate clear button clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.clear-notify')) {
+                const notice = e.target.closest('.group');
+                const id = notice?.getAttribute('data-notification-id');
+                if (id) {
+                    this.removeNotification(parseInt(id));
+                }
+                e.stopPropagation();
+            }
+            
+            if (e.target.id === 'clear-all-notify') {
+                this.clearAll();
+            }
+        });
+    }
+}
+
+// ===== UTILITY FUNCTIONS =====
+function formatTime(date) {
+    return date.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatDate(date) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const dayName = days[date.getDay()];
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    // Add ordinal suffix to day
+    const dayWithSuffix = day + (day % 10 === 1 && day !== 11 ? 'st' : 
+                               day % 10 === 2 && day !== 12 ? 'nd' : 
+                               day % 10 === 3 && day !== 13 ? 'rd' : 'th');
+    
+    return {
+        dayOfWeek: dayName.toUpperCase(),
+        fullDate: `${month} ${dayWithSuffix}, ${year}`
+    };
+}
+
+// ===== INITIALIZE ON DOM LOAD =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize notification system
+    window.notificationSystem = new NotificationSystem();
+    
+    // Add initial notifications
+    window.notificationSystem.addNotification('PROFILE LOADED', `Welcome back, <?php echo htmlspecialchars($userName); ?>!`, 'info');
+    
+    <?php if ($assignmentsCount > 0): ?>
+    window.notificationSystem.addNotification('ASSIGNMENTS', `You have completed <?php echo $assignmentsCount; ?> assignments.`, 'success');
+    <?php endif; ?>
+    
+    <?php if ($rank <= 10): ?>
+    window.notificationSystem.addNotification('LEADERBOARD', `You are ranked #<?php echo $rank; ?> on the leaderboard!`, 'success');
+    <?php endif; ?>
+    
+    // Update time and date
+    function updateDateTime() {
+        const now = new Date();
+        const indiaTime = new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).format(now);
+        
+        document.getElementById('current-time').textContent = indiaTime;
+        
+        // Update date
+        const dateInfo = formatDate(now);
+        document.getElementById('day-of-week').textContent = dateInfo.dayOfWeek;
+        document.getElementById('full-date').textContent = dateInfo.fullDate;
+    }
+
+    // Update immediately and every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Animate elements on load
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (!entry.target.classList.contains('animate-fadeIn') && 
+                    !entry.target.classList.contains('animate-slideUp')) {
+                    entry.target.classList.add('animate-fadeIn');
+                }
+            }
+        });
+    }, observerOptions);
+
+    // Observe all cards for animation
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => observer.observe(card));
+
+    // Demo: Add a test notification after 3 seconds
+    setTimeout(() => {
+        window.notificationSystem.addNotification('SYSTEM ONLINE', 'All systems are running optimally.', 'info');
+    }, 3000);
+});
+
+// Make addNotification globally available
+function addNotification(title, message, type = 'info') {
+    if (window.notificationSystem) {
+        window.notificationSystem.addNotification(title, message, type);
+    }
+}
     </script>
 </body>
 </html>
