@@ -703,10 +703,7 @@
                 <li class="nav-item"><a href="home-comps/about-home.php"><i class="fas fa-info-circle"></i> About Us</a></li>
                 <li class="nav-item"><a href="home-comps/contact-home.php"><i class="fas fa-envelope"></i> Contact</a></li>
 
-                <!-- MOBILE BUTTONS -->
-                <div class="nav-btns mobile-btns">
-                    <a href="login.php" class="button button-secondary"><i class="fas fa-sign-in-alt"></i> Login</a>
-                </div>
+                
             </ul>
 
             <!-- DESKTOP BUTTONS -->

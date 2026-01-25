@@ -1008,14 +1008,6 @@ body {
             </form>
         </div>
 
-        <!-- CTA SECTION -->
-        <section class="contact-cta animate-fadeIn delay-3">
-            <h2>Ready to Start Your <span>Tech Journey</span>?</h2>
-            <a href="courses.php" class="cta-btn">
-                <i class="fa-solid fa-rocket"></i>
-                Explore Courses
-            </a>
-        </section>
 
         <!-- FOOTER -->
         <footer class="footer animate-fadeIn delay-4">

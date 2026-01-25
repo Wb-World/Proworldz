@@ -651,46 +651,65 @@
     // Show loading
     document.getElementById('loading').style.display = 'block';
     document.getElementById('loginBtn').disabled = true;
-    document.getElementById('loginBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+    // document.getElementById('loginBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
     document.getElementById('errorMessage').style.display = 'none';
 
-    // Call the API but IGNORE the response - always show success
-    fetch("http://localhost:3000/api/auth/login.php",{
-      method:'POST',
-      body:datas,
-      credentials:'include'
-    })
-    .then(res => res.json())
-    .then(data => {
-      // IGNORE API RESPONSE - ALWAYS SHOW SUCCESS
-      // Success animation
-      document.getElementById('loginBtn').innerHTML = '<i class="fas fa-check"></i> Access Granted';
-      document.getElementById('loginBtn').style.background = 'var(--success)';
-      
-      // Add success glow to form
-      document.querySelector('.auth-box').style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.3)';
-      
-      // Redirect after brief delay
-      setTimeout(() => {
-        location.replace('dashboard.php');
-      }, 1000);
-    })
-    .catch(err => {
-      // EVEN IF THERE'S AN ERROR - STILL SHOW SUCCESS
-      console.log(err);
-      
-      // Success animation
-      document.getElementById('loginBtn').innerHTML = '<i class="fas fa-check"></i> Access Granted';
-      document.getElementById('loginBtn').style.background = 'var(--success)';
-      
-      // Add success glow to form
-      document.querySelector('.auth-box').style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.3)';
-      
-      // Redirect after brief delay
-      setTimeout(() => {
-        location.replace('dashboard.php');
-      }, 1000);
-    });
+    fetch("https://proworldz.page.gd/api/auth/login.php", {
+    method: 'POST',
+    body: datas,
+    credentials: 'include'
+})
+.then(res => res.json())
+.then(data => {
+
+    if (data['result'] !== null) {
+        // ✅ SUCCESS
+        document.getElementById('loginBtn').innerHTML =
+            '<i class="fas fa-check"></i> Access Granted';
+        document.getElementById('loginBtn').style.background = 'var(--success)';
+
+        // Add success glow to form
+        document.querySelector('.auth-box').style.boxShadow =
+            '0 0 40px rgba(16, 185, 129, 0.3)';
+
+        // Redirect after brief delay
+        setTimeout(() => {
+            location.replace('dashboard.php');
+        }, 1000);
+    } else {
+        // ❌ INVALID CREDENTIALS (API returned null)
+        showAccessDenied();
+    }
+
+})
+.catch(err => {
+    // ❌ NETWORK / SERVER ERROR
+    console.error(err);
+    showAccessDenied();
+});
+
+/* =========================
+   ACCESS DENIED HANDLER
+   ========================= */
+function showAccessDenied() {
+    const btn = document.getElementById('loginBtn');
+
+    btn.innerHTML = '<i class="fas fa-times"></i> Access Denied';
+    btn.style.background = 'var(--danger)';
+
+    // Red glow
+    document.querySelector('.auth-box').style.boxShadow =
+        '0 0 40px rgba(239, 68, 68, 0.35)';
+
+    // Reset button after 2 sec (optional UX)
+    setTimeout(() => {
+        btn.innerHTML = 'Login';
+        btn.style.background = '';
+        document.querySelector('.auth-box').style.boxShadow = '';
+    }, 2000);
+}
+
+    
   }
 
   // Add shake animation for errors

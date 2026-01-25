@@ -4,10 +4,14 @@
 // $db_pass = "HDm584vG4kZDnt";
 // $db_name = "if0_40322633_students";
 class DBconfig {
-    protected $db_host = "localhost";
-    protected $db_user = "root";
-    protected $db_pass = "mypass123";
-    protected $db_name = "test";
+    // protected $db_host = "localhost";
+    // protected $db_user = "root";
+    // protected $db_pass = "mypass123";
+    // protected $db_name = "test";
+    protected $db_host = "sql204.infinityfree.com";
+    protected $db_user = "if0_40322633";
+    protected $db_pass = "HDm584vG4kZDnt";
+    protected $db_name = "if0_40322633_students";
     protected $con;
 
     public function __construct()
