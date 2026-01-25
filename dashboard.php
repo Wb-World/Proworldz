@@ -1667,6 +1667,16 @@ $totalUsers = count($allUsers);
                                 </svg>
                                 <span class="nav-label">Laboratory</span>
                             </a>
+                            <a href="ourcourse.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                    <!-- Book icon -->
+                                    <path stroke-width="1.5" d="M16.667 15V5.833a2.5 2.5 0 0 0-2.5-2.5H5.833a2.5 2.5 0 0 0-2.5 2.5v10a2.5 2.5 0 0 0 2.5 2.5h10"/>
+                                    <path stroke-width="1.5" d="M6.667 3.333v13.334"/>
+                                    <path stroke-width="1.5" d="M10 6.667h3.333"/>
+                                    <path stroke-width="1.5" d="M10 10h3.333"/>
+                                </svg>
+                                <span class="nav-label">Courses</span>
+                            </a>
                             <a href="#" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
@@ -1699,7 +1709,7 @@ $totalUsers = count($allUsers);
                                     <!-- Font Awesome Dragon (simpler) -->
                                     <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
                                 </svg>
-                                <span class="nav-label">Dragon Tool</span>
+                                <span class="nav-label">Drago Tool</span>
                             </a>
                             <a href="logout.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
@@ -1815,11 +1825,11 @@ $totalUsers = count($allUsers);
                             <div class="bullet"></div>
                             <span class="text-sm font-medium uppercase">PERFORMANCE TREND</span>
                         </div>
-                        <div class="tabs-list" style="border: none; padding: 0;">
+                        <!-- <div class="tabs-list" style="border: none; padding: 0;">
                             <button class="tabs-trigger active" data-tab="week">WEEK</button>
                             <button class="tabs-trigger" data-tab="month">MONTH</button>
                             <button class="tabs-trigger" data-tab="year">YEAR</button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="bg-accent p-4">
@@ -2004,11 +2014,11 @@ $totalUsers = count($allUsers);
                 <div class="p-4 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-sm font-medium uppercase">
                         <span>Notifications</span><br><br>
-                        <span class="badge badge-destructive">3</span>
+                        <span class="badge badge-destructive">1</span>
                     </div>
                 </div>
                 <div class="bg-accent p-3 space-y-2">
-                    <div class="group p-3 rounded-lg border border-border bg-background cursor-pointer">
+                    <!-- <div class="group p-3 rounded-lg border border-border bg-background cursor-pointer">
                         <div class="flex items-start gap-3">
                             <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-success"></div>
                             <div class="flex-1">
@@ -2069,7 +2079,7 @@ $totalUsers = count($allUsers);
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     
                     <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
                         <div class="flex items-start gap-3">
@@ -2082,9 +2092,6 @@ $totalUsers = count($allUsers);
                                     </div>
                                     <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2">clear</button>
                                 </div>
-                                <p class="text-xs text-muted-foreground line-clamp-2">
-                                    Welcome to your dashboard! You have completed <?php echo htmlspecialchars($assignments); ?> assignments.
-                                </p>
                                 <div class="flex items-center justify-between mt-2">
                                     <span class="text-xs text-muted-foreground">Just now</span>
                                 </div>
@@ -2131,10 +2138,17 @@ $totalUsers = count($allUsers);
             // Update time and date
             function updateDateTime() {
                 const now = new Date();
-                
-                // Update time
-                document.getElementById('current-time').textContent = formatTime(now);
-                
+
+const indiaTime = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+}).format(now);
+
+document.getElementById('current-time').textContent = indiaTime;
+
                 // Update date
                 const dateInfo = formatDate(now);
                 document.getElementById('day-of-week').textContent = dateInfo.dayOfWeek;

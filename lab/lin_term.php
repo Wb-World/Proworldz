@@ -1,3 +1,29 @@
+<?php 
+session_start(); 
+// Include your DBconfig class
+require_once '../api/dbconf.php'; // Adjust the path if needed
+
+// Check if user is logged in
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$userId = $_SESSION['id'];
+
+// Create database connection
+$db = new DBconfig();
+
+// Check connection
+if (!$db->check_con()) {
+    die("Database connection failed");
+}
+
+// Get only the user's name
+$userInfo = $db->getUserInfo($userId, ['name']);
+$userName = isset($userInfo['name']) ? $userInfo['name'] : 'User';
+?>
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -100,18 +126,11 @@
         /* ===== DESKTOP-ONLY LAYOUT ===== */
         .desktop-container {
             display: grid;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 1fr;
             gap: var(--gap);
             min-height: 100vh;
             padding: var(--sides);
             background-color: var(--background);
-        }
-
-        /* Left Sidebar - Navigation */
-        .desktop-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap);
         }
 
         /* Main Content Area */
@@ -1260,64 +1279,6 @@
             background-color: var(--primary);
         }
 
-        /* ===== SIDEBAR NAVIGATION STYLES ===== */
-        .nav-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .nav-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-title .bullet {
-            width: 0.375rem;
-            height: 0.375rem;
-        }
-
-        .nav-title span {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--muted-foreground);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: calc(var(--radius) - 2px);
-            text-decoration: none;
-            color: var(--sidebar-foreground);
-            transition: all 0.2s;
-            margin-bottom: 0.25rem;
-        }
-
-        .nav-item:hover {
-            background-color: var(--sidebar-accent);
-        }
-
-        .nav-item.active {
-            background-color: var(--sidebar-primary);
-            color: var(--sidebar-primary-foreground);
-        }
-
-        .nav-icon {
-            width: 1.25rem;
-            height: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        .nav-label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
         /* ===== TERMINAL SPECIFIC STYLES ===== */
         .terminal-header {
             padding: 1.5rem;
@@ -1406,6 +1367,9 @@
         /* Terminal text styles */
         .terminal-line {
             margin-bottom: 2px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
         }
 
         .prompt {
@@ -1619,65 +1583,6 @@
 </head>
 <body>
     <div class="desktop-container">
-        <!-- Left Sidebar - Navigation -->
-        <div class="desktop-sidebar">
-            <!-- Logo Section -->
-            <div class="card">
-                <div class="p-4">
-                    <div class="flex items-center gap-3">
-                        <div class="size-12 flex items-center justify-center bg-primary rounded-lg">
-                            <svg class="size-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <div class="text-2xl font-display" id="sidebar-name">mohamed</div>
-                            <div class="text-xs uppercase text-muted-foreground">terminal module</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Sections -->
-            <div class="card">
-                <div class="p-3">
-                    <div class="nav-section">
-                        <div class="space-y-1" style="height: 45cap;">
-                            <a href="dashboard.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
-                                </svg>
-                                <span class="nav-label">Overview</span>
-                            </a>
-                            <a href="assignment.php" class="nav-item">
-                                <i class="nav-icon fas fa-book"></i>
-                                <span class="nav-label">Assignments</span>
-                            </a>
-                            <a href="lab.php" class="nav-item">
-                                <i class="nav-icon fas fa-terminal"></i>
-                                <span class="nav-label">Terminal</span>
-                            </a>
-                            <a href="leaderboard.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
-                                </svg>
-                                <span class="nav-label">Leaderboard</span>
-                            </a>
-                            <a href="contactus.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
-                                </svg>
-                                <span class="nav-label">Contact support</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content Area -->
         <div class="desktop-main">
             <!-- Terminal Header -->
@@ -1689,15 +1594,15 @@
                                 <i class="fas fa-terminal text-primary-foreground text-lg"></i>
                             </div>
                             <div>
-                                <h1 class="text-3xl font-display">Terminal</h1>
+                                <h1 class="text-3xl font-display">Proworldz Terminal</h1>
                                 <div class="text-sm text-muted-foreground">Ubuntu 22.04 LTS - Interactive Shell</div>
+                                <div class="text-sm text-muted-foreground">Warning : Refresh this can loss your command line data</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="badge badge-outline-success">ACTIVE</span>
                             <button class="button button-secondary button-sm" onclick="goBack()">
                                 <i class="fas fa-arrow-left mr-2"></i>
-                                Back to Lab
+                                Back to Dashboard
                             </button>
                         </div>
                     </div>
@@ -1715,26 +1620,25 @@
                     </div>
                     <div class="terminal-info">
                         <span><i class="fas fa-microchip"></i> Ubuntu 22.04 LTS</span>
-                        <span><i class="fas fa-user"></i> user@localhost</span>
+                        <span><i class="fas fa-user"></i> <?= $userName;?></span>
                         <span><i class="fas fa-folder"></i> ~</span>
                     </div>
                 </div>
 
                 <!-- Terminal Body -->
                 <div class="terminal-body">
-                    <div id="terminal"></div>
+                    <div id="terminal" tabindex="0"></div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-        // Ubuntu Terminal Engine (from your original code)
+        // Ubuntu Terminal Engine
         class UbuntuTerminal {
             constructor() {
-                this.username = 'user';
-                this.hostname = 'localhost';
+                this.username = <?= json_encode($userName); ?>;
+                this.hostname = 'root';
                 this.currentDir = '~';
                 this.commandHistory = [];
                 this.historyIndex = -1;
@@ -1796,7 +1700,7 @@
                                         size: '123',
                                         modified: 'Jan 1 00:00',
                                         name: 'notes.txt',
-                                        content: '# Welcome to M.O.N.K.Y OS Terminal\n\nThis is a simulated Linux terminal with full command support.\n\nType \'help\' to see available commands.\nType \'neofetch\' for system information.'
+                                        content: '# Welcome to Proworldz OS Terminal\n\nThis is a simulated Linux terminal with full command support.\n\nType \'help\' to see available commands.\nType \'neofetch\' for system information.'
                                     },
                                     'readme.md': {
                                         type: 'file',
@@ -1806,7 +1710,7 @@
                                         size: '456',
                                         modified: 'Jan 1 00:00',
                                         name: 'readme.md',
-                                        content: '# M.O.N.K.Y OS Ubuntu Terminal\n\nA fully functional terminal simulator with Linux commands.\n\nFeatures:\n- File system navigation\n- File operations\n- Text processing\n- System commands\n- Package management simulation'
+                                        content: '# Proworldz OS Ubuntu Terminal\n\nA fully functional terminal simulator with Linux commands.\n\nFeatures:\n- File system navigation\n- File operations\n- Text processing\n- System commands\n- Package management simulation'
                                     }
                                 }
                             },
@@ -1846,7 +1750,7 @@
                                                 size: '1024',
                                                 modified: 'Jan 1 00:00',
                                                 name: 'index.html',
-                                                content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>M.O.N.K.Y OS</title>\n</head>\n<body>\n    <h1>Welcome to M.O.N.K.Y OS</h1>\n</body>\n</html>'
+                                                content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Proworldz OS</title>\n</head>\n<body>\n    <h1>Welcome to Proworldz OS</h1>\n</body>\n</html>'
                                             }
                                         }
                                     }
@@ -2034,7 +1938,7 @@ Press ↑↓ for command history`;
                         const child = node.children[item];
                         const size = humanReadable ? this.formatSize(child.size) : child.size.padStart(5);
                         return `${child.permissions} ${child.owner} ${child.group} ${size} ${child.modified} ${child.name}`;
-                    }).join('\n');
+                    }).join(' ');
                 } else {
                     // Color code by type
                     return items.map(item => {
@@ -2042,7 +1946,7 @@ Press ↑↓ for command history`;
                         if (child.type === 'dir') return `<span class="directory">${item}/</span>`;
                         if (child.permissions.startsWith('-rwx')) return `<span class="executable">${item}*</span>`;
                         return `<span class="file">${item}</span>`;
-                    }).join('  ');
+                    }).join('&nbsp;&nbsp;&nbsp;&nbsp;');
                 }
             }
 
@@ -2185,65 +2089,7 @@ Press ↑↓ for command history`;
                 return this.rm(['-r', ...args]);
             }
 
-            date() {
-                return new Date().toString();
-            }
-
-            uptime() {
-                return ' 00:00:00 up 1 day,  0:00,  1 user,  load average: 0.00, 0.00, 0.00';
-            }
-
-            uname(args) {
-                if (args.includes('-a')) {
-                    return 'Linux localhost 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 5 18:08:27 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux';
-                }
-                return 'Linux';
-            }
-
-            df(args) {
-                return `Filesystem     1K-blocks    Used Available Use% Mounted on
-udev             4000000       0   4000000   0% /dev
-tmpfs             804768    1236    803532   1% /run
-/dev/sda1      102400000 20480000  81920000  20% /
-tmpfs            4023832       0   4023832   0% /dev/shm
-tmpfs               5120       0      5120   0% /run/lock
-tmpfs            4023832       0   4023832   0% /sys/fs/cgroup`;
-            }
-
-            ps(args) {
-                return `    PID TTY          TIME CMD
-      1 ?        00:00:01 systemd
-    456 ?        00:00:00 bash
-    ${Math.floor(Math.random() * 9000) + 1000} ?        00:00:00 ps`;
-            }
-
-            envCmd() {
-                return Object.entries(this.env).map(([k, v]) => `${k}=${v}`).join('\n');
-            }
-
-            historyCmd() {
-                return this.commandHistory.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n');
-            }
-
-            repeatLastCommand() {
-                if (this.commandHistory.length > 0) {
-                    return this.commandHistory[this.commandHistory.length - 1];
-                }
-                return '!!: no previous command';
-            }
-
-            neofetch() {
-                return `
-${' '.repeat(20)}.-\`\`\`\`\`-.,           \x1b[1;34muser\x1b[0m@\x1b[1;34mlocalhost\x1b[0m
-${' '.repeat(18)}/` + '`' + `${' '.repeat(11)}.-\`\`-.        \x1b[1;30m----------------\x1b[0m
-${' '.repeat(18)}/` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(11)}.      \x1b[1;34mOS\x1b[0m: Ubuntu 22.04.3 LTS x86_64
-${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(13)}|     \x1b[1;34mHost\x1b[0m: M.O.N.K.Y OS Virtual Machine
-${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}|` + '`' + `${' '.repeat(13)}|     \x1b[1;34mKernel\x1b[0m: 5.15.0-91-generic
-${' '.repeat(18)}\\` + '`' + `.` + '`' + `${' '.repeat(9)}/` + '`' + `${' '.repeat(12)}/      \x1b[1;34mUptime\x1b[0m: 1 day, 0 hours
-${' '.repeat(17)}\\`;
-            }
-
-                        cp(args) {
+            cp(args) {
                 if (args.length < 2) return 'cp: missing file operand';
                 
                 const node = this.getCurrentNode();
@@ -2300,7 +2146,7 @@ ${' '.repeat(17)}\\`;
 
             chmod(args) {
                 if (args.length < 2) return 'chmod: missing operand';
-                return ''; // Permission change simulated
+                return '';
             }
 
             grep(args) {
@@ -2323,7 +2169,7 @@ ${' '.repeat(17)}\\`;
                 const results = lines.filter(line => line.toLowerCase().includes(pattern.toLowerCase()));
                 
                 if (results.length === 0) {
-                    return ''; // No matches
+                    return '';
                 }
                 
                 return results.map(line => {
@@ -2340,7 +2186,7 @@ ${' '.repeat(17)}\\`;
 
             find(args) {
                 if (args.length === 0) return 'find: missing path';
-                return '.'; // Simple implementation
+                return '.';
             }
 
             wc(args) {
@@ -2437,6 +2283,10 @@ ${' '.repeat(17)}\\`;
                 return sorted.join('\n');
             }
 
+            date() {
+                return new Date().toString();
+            }
+
             cal(args) {
                 const now = new Date();
                 const month = args.length > 0 ? parseInt(args[0]) - 1 : now.getMonth();
@@ -2470,14 +2320,46 @@ ${' '.repeat(17)}\\`;
                 return result + calendar;
             }
 
+            uptime() {
+                return ' 00:00:00 up 1 day,  0:00,  1 user,  load average: 0.00, 0.00, 0.00';
+            }
+
+            uname(args) {
+                if (args.includes('-a')) {
+                    return 'Linux monkey-os 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 5 18:08:27 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux';
+                }
+                return 'Linux';
+            }
+
+            df(args) {
+                return `Filesystem     1K-blocks    Used Available Use% Mounted on
+udev             4000000       0   4000000   0% /dev
+tmpfs             804768    1236    803532   1% /run
+/dev/sda1      102400000 20480000  81920000  20% /
+tmpfs            4023832       0   4023832   0% /dev/shm
+tmpfs               5120       0      5120   0% /run/lock
+tmpfs            4023832       0   4023832   0% /sys/fs/cgroup`;
+            }
+
             du(args) {
                 const dir = args.length > 0 ? args[0] : '.';
                 return `4096\t${dir}`;
             }
 
+            ps(args) {
+                return `    PID TTY          TIME CMD
+      1 ?        00:00:01 systemd
+    456 ?        00:00:00 bash
+    ${Math.floor(Math.random() * 9000) + 1000} ?        00:00:00 ps`;
+            }
+
             kill(args) {
                 if (args.length === 0) return 'kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec ... or kill -l [sigspec]';
                 return '';
+            }
+
+            envCmd() {
+                return Object.entries(this.env).map(([k, v]) => `${k}=${v}`).join('\n');
             }
 
             export(args) {
@@ -2509,6 +2391,17 @@ ${' '.repeat(17)}\\`;
                     this.aliases[name] = value;
                 }
                 return '';
+            }
+
+            historyCmd() {
+                return this.commandHistory.map((cmd, i) => `${i + 1}  ${cmd}`).join('\n');
+            }
+
+            repeatLastCommand() {
+                if (this.commandHistory.length > 0) {
+                    return this.commandHistory[this.commandHistory.length - 1];
+                }
+                return '!!: no previous command';
             }
 
             sudo(args) {
@@ -2642,10 +2535,10 @@ ${' '.repeat(80)}
 
             neofetch() {
                 return `
-${' '.repeat(20)}.-\`\`\`\`\`-.,           \x1b[1;34muser\x1b[0m@\x1b[1;34mlocalhost\x1b[0m
+${' '.repeat(20)}.-\`\`\`\`\`-.,           \x1b[1;34muser\x1b[0m@\x1b[1;34mmonkey-os\x1b[0m
 ${' '.repeat(18)}/` + '`' + `${' '.repeat(11)}.-\`\`-.        \x1b[1;30m----------------\x1b[0m
-${' '.repeat(18)}/` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(11)}.      \x1b[1;34mOS\x1b[0m: Ubuntu 22.04.3 LTS x86_64
-${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(13)}|     \x1b[1;34mHost\x1b[0m: M.O.N.K.Y OS Virtual Machine
+${' '.repeat(18)}/` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(11)}.      \x1b[1;34mOS\x1b[0m: Proworldz OS 22.04.3 LTS x86_64
+${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(13)}|     \x1b[1;34mHost\x1b[0m: Proworldz OS Virtual Machine
 ${' '.repeat(19)}|` + '`' + `${' '.repeat(10)}|` + '`' + `${' '.repeat(13)}|     \x1b[1;34mKernel\x1b[0m: 5.15.0-91-generic
 ${' '.repeat(18)}\\` + '`' + `.` + '`' + `${' '.repeat(9)}/` + '`' + `${' '.repeat(12)}/      \x1b[1;34mUptime\x1b[0m: 1 day, 0 hours
 ${' '.repeat(17)}\\` + '`' + `${' '.repeat(10)}/` + '`' + `${' '.repeat(12)}.      \x1b[1;34mPackages\x1b[0m: 1234 (dpkg)
@@ -2656,7 +2549,7 @@ ${' '.repeat(19)}|` + '`' + `${' '.repeat(12)}|` + '`' + `${' '.repeat(12)}|    
 ${' '.repeat(18)}\\` + '`' + `${' '.repeat(12)}|` + '`' + `${' '.repeat(12)}|     \x1b[1;34mWM Theme\x1b[0m: Adwaita
 ${' '.repeat(17)}/` + '`' + `${' '.repeat(12)}/` + '`' + `${' '.repeat(12)}|     \x1b[1;34mTheme\x1b[0m: Yaru-dark [GTK2/3]
 ${' '.repeat(16)}/` + '`' + `${' '.repeat(13)}/_\\` + '`' + `${' '.repeat(11)}|     \x1b[1;34mIcons\x1b[0m: Yaru [GTK2/3]
-${' '.repeat(14)}/` + '`' + `${' '.repeat(14)}/` + '`' + `${' '.repeat(14)}|     \x1b[1;34mTerminal\x1b[0m: M.O.N.K.Y Terminal
+${' '.repeat(14)}/` + '`' + `${' '.repeat(14)}/` + '`' + `${' '.repeat(14)}|     \x1b[1;34mTerminal\x1b[0m: Proworldz Terminal
 ${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|     \x1b[1;34mCPU\x1b[0m: Intel i7-12700K (16) @ 4.90GHz
 ${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|     \x1b[1;34mGPU\x1b[0m: NVIDIA GeForce RTX 3080
 ${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|     \x1b[1;34mMemory\x1b[0m: 1284MiB / 15937MiB`;
@@ -2665,10 +2558,8 @@ ${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|    
 
         // Terminal UI Controller
         const terminal = new UbuntuTerminal();
-        let terminalActive = true;
         let commandBuffer = '';
         let isProcessing = false;
-        let autoCompleteIndex = 0;
 
         // Initialize terminal
         document.addEventListener('DOMContentLoaded', function() {
@@ -2686,70 +2577,94 @@ ${' '.repeat(13)}|` + '`' + `${' '.repeat(15)}|` + '`' + `${' '.repeat(15)}|    
         }
 
         function setupEventListeners() {
-            const terminalElement = document.getElementById('terminal');
-            
-            terminalElement.addEventListener('click', function() {
-                this.focus();
-            });
-            
-            terminalElement.addEventListener('keydown', function(e) {
-                if (!terminalActive || isProcessing) return;
-                
-                switch(e.key) {
-                    case 'Enter':
-                        e.preventDefault();
-                        processCommand();
-                        break;
-                    case 'Backspace':
-                        if (commandBuffer.length > 0) {
-                            commandBuffer = commandBuffer.slice(0, -1);
-                            updatePrompt();
-                        }
-                        break;
-                    case 'Tab':
-                        e.preventDefault();
-                        autoComplete();
-                        break;
-                    case 'ArrowUp':
-                        e.preventDefault();
-                        navigateHistory(-1);
-                        break;
-                    case 'ArrowDown':
-                        e.preventDefault();
-                        navigateHistory(1);
-                        break;
-                    case 'c':
-                        if (e.ctrlKey) {
-                            e.preventDefault();
-                            addOutput('^C');
-                            commandBuffer = '';
-                            updatePrompt();
-                        }
-                        break;
-                    case 'l':
-                        if (e.ctrlKey) {
-                            e.preventDefault();
-                            clearTerminal();
-                        }
-                        break;
-                    default:
-                        if (e.key.length === 1 && !e.ctrlKey) {
-                            commandBuffer += e.key;
-                            updatePrompt();
-                        }
-                }
-            });
-            
-            // Focus terminal on page load
-            terminalElement.focus();
+    const terminalElement = document.getElementById('terminal');
+    
+    terminalElement.addEventListener('click', function() {
+        this.focus();
+    });
+    
+    terminalElement.addEventListener('keydown', function(e) {
+        // Handle Ctrl combinations first
+        if (e.ctrlKey) {
+            switch(e.key.toLowerCase()) {
+                case 'c':
+                    e.preventDefault();
+                    addOutput('^C');
+                    commandBuffer = '';
+                    updatePrompt();
+                    return;
+                case 'l':
+                    e.preventDefault();
+                    clearTerminal();
+                    return;
+                case 'u':
+                    e.preventDefault();
+                    commandBuffer = '';
+                    updatePrompt();
+                    return;
+                case 'k':
+                    e.preventDefault();
+                    commandBuffer = commandBuffer.slice(0, -1);
+                    updatePrompt();
+                    return;
+            }
         }
+        
+        // Handle other special keys
+        switch(e.key) {
+            case 'Enter':
+                e.preventDefault();
+                processCommand();
+                break;
+            case 'Backspace':
+                e.preventDefault();
+                if (commandBuffer.length > 0) {
+                    commandBuffer = commandBuffer.slice(0, -1);
+                    updatePrompt();
+                }
+                break;
+            case 'Tab':
+                e.preventDefault();
+                autoComplete();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                navigateHistory(-1);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                navigateHistory(1);
+                break;
+            case 'ArrowLeft':
+            case 'ArrowRight':
+            case 'Shift':
+            case 'Alt':
+            case 'Meta':
+            case 'Control':
+            case 'Escape':
+                // Allow default behavior for these keys
+                break;
+            default:
+                // Only prevent default for single character keys
+                // Check if it's a single character (not a special key)
+                if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                    e.preventDefault();
+                    commandBuffer += e.key;
+                    updatePrompt();
+                }
+                break;
+        }
+    });
+    
+    // Focus terminal on page load
+    terminalElement.focus();
+}
 
         function showWelcomeMessage() {
-            const welcome = `Welcome to M.O.N.K.Y OS Ubuntu Terminal 22.04 LTS
+            const welcome = `Welcome to Proworldz OS Ubuntu Terminal 22.04 LTS
 
 This is a simulated Linux terminal with full command support.
 Type 'help' to see available commands.
-Type 'neofetch' for system information.
 
 `;
             addOutput(welcome);
@@ -2785,17 +2700,10 @@ Type 'neofetch' for system information.
             }
             
             if (text.trim()) {
-                // Convert ANSI escape codes to HTML spans
-                const processedText = text.replace(/\x1b\[1;(\d+)m/g, '<span class="$1">')
-                                           .replace(/\x1b\[0m/g, '</span>')
-                                           .replace(/\x1b\[1;34m/g, '<span class="directory">')
-                                           .replace(/\x1b\[1;31m/g, '<span class="error">');
-                
-                const outputLine = `<div class="terminal-line output">${processedText}</div>`;
+                const outputLine = `<div class="terminal-line output">${text}</div>`;
                 terminalElement.innerHTML += outputLine;
             }
             
-            // Scroll to bottom
             terminalElement.scrollTop = terminalElement.scrollHeight;
         }
 
@@ -2855,7 +2763,7 @@ Type 'neofetch' for system information.
 
         // UI Functions
         function goBack() {
-            window.location.href = 'lab.php';
+            window.history.back();
         }
 
         function clearTerminal() {
@@ -2872,31 +2780,8 @@ Type 'neofetch' for system information.
             const terminalContainer = document.querySelector('.terminal-container');
             terminalContainer.classList.toggle('fullscreen');
             
-            const statusElement = document.getElementById('terminal-status');
-            if (terminalContainer.classList.contains('fullscreen')) {
-                statusElement.textContent = 'FULLSCREEN';
-                statusElement.className = 'badge badge-outline-warning';
-            } else {
-                statusElement.textContent = 'RUNNING';
-                statusElement.className = 'badge badge-outline-success';
-            }
-            
             // Focus terminal after fullscreen toggle
             document.getElementById('terminal').focus();
-        }
-
-        function insertCommand(cmd) {
-            if (isProcessing) return;
-            
-            commandBuffer = cmd;
-            updatePrompt();
-            
-            // Auto-execute if terminal is active
-            if (terminalActive) {
-                setTimeout(() => {
-                    processCommand();
-                }, 100);
-            }
         }
     </script>
 </body>

@@ -1,6 +1,8 @@
 <?php
-session_start();
-// if(!isset($_SESSION['current-student'])) header("Location: login.php");
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
@@ -83,18 +85,11 @@ session_start();
         /* ===== DESKTOP-ONLY LAYOUT ===== */
         .desktop-container {
             display: grid;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 1fr;
             gap: var(--gap);
             min-height: 100vh;
             padding: var(--sides);
             background-color: var(--background);
-        }
-
-        /* Left Sidebar - Navigation */
-        .desktop-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap);
         }
 
         /* Main Content Area */
@@ -497,59 +492,6 @@ session_start();
             font-size: 1rem;
         }
 
-        /* ===== SIDEBAR NAVIGATION STYLES ===== */
-        .nav-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .nav-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-title span {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--muted-foreground);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: calc(var(--radius) - 2px);
-            text-decoration: none;
-            color: var(--sidebar-foreground);
-            transition: all 0.2s;
-            margin-bottom: 0.25rem;
-        }
-
-        .nav-item:hover {
-            background-color: var(--sidebar-accent);
-        }
-
-        .nav-item.active {
-            background-color: var(--sidebar-primary);
-            color: var(--sidebar-primary-foreground);
-        }
-
-        .nav-icon {
-            width: 1.25rem;
-            height: 1.25rem;
-            flex-shrink: 0;
-        }
-
-        .nav-label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
         /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -603,24 +545,63 @@ session_start();
             background: linear-gradient(135deg, var(--card) 0%, rgba(13, 16, 21, 0.9) 100%);
             border-bottom: 1px solid var(--border);
             margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .interpreter-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
         }
 
         .interpreter-hero {
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .interpreter-hero h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 0.5rem;
             background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.02em;
         }
 
         .interpreter-hero p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: var(--muted-foreground);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .environment-info {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .env-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.875rem;
+        }
+
+        .env-item i {
+            color: var(--primary);
         }
 
         .interpreter-grid {
@@ -640,7 +621,7 @@ session_start();
         }
 
         .editor-section, .output-section {
-            background: linear-gradient(135deg, var(--card) 0%, rgba(26, 29, 36, 0.8) 100%);
+            background: linear-gradient(135deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 1.5rem;
@@ -649,6 +630,7 @@ session_start();
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .editor-section::before, .output-section::before {
@@ -664,7 +646,7 @@ session_start();
         .editor-section:hover, .output-section:hover {
             transform: translateY(-2px);
             border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
         }
 
         .section-header {
@@ -677,29 +659,30 @@ session_start();
         }
 
         .section-header h3 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--foreground);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .section-header h3 i {
             color: var(--primary);
+            font-size: 1.2rem;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             font-size: 0.875rem;
             color: var(--muted-foreground);
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--success);
         }
@@ -715,7 +698,7 @@ session_start();
 
         .code-editor-container {
             flex: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(13, 16, 21, 0.5);
             border: 1px solid var(--border);
             border-radius: calc(var(--radius) - 2px);
             overflow: hidden;
@@ -727,7 +710,7 @@ session_start();
             height: 100%;
             padding: 1.5rem;
             font-family: 'Roboto Mono', monospace;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
             color: var(--foreground);
             background: transparent;
@@ -736,6 +719,12 @@ session_start();
             resize: none;
             white-space: pre;
             tab-size: 4;
+            caret-color: var(--primary);
+        }
+
+        #code::placeholder {
+            color: var(--muted-foreground);
+            opacity: 0.6;
         }
 
         #code::-webkit-scrollbar {
@@ -757,12 +746,12 @@ session_start();
 
         .output-display {
             flex: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(13, 16, 21, 0.5);
             border: 1px solid var(--border);
             border-radius: calc(var(--radius) - 2px);
             padding: 1.5rem;
             font-family: 'Roboto Mono', monospace;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
             color: var(--foreground);
             white-space: pre-wrap;
@@ -800,12 +789,13 @@ session_start();
         }
 
         .controls-section {
-            background: linear-gradient(135deg, var(--card) 0%, rgba(26, 29, 36, 0.8) 100%);
+            background: linear-gradient(135deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 1.5rem;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .controls-section::before {
@@ -821,7 +811,7 @@ session_start();
         .controls-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .shortcut-hint {
@@ -830,124 +820,52 @@ session_start();
             background: rgba(99, 102, 241, 0.1);
             border-left: 4px solid var(--primary);
             border-radius: 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: var(--muted-foreground);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .shortcut-hint i {
             color: var(--primary);
-            margin-right: 0.5rem;
         }
 
         .shortcut-hint kbd {
             background: var(--secondary);
-            padding: 0.25rem 0.5rem;
+            padding: 0.25rem 0.75rem;
             border-radius: calc(var(--radius) - 4px);
             font-family: 'Roboto Mono', monospace;
             font-size: 0.875rem;
             border: 1px solid var(--border);
             color: var(--foreground);
+            margin: 0 0.25rem;
         }
 
-        .notification-btn {
-            position: relative;
-            width: 48px;
-            height: 48px;
-            border-radius: calc(var(--radius) - 2px);
-            background: var(--accent);
-            border: 1px solid var(--border);
+        .editor-stats {
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .notification-btn:hover {
-            background: rgba(99, 102, 241, 0.1);
-            border-color: var(--primary);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--destructive);
-            color: white;
-            font-size: 0.75rem;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            animation: pulse 2s infinite;
-        }
-
-        .header-profile {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .profile-avatar {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 1.1rem;
-        }
-
-        .profile-info h4 {
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
-            color: var(--foreground);
-        }
-
-        .profile-info p {
+            gap: 1.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
             font-size: 0.875rem;
             color: var(--muted-foreground);
         }
 
-        .back-btn {
-            display: inline-flex;
+        .stat-item {
+            display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: var(--secondary);
-            color: var(--secondary-foreground);
-            border: 1px solid var(--border);
-            border-radius: calc(var(--radius) - 2px);
-            text-decoration: none;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all 0.2s;
-        }
-
-        .back-btn:hover {
-            background: color-mix(in srgb, var(--secondary) 90%, black);
-            transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
             .desktop-container {
-                grid-template-columns: 1fr;
                 padding: 1rem;
             }
 
-            .desktop-sidebar {
-                display: none;
-            }
-
             .interpreter-hero h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
 
             .interpreter-hero p {
@@ -956,141 +874,139 @@ session_start();
 
             .interpreter-grid {
                 height: auto;
-                min-height: 600px;
+                min-height: 700px;
             }
 
             .editor-section, .output-section {
-                padding: 1rem;
+                padding: 1.25rem;
             }
 
             .controls-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .environment-info {
+                gap: 1rem;
+            }
+
+            .env-item {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="desktop-container">
-        <!-- Left Sidebar - Navigation -->
-        <div class="desktop-sidebar">
-            <!-- Logo Section -->
-            <div class="card">
-                <div class="p-4">
-                    <div class="flex items-center gap-3">
-                        <div class="size-12 flex items-center justify-center bg-primary rounded-lg">
-                            <svg class="size-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <div class="text-2xl font-display">ProWorldz</div>
-                            <div class="text-xs uppercase text-muted-foreground">Python Interpreter</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Sections -->
-            <div class="card">
-                <div class="p-3">
-                    <div class="nav-section">
-                        <div class="space-y-2">
-                            <a href="../dashboard.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
-                                </svg>
-                                <span class="nav-label">Dashboard</span>
-                            </a>
-                            <a href="../ourcourse.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
-                                </svg>
-                                <span class="nav-label">Courses</span>
-                            </a>
-                            <a href="../lab.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
-                                </svg>
-                                <span class="nav-label">Laboratory</span>
-                            </a>
-                            <a href="../leaderboard.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
-                                </svg>
-                                <span class="nav-label">Leaderboard</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content Area -->
         <div class="desktop-main">
             <!-- Python Interpreter Header -->
             <div class="card interpreter-header">
                 <div class="interpreter-hero">
-                    <div class="flex items-start justify-between mb-6">
-                        <div>
-                            <h1 class="font-display">Python Interpreter</h1>
-                            <p>Write, run, and debug Python code in your browser</p>
+                    <h1 class="font-display">Python Interpreter</h1>
+                    <p>Write, execute, and debug Python 3.11 code directly in your browser with full standard library support</p>
+                    
+                    <!-- <div class="environment-info">
+                        <div class="env-item">
+                            <i class="fab fa-python"></i>
+                            <span>Python 3.11</span>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <a href="../lab.php" class="back-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                <span>Back to Lab</span>
-                            </a>
-                            <div class="header-profile">
-                                <div class="profile-avatar">
-                                    <?= isset($_SESSION['current-student']) ? htmlspecialchars(substr($_SESSION['current-student'], 0, 1)) : 'U' ?>
-                                </div>
-                            </div>
+                        <div class="env-item">
+                            <i class="fas fa-microchip"></i>
+                            <span>Pyodide v0.24.1</span>
                         </div>
-                    </div>
+                        <div class="env-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Browser-Safe Execution</span>
+                        </div>
+                        <div class="env-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>WebAssembly Runtime</span>
+                        </div>
+                    </div> -->
                 </div>
             </div>
 
             <!-- Interpreter Grid -->
             <div class="interpreter-grid">
                 <!-- Code Editor -->
-                <div class="editor-section">
+                <div class="editor-section" style="height: 100cap;">
                     <div class="section-header">
                         <h3><i class="fas fa-code"></i> Code Editor</h3>
                         <div class="status-indicator">
                             <div class="status-dot" id="statusDot"></div>
-                            <span id="statusText">Loading Python...</span>
+                            <span id="statusText">Initializing...</span>
                         </div>
                     </div>
                     <div class="code-editor-container">
-                        <textarea id="code" placeholder="# Write Python code here...
-# Press Ctrl+Enter to run
-# Press Tab for indentation
+                        <textarea id="code" placeholder="# Welcome to ProWorldz Python Interpreter
+# Write your Python code here
+# Press Ctrl+Enter to execute
+# Use Tab for indentation
 
-print(&quot;Welcome to Python Interpreter!&quot;)
+# Example: Simple calculator
+def calculate(a, b, operation='add'):
+    operations = {
+        'add': a + b,
+        'subtract': a - b,
+        'multiply': a * b,
+        'divide': a / b if b != 0 else 'Error: Division by zero'
+    }
+    return operations.get(operation, 'Invalid operation')
 
-def greet(name):
-    return f&quot;Hello, {name}!&quot;
+# Test the function
+if __name__ == '__main__':
+    result = calculate(10, 5, 'multiply')
+    print(f'10 * 5 = {result}')">print("Welcome to ProWorldz Python Interpreter")
+print("=" * 40)
 
-# Example usage
-result = greet(&quot;ProWorldz&quot;)
-print(result)">print("hello bro")
-print("Welcome to ProWorldz Python Interpreter")
+# Calculate circle area
 import math
 
 def calculate_circle_area(radius):
     return math.pi * radius * radius
 
+def calculate_factorial(n):
+    if n == 0:
+        return 1
+    return n * calculate_factorial(n - 1)
+
+# Execute main program
 if __name__ == "__main__":
-    r = 5
-    area = calculate_circle_area(r)
-    print(f"Area of circle with radius {r} is {area:.2f}")</textarea>
+    # Circle calculation
+    radius = 7.5
+    area = calculate_circle_area(radius)
+    print(f"Circle with radius {radius}:")
+    print(f"  Area = {area:.2f}")
+    print()
+    
+    # Factorial calculation
+    num = 6
+    factorial = calculate_factorial(num)
+    print(f"Factorial of {num}:")
+    print(f"  {num}! = {factorial}")
+    print()
+    
+    print("Program execution completed successfully!")</textarea>
+                    </div>
+                    <div class="editor-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-file-code"></i>
+                            <span id="lineCount">Lines: 0</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-font"></i>
+                            <span id="charCount">Characters: 0</span>
+                        </div>
                     </div>
                     <div class="shortcut-hint">
                         <i class="fas fa-keyboard"></i>
-                        <strong>Pro Tip:</strong> Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run your code • <kbd>Tab</kbd> for indentation • <kbd>Shift</kbd> + <kbd>Tab</kbd> for outdent
+                        <div>
+                            <strong>Keyboard Shortcuts:</strong> 
+                            <kbd>Ctrl</kbd> + <kbd>Enter</kbd> Run Code • 
+                            <kbd>Tab</kbd> Indent • 
+                            <kbd>Shift</kbd> + <kbd>Tab</kbd> Outdent
+                        </div>
                     </div>
                 </div>
 
@@ -1099,10 +1015,10 @@ if __name__ == "__main__":
                     <div class="section-header">
                         <h3><i class="fas fa-terminal"></i> Output Console</h3>
                         <div class="status-indicator">
-                            <span>Execution Results</span>
+                            <span id="executionTime">Ready</span>
                         </div>
                     </div>
-                    <pre id="output" class="output-display">Initializing Python interpreter...</pre>
+                    <pre id="output" class="output-display">Initializing Python interpreter environment...</pre>
                 </div>
             </div>
 
@@ -1110,15 +1026,26 @@ if __name__ == "__main__":
             <div class="controls-section">
                 <div class="controls-grid">
                     <button onclick="runPython()" class="button button-lg button-default" id="runBtn">
-                        <i class="fas fa-play"></i> Run Python Code
+                        <i class="fas fa-play"></i> Execute Code
                     </button>
                     <button onclick="clearCode()" class="button button-lg button-secondary">
-                        <i class="fas fa-eraser"></i> Clear Code
+                        <i class="fas fa-eraser"></i> Clear Editor
                     </button>
                     <button onclick="resetInterpreter()" class="button button-lg button-ghost">
-                        <i class="fas fa-redo"></i> Reset Interpreter
+                        <i class="fas fa-redo"></i> Reset Environment
+                    </button>
+                    <button onclick="saveToFile()" class="button button-lg button-ghost">
+                        <i class="fas fa-download"></i> Save Script
                     </button>
                 </div>
+                <!-- <div class="shortcut-hint">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>Features:</strong> Full Python 3.11 Standard Library • 
+                        Math, Statistics, Random Modules • Safe Browser Execution • 
+                        Real-time Output • Error Handling with Traceback
+                    </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -1127,6 +1054,7 @@ if __name__ == "__main__":
         let pyodide = null;
         let isInitialized = false;
         let codeTextarea = null;
+        let executionStartTime = 0;
 
         async function initializePyodide() {
             const statusDot = document.getElementById('statusDot');
@@ -1136,23 +1064,31 @@ if __name__ == "__main__":
 
             try {
                 statusDot.className = 'status-dot loading';
-                statusText.textContent = 'Loading Python...';
+                statusText.textContent = 'Loading Python Runtime...';
                 runBtn.disabled = true;
-                output.textContent = 'Loading Python interpreter (Pyodide v0.24.1)...';
+                output.textContent = 'Initializing WebAssembly Python environment...\nLoading Pyodide v0.24.1...';
 
                 pyodide = await loadPyodide();
+                
+                // Load additional packages if needed
+                await pyodide.loadPackage(['numpy', 'micropip']);
+                
                 isInitialized = true;
                 
                 statusDot.className = 'status-dot';
-                statusText.textContent = 'Python Ready';
+                statusText.textContent = 'Python 3.11 Ready';
                 runBtn.disabled = false;
-                output.innerHTML = '<span class="output-success">✓ Python interpreter initialized successfully!</span>\n\n<span class="output-info">You can now write and execute Python code.</span>\n<span class="output-info">Try the example code or write your own.</span>';
+                output.innerHTML = '<span class="output-success">✓ Python 3.11 environment initialized successfully!</span>\n' +
+                                  '<span class="output-info">Standard library modules loaded.</span>\n' +
+                                  '<span class="output-info">Write your Python code in the editor and press Execute.</span>';
                 
             } catch (error) {
                 statusDot.className = 'status-dot error';
-                statusText.textContent = 'Load Failed';
-                output.innerHTML = '<span class="output-error">✗ Failed to load Python interpreter.</span>\n\nPlease check your internet connection and try refreshing the page.';
-                console.error('Pyodide load error:', error);
+                statusText.textContent = 'Initialization Failed';
+                output.innerHTML = '<span class="output-error">✗ Failed to initialize Python environment.</span>\n\n' +
+                                 'Error: ' + error.message + '\n\n' +
+                                 '<span class="output-info">Please check your internet connection and refresh the page.</span>';
+                console.error('Pyodide initialization error:', error);
             }
         }
 
@@ -1160,6 +1096,18 @@ if __name__ == "__main__":
             codeTextarea = document.getElementById('code');
             
             if (!codeTextarea) return;
+            
+            // Update character and line count
+            function updateStats() {
+                const text = codeTextarea.value;
+                const lines = text.split('\n').length;
+                const chars = text.length;
+                document.getElementById('lineCount').textContent = `Lines: ${lines}`;
+                document.getElementById('charCount').textContent = `Characters: ${chars}`;
+            }
+            
+            codeTextarea.addEventListener('input', updateStats);
+            updateStats(); // Initial count
             
             codeTextarea.addEventListener('keydown', function(e) {
                 if (e.key === 'Tab') {
@@ -1169,6 +1117,7 @@ if __name__ == "__main__":
                     
                     this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
                     this.selectionStart = this.selectionEnd = start + 4;
+                    updateStats();
                 }
                 
                 if (e.ctrlKey && e.key === 'Enter') {
@@ -1184,6 +1133,7 @@ if __name__ == "__main__":
                     if (before.endsWith('    ')) {
                         this.value = this.value.substring(0, start - 4) + this.value.substring(start);
                         this.selectionStart = this.selectionEnd = start - 4;
+                        updateStats();
                     }
                 }
             });
@@ -1191,7 +1141,7 @@ if __name__ == "__main__":
 
         async function runPython() {
             if (!pyodide || !isInitialized) {
-                document.getElementById('output').innerHTML = '<span class="output-error">Python interpreter is still loading. Please wait...</span>';
+                document.getElementById('output').innerHTML = '<span class="output-error">Python environment is still initializing. Please wait...</span>';
                 return;
             }
 
@@ -1200,68 +1150,134 @@ if __name__ == "__main__":
             const runBtn = document.getElementById('runBtn');
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
+            const executionTime = document.getElementById('executionTime');
 
             runBtn.disabled = true;
-            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
             statusDot.className = 'status-dot loading';
             statusText.textContent = 'Executing Code';
+            executionTime.textContent = 'Running...';
+
+            executionStartTime = performance.now();
 
             const wrappedCode = `
 import sys
-from io import StringIO
+import io
 import traceback
+import time
 
-_stdout = sys.stdout
-sys.stdout = StringIO()
+# Capture output
+old_stdout = sys.stdout
+sys.stdout = io.StringIO()
+
+# Capture errors
+old_stderr = sys.stderr
+sys.stderr = io.StringIO()
 
 try:
+    # User code
 ${code.split("\n").map(l => "    " + l).join("\n")}
-    result = sys.stdout.getvalue()
+    
+    # Get captured output
+    stdout_output = sys.stdout.getvalue()
+    stderr_output = sys.stderr.getvalue()
+    
+    # Restore original stdout/stderr
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
+    
+    # Combine outputs
+    if stderr_output:
+        result = "STDERR:\\n" + stderr_output + "\\nSTDOUT:\\n" + stdout_output
+    else:
+        result = stdout_output
+        
 except Exception as e:
-    result = f"Error: {str(e)}\\n\\nTraceback:\\n{''.join(traceback.format_exception(type(e), e, e.__traceback__))}"
+    # Restore original stdout/stderr
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
+    
+    # Format error with traceback
+    tb = traceback.format_exception(type(e), e, e.__traceback__)
+    result = "ERROR:\\n" + ''.join(tb)
 
-sys.stdout = _stdout
 result
 `;
 
             try {
                 const result = await pyodide.runPythonAsync(wrappedCode);
+                const executionEndTime = performance.now();
+                const executionDuration = (executionEndTime - executionStartTime).toFixed(2);
                 
-                if (result && result.startsWith('Error:')) {
+                if (result.startsWith('ERROR:')) {
                     output.innerHTML = `<span class="output-error">${escapeHtml(result)}</span>`;
                     statusDot.className = 'status-dot error';
-                    statusText.textContent = 'Execution Error';
-                } else if (result && result.trim() !== '') {
+                    statusText.textContent = 'Execution Failed';
+                } else if (result.startsWith('STDERR:')) {
                     output.textContent = result;
                     statusDot.className = 'status-dot';
-                    statusText.textContent = 'Execution Complete';
+                    statusText.textContent = 'Completed with Warnings';
+                } else if (result.trim() !== '') {
+                    output.textContent = result;
+                    statusDot.className = 'status-dot';
+                    statusText.textContent = 'Execution Successful';
                 } else {
-                    output.innerHTML = '<span class="output-info">Code executed successfully (no output).</span>';
+                    output.innerHTML = '<span class="output-info">✓ Code executed successfully (no output generated)</span>';
                     statusDot.className = 'status-dot';
                     statusText.textContent = 'Execution Complete';
                 }
+                
+                executionTime.textContent = `${executionDuration}ms`;
+                
             } catch (err) {
-                output.innerHTML = `<span class="output-error">Fatal Error: ${escapeHtml(err.toString())}</span>`;
+                const executionEndTime = performance.now();
+                const executionDuration = (executionEndTime - executionStartTime).toFixed(2);
+                
+                output.innerHTML = `<span class="output-error">FATAL ERROR: ${escapeHtml(err.toString())}</span>`;
                 statusDot.className = 'status-dot error';
                 statusText.textContent = 'Fatal Error';
+                executionTime.textContent = `${executionDuration}ms`;
+                
             } finally {
                 runBtn.disabled = false;
-                runBtn.innerHTML = '<i class="fas fa-play"></i> Run Python Code';
+                runBtn.innerHTML = '<i class="fas fa-play"></i> Execute Code';
             }
         }
 
         function clearCode() {
             if (codeTextarea) {
                 codeTextarea.value = '';
+                const lineCount = document.getElementById('lineCount');
+                const charCount = document.getElementById('charCount');
+                lineCount.textContent = 'Lines: 0';
+                charCount.textContent = 'Characters: 0';
             }
-            document.getElementById('output').innerHTML = '<span class="output-info">Code editor cleared. Write your Python code above.</span>';
+            document.getElementById('output').innerHTML = '<span class="output-info">✓ Editor cleared. Write your Python code above.</span>';
         }
 
         async function resetInterpreter() {
             const output = document.getElementById('output');
-            output.innerHTML = '<span class="output-info">Resetting Python interpreter...</span>';
+            output.innerHTML = '<span class="output-info">Resetting Python environment...</span>';
             isInitialized = false;
             await initializePyodide();
+        }
+
+        function saveToFile() {
+            const code = codeTextarea.value;
+            if (!code.trim()) {
+                alert('No code to save!');
+                return;
+            }
+            
+            const blob = new Blob([code], { type: 'text/x-python' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'python_script.py';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         function escapeHtml(text) {
@@ -1269,13 +1285,6 @@ result
             div.textContent = text;
             return div.innerHTML;
         }
-
-        const notificationBtn = document.getElementById('notificationBtn');
-        notificationBtn.addEventListener('click', function() {
-            const badge = this.querySelector('.notification-badge');
-            badge.style.display = 'none';
-            alert('You have 3 notifications:\n1. Assignment due tomorrow\n2. New grade posted\n3. Class schedule updated');
-        });
 
         document.addEventListener('DOMContentLoaded', function() {
             setupEditor();

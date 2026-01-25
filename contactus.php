@@ -1,3 +1,9 @@
+<?php
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,165 +88,115 @@ body {
     --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* ===== DASHBOARD LAYOUT ===== */
-.dashboard {
-    display: flex;
+/* ===== DESKTOP LAYOUT ===== */
+.desktop-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
     min-height: 100vh;
-    background: var(--gradient-dark);
-}
-
-/* ===== SIDEBAR ===== */
-.sidebar {
-    width: 260px;
-    background: var(--sidebar);
-    border-right: 1px solid var(--sidebar-border);
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 1000;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(10px);
-}
-
-.sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--sidebar-border);
+    background-color: var(--background);
+    min-width: 1280px;
+    overflow-x: auto;
+}
+
+/* ===== SIDEBAR STYLES ===== */
+.desktop-sidebar {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.logo {
-    font-family: 'Rebels', monospace;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--foreground);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.logo span {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.logo::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    background: var(--primary);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.menu {
-    list-style: none;
-    padding: 1.5rem;
-}
-
-.menu li {
-    margin-bottom: 0.5rem;
-}
-
-.menu li a {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: calc(var(--radius) - 2px);
-    color: var(--sidebar-foreground);
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+.card {
+    background-color: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
     overflow: hidden;
 }
 
-.menu li a::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    transition: left 0.5s;
+.p-4 { padding: 1rem; }
+.p-3 { padding: 0.75rem; }
+
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-3 { gap: 0.75rem; }
+.size-12 { width: 3rem; height: 3rem; }
+.bg-primary { background-color: var(--primary); }
+.rounded-lg { border-radius: var(--radius); }
+.text-primary-foreground { color: var(--primary-foreground); }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.font-display { font-family: 'Rebels', monospace; font-weight: 700; }
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-muted-foreground { color: var(--muted-foreground); }
+.uppercase { text-transform: uppercase; }
+.flex-1 { flex: 1 1 0%; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+/* Navigation Styles */
+.nav-section {
+    margin-bottom: 1.5rem;
 }
 
-.menu li a:hover::before {
-    left: 100%;
+.space-y-1 > * + * {
+    margin-top: 0.25rem;
 }
 
-.menu li a i {
-    font-size: 1rem;
-    width: 20px;
-    text-align: center;
-}
-
-.menu li a:hover,
-.menu li.active a {
-    background-color: var(--sidebar-accent);
-    color: var(--sidebar-primary);
-    border-left: 3px solid var(--sidebar-primary);
-}
-
-.menu li a:hover i,
-.menu li.active a i {
-    color: var(--sidebar-primary);
-}
-
-.close-btn {
-    display: none;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--muted-foreground);
-    font-size: 1.25rem;
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    text-decoration: none;
+    color: var(--sidebar-foreground);
+    transition: all 0.2s;
+    margin-bottom: 0.25rem;
     cursor: pointer;
-    transition: color 0.3s;
 }
 
-.close-btn:hover {
-    color: var(--foreground);
+.nav-item:hover {
+    background-color: var(--sidebar-accent);
+}
+
+.nav-item.active {
+    background-color: var(--sidebar-primary);
+    color: var(--sidebar-primary-foreground);
+}
+
+.nav-item.disabled {
+    /* opacity: 0.5; */
+}
+
+.nav-item.disabled:hover {
+    background-color: transparent;
+}
+
+.nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+.nav-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
 }
 
 /* ===== MAIN CONTENT ===== */
-.main {
-    margin-left: 260px;
-    padding: 2rem;
-    width: calc(100% - 260px);
-    background: var(--background);
-    position: relative;
+.desktop-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 3rem);
+    padding-right: 0.5rem;
 }
 
-.main::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--gradient-primary);
-    opacity: 0.2;
-}
-
-/* ===== PAGE HEADER ===== */
+/* Page Header */
 .page-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     position: relative;
 }
 
@@ -268,8 +224,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 3rem;
-    max-width: 1200px;
-    margin: 0 auto 4rem;
+    margin-bottom: 3rem;
 }
 
 /* ===== CONTACT INFO ===== */
@@ -501,8 +456,8 @@ body {
     border-radius: var(--radius);
     border: 1px solid var(--border);
     text-align: center;
-    max-width: 800px;
     margin: 0 auto 4rem;
+    max-width: 800px;
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow-xl);
@@ -585,7 +540,7 @@ body {
     padding: 2rem;
     color: var(--muted-foreground);
     border-top: 1px solid var(--border);
-    margin-top: 2rem;
+    margin-top: auto;
     font-size: 0.875rem;
 }
 
@@ -711,65 +666,15 @@ body {
 .animate-fadeIn.delay-3 { animation-delay: 0.3s; }
 .animate-fadeIn.delay-4 { animation-delay: 0.4s; }
 
-/* ===== MOBILE MENU ===== */
-.menu-btn {
-    display: none;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    font-size: 1.5rem;
-    background: none;
-    border: none;
-    color: var(--foreground);
-    z-index: 1100;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--card);
-    border: 1px solid var(--border);
-    transition: all 0.3s ease;
-}
-
-.menu-btn:hover {
-    background: var(--accent);
-    color: var(--primary);
-}
-
-.overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    z-index: 900;
-}
-
 /* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 1200px) {
-    .contact-container {
-        max-width: 900px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 240px;
-    }
-    
-    .main {
-        margin-left: 240px;
-        width: calc(100% - 240px);
-        padding: 1.5rem;
-    }
-    
-    .page-header h1 {
-        font-size: 2.75rem;
+@media (max-width: 1400px) {
+    .desktop-container {
+        min-width: 100%;
+        grid-template-columns: 240px 1fr;
     }
     
     .contact-container {
-        grid-template-columns: 1fr;
         gap: 2rem;
-        max-width: 700px;
     }
     
     .contact-info,
@@ -779,40 +684,37 @@ body {
     }
 }
 
+@media (max-width: 1024px) {
+    .desktop-container {
+        grid-template-columns: 1fr;
+        min-width: 100%;
+        padding: 1rem;
+    }
+    
+    .desktop-sidebar {
+        display: none;
+    }
+    
+    .contact-container {
+        grid-template-columns: 1fr;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .page-header h1 {
+        font-size: 2.75rem;
+    }
+}
+
 @media (max-width: 768px) {
-    .menu-btn {
-        display: block;
-    }
-    
-    .close-btn {
-        display: block;
-    }
-    
-    .sidebar {
-        transform: translateX(-100%);
-        width: 300px;
-    }
-    
-    .sidebar.active {
-        transform: translateX(0);
-    }
-    
-    .overlay.active {
-        display: block;
-    }
-    
-    .main {
-        margin-left: 0;
-        width: 100%;
-        padding: 1.25rem;
-    }
-    
     .page-header h1 {
         font-size: 2.25rem;
     }
     
     .page-header p {
         font-size: 1rem;
+        padding: 0 1rem;
     }
     
     .contact-info h2,
@@ -851,12 +753,12 @@ body {
 }
 
 @media (max-width: 480px) {
-    .main {
-        padding: 1rem;
+    .desktop-container {
+        padding: 0.75rem;
     }
     
     .page-header {
-        margin-bottom: 2.5rem;
+        margin-bottom: 1.5rem;
     }
     
     .page-header h1 {
@@ -895,32 +797,22 @@ body {
     }
 }
 
-/* Landscape Mode */
-@media (max-height: 600px) and (orientation: landscape) {
-    .sidebar {
-        overflow-y: auto;
-    }
-    
-    .menu {
-        padding: 1rem;
-    }
-    
-    .menu li {
-        margin-bottom: 0.25rem;
-    }
-    
-    .menu li a {
-        padding: 0.75rem 1rem;
-    }
+/* Custom Scrollbar */
+.desktop-main::-webkit-scrollbar {
+    width: 6px;
 }
 
-/* High DPI Screens */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .contact-info,
-    .contact-form,
-    .contact-cta {
-        border-width: 1.5px;
-    }
+.desktop-main::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.desktop-main::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 3px;
+}
+
+.desktop-main::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
 }
 
 /* Print Styles */
@@ -930,13 +822,13 @@ body {
         color: black;
     }
     
-    .sidebar {
+    .desktop-sidebar {
         display: none;
     }
     
-    .main {
-        margin-left: 0;
-        width: 100%;
+    .desktop-container {
+        grid-template-columns: 1fr;
+        min-width: 100%;
     }
     
     .contact-info,
@@ -952,131 +844,176 @@ body {
 <!-- TV Noise Effect -->
 <div class="tv-noise"></div>
 
-<!-- Mobile Menu Button -->
-<button class="menu-btn" id="menuBtn">
-    <i class="fas fa-bars"></i>
-</button>
-
-<div class="dashboard">
-  <!-- SIDEBAR NAVIGATION -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo">PRO<span>WORLDZ</span></div>
-        <button class="close-btn" id="closeBtn">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-    </div>
-    
-    <ul class="menu">
-        <li class="animate-fadeIn">
-            <a href="index.php" style="color: inherit; text-decoration: none;">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Home</span>
-            </a>
-        </li>
-        <li class="animate-fadeIn delay-1">
-            <a href="courses.php" style="color: inherit; text-decoration: none;">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>Courses</span>
-            </a>
-        </li>
-        <li class="animate-fadeIn delay-2">
-            <a href="about.php" style="color: inherit; text-decoration: none;">
-                <i class="fa-solid fa-info-circle"></i>
-                <span>About Us</span>
-            </a>
-        </li>
-        <li class="animate-fadeIn delay-3 active">
-            <a href="contact.php" style="color: inherit; text-decoration: none;">
-                <i class="fa-solid fa-envelope"></i>
-                <span>Contact Us</span>
-            </a>
-        </li>
-    </ul>
-  </aside>
-
-  <!-- OVERLAY (for mobile) -->
-  <div class="overlay" id="overlay"></div>
-
-  <!-- MAIN -->
-  <main class="main">
-    <!-- HEADER -->
-    <section class="page-header animate-fadeIn">
-      <h1>Contact ProWorldz</h1>
-      <p>Let's connect and build your future in technology</p>
-    </section>
-
-    <!-- CONTACT CONTAINER -->
-    <div class="contact-container">
-        <!-- CONTACT INFO -->
-        <div class="contact-info animate-fadeIn delay-1">
-            <h2>Get in Touch</h2>
-            <p>Have questions about our courses or platform? Send us a message and our team will reach out to you.</p>
-
-            <div class="info-box animate-fadeIn delay-2">
-                <i class="fa-solid fa-envelope"></i>
-                <p>proworldz0311@gmail.com</p>
-            </div>
-
-            <div class="info-box animate-fadeIn delay-3">
-                <i class="fa-solid fa-phone"></i>
-                <p>+91 98765 43210</p>
-            </div>
-
-            <div class="info-box animate-fadeIn delay-4">
-                <i class="fa-solid fa-map-marker-alt"></i>
-                <p>India</p>
+<div class="desktop-container">
+    <!-- Left Sidebar - Navigation -->
+    <div class="desktop-sidebar">
+        <!-- Logo Section -->
+        <div class="card">
+            <div class="p-4">
+                <div class="flex items-center gap-3">
+                    <div class="size-12 flex items-center justify-center bg-primary rounded-lg">
+                        <svg class="size-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-2xl font-display">PROWORLDZ</div>
+                        <div class="text-xs uppercase text-muted-foreground">Education Platform</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- CONTACT FORM -->
-        <form class="contact-form animate-fadeIn delay-2" id="contactForm">
-            <h2>Send Message</h2>
-            
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+        <div class="card">
+                <div class="p-3">
+                    <!-- Tools Section -->
+                    <div class="nav-section">
+                        <div class="space-y-1" style="height: 45cap;">
+                            <a href="dashboard.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
+                                </svg>
+                                <span class="nav-label">Overview</span>
+                            </a>
+                            <a href="lab.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-width="1.667" d="M16.228 3.772c1.31 1.31-.416 5.16-3.856 8.6-3.44 3.44-7.29 5.167-8.6 3.856-1.31-1.31.415-5.16 3.855-8.6 3.44-3.44 7.29-5.167 8.6-3.856Z"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M16.228 16.228c-1.31 1.31-5.161-.416-8.601-3.855-3.44-3.44-5.166-7.29-3.856-8.601 1.31-1.31 5.162.416 8.601 3.855 3.44 3.44 5.166 7.29 3.856 8.601Z"/>
+                                </svg>
+                                <span class="nav-label">Laboratory</span>
+                            </a>
+                           <a href="ourcourse.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                    <!-- Book icon -->
+                                    <path stroke-width="1.5" d="M16.667 15V5.833a2.5 2.5 0 0 0-2.5-2.5H5.833a2.5 2.5 0 0 0-2.5 2.5v10a2.5 2.5 0 0 0 2.5 2.5h10"/>
+                                    <path stroke-width="1.5" d="M6.667 3.333v13.334"/>
+                                    <path stroke-width="1.5" d="M10 6.667h3.333"/>
+                                    <path stroke-width="1.5" d="M10 10h3.333"/>
+                                </svg>
+                                <span class="nav-label">Courses</span>
+                            </a>
+                            <a href="#" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
+                                </svg>
+                                <span class="nav-label">Devices</span>
+                            </a>
+                            <a href="leaderboard.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
+                                </svg>
+                                <span class="nav-label">Leaderboard</span>
+                            </a>
+                            <a href="#" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
+                                </svg>
+                                <span class="nav-label">Security status</span>
+                            </a>
+                            <a href="contactus.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
+                                </svg>
+                                <span class="nav-label">Contact support</span>
+                            </a>
+                            <a href="#" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
+                                    <!-- Font Awesome Dragon (simpler) -->
+                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
+                                </svg>
+                                <span class="nav-label">Drago Tool</span>
+                            </a>
+                            <a href="logout.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
+                                    <!-- Font Awesome Sign-out icon -->
+                                    <path d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z"/>
+                                </svg>
+                                <span class="nav-label">Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required placeholder="Enter your email address">
-            </div>
-
-            <div class="form-group">
-                <label for="message">Your Message</label>
-                <textarea id="message" name="message" required placeholder="Enter your message here..."></textarea>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submitBtn">
-                <i class="fa-solid fa-paper-plane"></i>
-                Send Message
-            </button>
-        </form>
     </div>
 
-    <!-- CTA SECTION -->
-    <section class="contact-cta animate-fadeIn delay-3">
-      <h2>Ready to Start Your <span>Tech Journey</span>?</h2>
-      <a href="courses.php" class="cta-btn">
-        <i class="fa-solid fa-rocket"></i>
-        Explore Courses
-      </a>
-    </section>
+    <!-- Main Content Area -->
+    <div class="desktop-main">
+        <!-- HEADER -->
+        <section class="page-header animate-fadeIn">
+            <h1>Contact ProWorldz</h1>
+            <p>Let's connect and build your future in technology</p>
+        </section>
 
-    <!-- FOOTER -->
-    <footer class="footer animate-fadeIn delay-4">
-      <p>&copy; 2026 ProWorldz. All rights reserved.</p>
-    </footer>
-  </main>
+        <!-- CONTACT CONTAINER -->
+        <div class="contact-container">
+            <!-- CONTACT INFO -->
+            <div class="contact-info animate-fadeIn delay-1">
+                <h2>Get in Touch</h2>
+                <p>Have questions about our courses or platform? Send us a message and our team will reach out to you.</p>
+
+                <div class="info-box animate-fadeIn delay-2">
+                    <i class="fa-solid fa-envelope"></i>
+                    <p>proworldz0311@gmail.com</p>
+                </div>
+
+                <div class="info-box animate-fadeIn delay-3">
+                    <i class="fa-solid fa-phone"></i>
+                    <p>+91 98765 43210</p>
+                </div>
+
+                <div class="info-box animate-fadeIn delay-4">
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                    <p>India</p>
+                </div>
+            </div>
+
+            <!-- CONTACT FORM -->
+            <form class="contact-form animate-fadeIn delay-2" id="contactForm">
+                <h2>Send Message</h2>
+                
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" required placeholder="Enter your message here..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send Message
+                </button>
+            </form>
+        </div>
+
+        <!-- CTA SECTION -->
+        <section class="contact-cta animate-fadeIn delay-3">
+            <h2>Ready to Start Your <span>Tech Journey</span>?</h2>
+            <a href="courses.php" class="cta-btn">
+                <i class="fa-solid fa-rocket"></i>
+                Explore Courses
+            </a>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer animate-fadeIn delay-4">
+            <p>&copy; 2026 ProWorldz. All rights reserved.</p>
+        </footer>
+    </div>
 </div>
 
 <script>
 // DOM Elements
-const menuBtn = document.getElementById('menuBtn');
-const closeBtn = document.getElementById("closeBtn");
-const sidebar = document.querySelector(".sidebar");
-const overlay = document.getElementById("overlay");
 const contactForm = document.getElementById('contactForm');
 const submitBtn = document.getElementById('submitBtn');
 
@@ -1091,46 +1028,6 @@ const observer = new IntersectionObserver((entries) => {
 }, {
     threshold: 0.1,
     rootMargin: '0px 0px -50px 0px'
-});
-
-// Mobile Menu Functionality
-menuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
-});
-
-closeBtn.addEventListener("click", () => {
-    sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-    document.body.style.overflow = 'auto';
-});
-
-overlay.addEventListener("click", () => {
-    sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-    document.body.style.overflow = 'auto';
-});
-
-// Close sidebar when clicking on menu links (mobile)
-const menuLinks = document.querySelectorAll('.menu a');
-menuLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-    });
-});
-
-// Close sidebar on window resize (if resized to desktop)
-window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
-    }
 });
 
 // Observe all animated elements
@@ -1252,29 +1149,16 @@ document.querySelectorAll('.form-group input, .form-group textarea').forEach(inp
     });
 });
 
-// Add smooth scroll effect
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const tvNoise = document.querySelector('.tv-noise');
-    if (tvNoise) {
-        tvNoise.style.transform = `translateY(${scrolled * 0.1}px)`;
-    }
-});
-
-// Add keyboard navigation
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && sidebar.classList.contains('active')) {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
-    }
-});
-
-// Add animation to form on focus
-const formInputs = contactForm.querySelectorAll('input, textarea');
-formInputs.forEach((input, index) => {
-    input.addEventListener('focus', () => {
-        input.parentElement.style.animation = `fadeInUp 0.3s ease ${index * 0.1}s both`;
+// Navigation active states
+const navItems = document.querySelectorAll('.nav-item');
+navItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+        if (!this.classList.contains('disabled')) {
+            // Remove active class from all items
+            navItems.forEach(i => i.classList.remove('active'));
+            // Add active class to clicked item
+            this.classList.add('active');
+        }
     });
 });
 

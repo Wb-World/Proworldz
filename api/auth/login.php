@@ -13,15 +13,15 @@ if(!is_string($conn)){
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
         $mail = $_POST['mail-login'];
         $passw = $_POST['passw-login'];
-        $q = $conn->prepare("SELECT name FROM `users` WHERE email = ? AND passw = ?");
+        $q = $conn->prepare("SELECT id FROM `users` WHERE email = ? AND passw = ?");
         $q->bind_param("ss",$mail,$passw);
         $q->execute();
         $getres = $q->get_result();
 
         if($getres->num_rows > 0){
             $datas = $getres->fetch_assoc();
-            $_SESSION['current-student'] = $datas['name'];
-            echo json_encode(['result' => $datas['name']]);
+            $_SESSION['id'] = $datas['id'];
+            echo json_encode(['result' => $datas['id']]);
         } else echo json_encode(['result' => null]);
     }
 } else echo json_encode(['result' => null]);
