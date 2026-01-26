@@ -639,8 +639,6 @@
       this.parentElement.style.transform = 'translateY(0)';
     });
   });
-
-  // MODIFIED LOGIN FUNCTION - Always shows Access Granted regardless of API response
   function login(){
     let datas = new FormData();
     let mail = document.getElementById('mail-login').value;
@@ -651,46 +649,67 @@
     // Show loading
     document.getElementById('loading').style.display = 'block';
     document.getElementById('loginBtn').disabled = true;
-    // document.getElementById('loginBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
     document.getElementById('errorMessage').style.display = 'none';
 
     fetch("https://proworldz.page.gd/api/auth/login.php", {
-    method: 'POST',
-    body: datas,
-    credentials: 'include'
-})
-.then(res => res.json())
-.then(data => {
+        method: 'POST',
+        body: datas,
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('API Response:', data);
+        console.log('Result value:', data['result']);
+        // Check for invalid email (PHP returns ['result' => 203])
+        if(data['result'] === 203) {
+            alert('Invalid email found');
+            showAccessDenied();
+            window.location.reload();
+        } 
+        // Check for session error (PHP returns ['result' => 'Try again'])
+        else if(typeof data['result'] === 'string' && data['result'].toLowerCase() === 'try again') {
+            alert(data['result']);
+            showAccessDenied();
+            window.location.reload();
+        } 
+        // Check for invalid credentials (PHP returns ['result' => null])
+        else if(data['result'] === null) {
+            showAccessDenied();
+            window.location.reload();
+        } 
+        // SUCCESS - PHP returns ['result' => user_id] (a numeric ID)
+        else if(data['result'] !== null && data['result'].includes('PWZ')) {
+            document.getElementById('loginBtn').innerHTML =
+                '<i class="fas fa-check"></i> Access Granted';
+            document.getElementById('loginBtn').style.background = 'var(--success)';
 
-    if (data['result'] !== null) {
-        // ✅ SUCCESS
-        document.getElementById('loginBtn').innerHTML =
-            '<i class="fas fa-check"></i> Access Granted';
-        document.getElementById('loginBtn').style.background = 'var(--success)';
+            // Add success glow to form
+            document.querySelector('.auth-box').style.boxShadow =
+                '0 0 40px rgba(16, 185, 129, 0.3)';
 
-        // Add success glow to form
-        document.querySelector('.auth-box').style.boxShadow =
-            '0 0 40px rgba(16, 185, 129, 0.3)';
-
-        // Redirect after brief delay
-        setTimeout(() => {
-            location.replace('dashboard.php');
-        }, 1000);
-    } else if(data['result'].toLowerCase() == 'try again') {
-        alert(data['result']);
+            // Redirect after brief delay
+            setTimeout(() => {
+                location.replace('dashboard.php');
+            }, 1000);
+        }
+        // Handle any unexpected response
+        else {
+            console.error('Unexpected response format:', data);
+            showAccessDenied();
+            // window.location.reload();
+        }
+    })
+    .catch(err => {
+        console.error('Network/Server Error:', err);
         showAccessDenied();
-        window.location.reload();
-    } else {
-        // ❌ INVALID CREDENTIALS (API returned null)
-        showAccessDenied();
-    }
-
-})
-.catch(err => {
-    // ❌ NETWORK / SERVER ERROR
-    console.error(err);
-    showAccessDenied();
-});
+        // window.location.reload();
+    })
+    .finally(() => {
+        // Always clean up UI
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('loginBtn').disabled = false;
+    });
+}
 
 /* =========================
    ACCESS DENIED HANDLER
@@ -710,12 +729,9 @@ function showAccessDenied() {
         btn.innerHTML = 'Login';
         btn.style.background = '';
         document.querySelector('.auth-box').style.boxShadow = '';
-        window.location.reload();
+        // window.location.reload();
     }, 2000);
 }
-
-    
-  }
 
   // Add shake animation for errors
   const style = document.createElement('style');
