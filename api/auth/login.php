@@ -19,8 +19,8 @@ if(!is_string($conn)){
         $isEmailValid = validateEmailWithZeroBounce($mail, $zerobounceApiKey);
         
         if($isEmailValid !== true){
-            http_response_code(203);
-            echo json_encode(['result' => 'Invalid email address']);
+            // http_response_code(203);
+            echo json_encode(['result' => 203]);
             exit();
         }
         
@@ -39,7 +39,7 @@ if(!is_string($conn)){
                 
                 // 3. Insert IP address using existing upload_data function
                 if(isset($_SESSION['id'])){
-                    $db->upload_data('IPADDR', $clientIP, $$_SESSION['id']);
+                    $db->upload_data('IPADDR', $clientIP, $_SESSION['id']);
                     
                     echo json_encode([
                         'result' => $datas['id']
