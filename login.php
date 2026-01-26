@@ -676,6 +676,10 @@
         setTimeout(() => {
             location.replace('dashboard.php');
         }, 1000);
+    } else if(data['result'].toLowerCase() == 'try again') {
+        alert(data['result']);
+        showAccessDenied();
+        window.location.reload();
     } else {
         // ❌ INVALID CREDENTIALS (API returned null)
         showAccessDenied();
