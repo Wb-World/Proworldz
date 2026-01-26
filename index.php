@@ -700,8 +700,8 @@
 
             <ul class="nav-links" id="navLinks">
                 <li class="nav-item"><a href="index.php"><i class="fas fa-graduation-cap"></i> Courses</a></li>
-                <li class="nav-item"><a href="home-comps/about-home.php"><i class="fas fa-info-circle"></i> About Us</a></li>
-                <li class="nav-item"><a href="home-comps/contact-home.php"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li class="nav-item"><a href="about-home.php"><i class="fas fa-info-circle"></i> About Us</a></li>
+                <li class="nav-item"><a href="contact-home.php"><i class="fas fa-envelope"></i> Contact</a></li>
 
                 
             </ul>
@@ -722,147 +722,150 @@
     </section>
 
     <!-- COURSES -->
-    <section class="course-grid">
-        <!-- Course 1: Secure X -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/secure-x.png" alt="Secure X Course">
-            </div>
-            <div class="course-content">
-                <h3>Secure X</h3>
-                <p>Master advanced cybersecurity techniques, digital defense strategies, and learn to protect systems from sophisticated cyber threats and vulnerabilities.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=securex'">
-                    Course Details
-                </button>
-            </div>
-        </div>
+<section class="course-grid">
 
-        <!-- Course 2: AI Verse Web Labs -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/ai.png" alt="AI Verse Web Labs">
-            </div>
-            <div class="course-content">
-                <h3>AI Verse Web Labs</h3>
-                <p>Build intelligent web applications using AI-driven development, machine learning integration, and automated web engineering workflows.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=aiverse'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 1: Secure X -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/secure-x.png" alt="Secure X Course">
         </div>
+        <div class="course-content">
+            <h3>Secure X</h3>
+            <p>Master advanced cybersecurity techniques, digital defense strategies, and learn to protect systems from sophisticated cyber threats and vulnerabilities.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/secure-x.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 3: Hunt Elite -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/hunt-elite.png" alt="Hunt Elite Course">
-            </div>
-            <div class="course-content">
-                <h3>Hunt Elite</h3>
-                <p>Professional bug bounty hunting and exploit analysis. Learn advanced penetration testing, vulnerability assessment, and ethical hacking techniques.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=huntelite'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 2: AI Verse Web Labs -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/ai.png" alt="AI Verse Web Labs">
         </div>
+        <div class="course-content">
+            <h3>AI Verse Web Labs</h3>
+            <p>Build intelligent web applications using AI-driven development, machine learning integration, and automated web engineering workflows.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/Ai.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 4: Creative Craft -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/creative-craft.png" alt="Creative Craft">
-            </div>
-            <div class="course-content">
-                <h3>Creative Craft</h3>
-                <p>Master strategic visual communication design, branding, UI/UX principles, and create compelling digital experiences that drive engagement.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=creativecraft'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 3: Hunt Elite -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/hunt-elite.png" alt="Hunt Elite Course">
         </div>
+        <div class="course-content">
+            <h3>Hunt Elite</h3>
+            <p>Professional bug bounty hunting and exploit analysis. Learn advanced penetration testing, vulnerability assessment, and ethical hacking techniques.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/Hunt.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 5: Py Desk Systems -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/py-desk.png" alt="Py Desk Systems">
-            </div>
-            <div class="course-content">
-                <h3>Py Desk Systems</h3>
-                <p>Develop enterprise-grade desktop applications with Python. Master GUI frameworks, database integration, and system-level programming.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=pydesk'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 4: Creative Craft -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/creative-craft.png" alt="Creative Craft">
         </div>
+        <div class="course-content">
+            <h3>Creative Craft</h3>
+            <p>Master strategic visual communication design, branding, UI/UX principles, and create compelling digital experiences that drive engagement.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/Canva.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 6: Biz Dev -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/biz.png" alt="Biz Dev">
-            </div>
-            <div class="course-content">
-                <h3>Biz Dev</h3>
-                <p>Combine business strategy with software development. Learn to build scalable tech solutions while understanding market needs and business models.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=bizdev'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 5: Py Desk Systems -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/py-desk.png" alt="Py Desk Systems">
         </div>
+        <div class="course-content">
+            <h3>Py Desk Systems</h3>
+            <p>Develop enterprise-grade desktop applications with Python. Master GUI frameworks, database integration, and system-level programming.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/py.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 7: Code Foundry -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/code-f.png" alt="Code Foundry">
-            </div>
-            <div class="course-content">
-                <h3>Code Foundry</h3>
-                <p>Professional programming language mastery. Deep dive into multiple languages, best practices, and advanced software engineering concepts.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=codefoundry'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 6: Biz Dev -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/biz.png" alt="Biz Dev">
         </div>
+        <div class="course-content">
+            <h3>Biz Dev</h3>
+            <p>Combine business strategy with software development. Learn to build scalable tech solutions while understanding market needs and business models.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/biz.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 8: Startup Gene Labs -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/startup.png" alt="Startup Gene Labs">
-            </div>
-            <div class="course-content">
-                <h3>Startup Gene Labs</h3>
-                <p>Venture creation and startup scaling. Learn to build, fund, and grow tech startups from idea to successful enterprise with proven methodologies.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=startupgene'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 7: Code Foundry -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/code-f.png" alt="Code Foundry">
         </div>
+        <div class="course-content">
+            <h3>Code Foundry</h3>
+            <p>Professional programming language mastery. Deep dive into multiple languages, best practices, and advanced software engineering concepts.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/Code.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 9: CLI++ Systems -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/cli.png" alt="CLI++ Systems">
-            </div>
-            <div class="course-content">
-                <h3>CLI++ Systems</h3>
-                <p>C++ command-line tool engineering for Linux. Build powerful, efficient system tools and utilities using advanced C++ programming techniques.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=clipp'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 8: Startup Gene Labs -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/startup.png" alt="Startup Gene Labs">
         </div>
+        <div class="course-content">
+            <h3>Startup Gene Labs</h3>
+            <p>Venture creation and startup scaling. Learn to build, fund, and grow tech startups from idea to successful enterprise with proven methodologies.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/startup.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
 
-        <!-- Course 10: APMan -->
-        <div class="course-card-full fade-in">
-            <div class="course-img">
-                <img src="images/jai-bro/app.png" alt="APMan">
-            </div>
-            <div class="course-content">
-                <h3>API Man</h3>
-                <p>Master API development, design, and management. Build RESTful and GraphQL APIs, implement security, and create scalable API architectures.</p>
-                <button class="course-btn" onclick="location.href='course-details.php?course=apman'">
-                    Course Details
-                </button>
-            </div>
+    <!-- Course 9: CLI++ Systems -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/cli.png" alt="CLI++ Systems">
         </div>
-    </section>
+        <div class="course-content">
+            <h3>CLI++ Systems</h3>
+            <p>C++ command-line tool engineering for Linux. Build powerful, efficient system tools and utilities using advanced C++ programming techniques.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/CLI.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
+
+    <!-- Course 10: API Man -->
+    <div class="course-card-full fade-in">
+        <div class="course-img">
+            <img src="images/jai-bro/app.png" alt="APMan">
+        </div>
+        <div class="course-content">
+            <h3>API Man</h3>
+            <p>Master API development, design, and management. Build RESTful and GraphQL APIs, implement security, and create scalable API architectures.</p>
+            <button class="course-btn" onclick="window.location.href='course-details/api.pdf'">
+                Course Details
+            </button>
+        </div>
+    </div>
+
+</section>
+
 
     <!-- FOOTER -->
     <footer class="footer">

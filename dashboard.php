@@ -1,39 +1,37 @@
 <?php
 session_start();
-// Include your DBconfig class
-require_once 'api/dbconf.php'; // Adjust the path if needed
+require_once 'api/dbconf.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
 }
 
 $userId = $_SESSION['id'];
-
-// Create database connection
 $db = new DBconfig();
 
-// Check connection
 if (!$db->check_con()) {
     die("Database connection failed");
 }
 
-// Get user name, assignments, and eagle coins
-$userInfo = $db->getUserInfo($userId, ['name', 'assignments', 'eagle_coins', 'course']);
+// Get user info
+$userInfo = $db->getUserInfo($userId, ['name', 'assignments', 'eagle_coins', 'course', 'assigns_complete']);
 $userName = isset($userInfo['name']) ? $userInfo['name'] : 'User';
 $assignments = isset($userInfo['assignments']) ? $userInfo['assignments'] : 0;
 $eagleCoins = isset($userInfo['eagle_coins']) ? $userInfo['eagle_coins'] : 0;
 $course = isset($userInfo['course']) ? $userInfo['course'] : 'Not enrolled';
+$_SESSION['c-user'] = $userName;
+$_SESSION['c-course'] = $course;
 
-$assignmentsArray = !empty($assignmentsData) ? explode(',', $assignmentsData) : [];
-$assignmentsCount = count(array_filter($assignmentsArray)); // Filter to remove empty values
-// Get all users sorted by eagle coins to calculate rank
+$assignmentsArray = !empty($assignments) ? explode(',', $assignments) : [];
+$assignmentsCount = count(array_filter($assignmentsArray));
+$completed_assigns = $userInfo['assigns_complete'];
+
+// Get all users for rank calculation
 $allUsers = $db->getAllUsersData(['id', 'eagle_coins']);
 usort($allUsers, function($a, $b) {
     return $b['eagle_coins'] - $a['eagle_coins'];
 });
 
-// Calculate rank
 $rank = 1;
 foreach ($allUsers as $user) {
     if ($user['id'] == $userId) {
@@ -42,8 +40,48 @@ foreach ($allUsers as $user) {
     $rank++;
 }
 
-// Get total users count for context
 $totalUsers = count($allUsers);
+
+// ===== TRACK CHANGES FOR NOTIFICATIONS =====
+// Store previous values in session to detect changes
+$prevCoins = isset($_SESSION['prev_eagle_coins']) ? $_SESSION['prev_eagle_coins'] : $eagleCoins;
+$prevRank = isset($_SESSION['prev_rank']) ? $_SESSION['prev_rank'] : $rank;
+$prevAssignments = isset($_SESSION['prev_assignments_count']) ? $_SESSION['prev_assignments_count'] : $assignmentsCount;
+
+// Calculate changes
+$coinsChange = $eagleCoins - $prevCoins;
+$rankChange = $prevRank - $rank; // Positive = rank improved
+$assignmentsChange = $assignmentsCount - $prevAssignments;
+
+// Update session with current values for next time
+$_SESSION['prev_eagle_coins'] = $eagleCoins;
+$_SESSION['prev_rank'] = $rank;
+$_SESSION['prev_assignments_count'] = $assignmentsCount;
+
+// ===== NOTIFICATION DATA TO PASS TO JAVASCRIPT =====
+$notificationData = [
+    'userName' => htmlspecialchars($userName),
+    'showWelcome' => !isset($_SESSION['welcome_shown']), // Show welcome only once
+    'coinsChange' => $coinsChange,
+    'rankChange' => $rankChange,
+    'assignmentsChange' => $assignmentsChange,
+    'currentRank' => $rank,
+    'currentCoins' => $eagleCoins,
+    'currentAssignments' => $assignmentsCount
+];
+
+// Mark welcome as shown for this session
+$_SESSION['welcome_shown'] = true;
+
+$maxCoins = 0;
+foreach ($allUsers as $user) {
+    if ($user['eagle_coins'] > $maxCoins) {
+        $maxCoins = $user['eagle_coins'];
+    }
+}
+if ($maxCoins === 0) {
+    $maxCoins = $eagleCoins ?: 1;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
@@ -1623,6 +1661,42 @@ $totalUsers = count($allUsers);
         ::-webkit-scrollbar-thumb:hover {
             background: var(--muted-foreground);
         }
+        /* Notification specific styles */
+#notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    transition: all 0.3s ease;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.notification-item:hover {
+    background-color: var(--accent);
+    transform: translateX(2px);
+}
+
+#view-all-container {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+}
+
+#view-all-notifications:hover, 
+#show-less-notifications:hover {
+    background-color: var(--accent);
+}
+
+/* Animation for new notifications */
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.new-notification {
+    animation: pulse 2s infinite;
+}
     </style>
 </head>
 <body>
@@ -1686,7 +1760,7 @@ $totalUsers = count($allUsers);
                                 </svg>
                                 <span class="nav-label">Assignments</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
+                            <a href="maintanance.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
                                 </svg>
@@ -1701,7 +1775,7 @@ $totalUsers = count($allUsers);
                                 </svg>
                                 <span class="nav-label">Leaderboard</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
+                            <a href="maintanance.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
                                 </svg>
@@ -1713,13 +1787,16 @@ $totalUsers = count($allUsers);
                                 </svg>
                                 <span class="nav-label">Contact support</span>
                             </a>
-                            <a href="https://dragotool.shop/" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
-                                    <!-- Font Awesome Dragon (simpler) -->
-                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
-                                </svg>
-                                <span class="nav-label">Drago Tool</span>
-                            </a>
+                            <a href="https://dragotool.shop/"
+   class="nav-item"
+   target="_blank"
+   rel="noopener noreferrer">
+    <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
+        <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
+    </svg>
+    <span class="nav-label">Drago Tool</span>
+</a>
+
                             <a href="logout.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
                                     <!-- Font Awesome Sign-out icon -->
@@ -1768,7 +1845,7 @@ $totalUsers = count($allUsers);
                     </div>
                     <div class="bg-accent p-4 relative overflow-hidden">
                         <div class="flex items-center">
-                            <span class="text-5xl font-display text-success"><?php echo htmlspecialchars($assignmentsCount); ?></span>
+                            <span class="text-5xl font-display text-success"><?php echo htmlspecialchars($completed_assigns); ?></span>
                         </div>
                         <div class="mt-2">
                             <p class="text-sm font-medium text-muted-foreground tracking-wide">
@@ -1827,75 +1904,165 @@ $totalUsers = count($allUsers);
             </div>
 
             <!-- Chart Section -->
-            <div class="card animate-slideUp" style="animation-delay: 0.3s">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                            <div class="bullet"></div>
-                            <span class="text-sm font-medium uppercase">PERFORMANCE TREND</span>
-                        </div>
-                        <!-- <div class="tabs-list" style="border: none; padding: 0;">
-                            <button class="tabs-trigger active" data-tab="week">WEEK</button>
-                            <button class="tabs-trigger" data-tab="month">MONTH</button>
-                            <button class="tabs-trigger" data-tab="year">YEAR</button>
-                        </div> -->
-                    </div>
-                </div>
-                <div class="bg-accent p-4">
-                    <div class="chart-container" style="height: 250px;">
-                        <svg class="w-full h-full" viewBox="0 0 800 250">
-                            <!-- Grid Lines -->
-                            <line x1="0" y1="40" x2="800" y2="40" class="chart-grid" />
-                            <line x1="0" y1="90" x2="800" y2="90" class="chart-grid" />
-                            <line x1="0" y1="140" x2="800" y2="140" class="chart-grid" />
-                            <line x1="0" y1="190" x2="800" y2="190" class="chart-grid" />
-                            
-                            <!-- X Axis -->
-                            <text x="50" y="230" class="text-xs fill-muted-foreground uppercase">Mon</text>
-                            <text x="150" y="230" class="text-xs fill-muted-foreground uppercase">Tue</text>
-                            <text x="250" y="230" class="text-xs fill-muted-foreground uppercase">Wed</text>
-                            <text x="350" y="230" class="text-xs fill-muted-foreground uppercase">Thu</text>
-                            <text x="450" y="230" class="text-xs fill-muted-foreground uppercase">Fri</text>
-                            <text x="550" y="230" class="text-xs fill-muted-foreground uppercase">Sat</text>
-                            <text x="650" y="230" class="text-xs fill-muted-foreground uppercase">Sun</text>
-                            
-                            <!-- Y Axis Labels -->
-                            <text x="20" y="40" class="text-xs fill-muted-foreground">100%</text>
-                            <text x="20" y="90" class="text-xs fill-muted-foreground">75%</text>
-                            <text x="20" y="140" class="text-xs fill-muted-foreground">50%</text>
-                            <text x="20" y="190" class="text-xs fill-muted-foreground">25%</text>
-                            
-                            <!-- Performance Line -->
-                            <path d="M50,190 L150,140 L250,160 L350,120 L450,170 L550,130 L650,150 L750,110" 
-                                  fill="none" stroke="var(--chart-2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                            
-                            <!-- Performance Area -->
-                            <path d="M50,190 L150,140 L250,160 L350,120 L450,170 L550,130 L650,150 L750,110 L750,250 L50,250 Z" 
-                                  fill="url(#performanceGradient)" class="chart-area" stroke="none"/>
-                            
-                            <!-- Data Points -->
-                            <circle cx="50" cy="190" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="150" cy="140" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="250" cy="160" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="350" cy="120" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="450" cy="170" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="550" cy="130" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="650" cy="150" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" />
-                            <circle cx="750" cy="110" r="6" fill="var(--chart-2)" stroke="white" stroke-width="2">
-                                <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite" />
-                            </circle>
-                            
-                            <defs>
-                                <linearGradient id="performanceGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stop-color="var(--chart-2)" stop-opacity="0.3"/>
-                                    <stop offset="95%" stop-color="var(--chart-2)" stop-opacity="0.05"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-                </div>
+            <!-- Chart Section -->
+<div class="card animate-slideUp" style="animation-delay: 0.3s">
+    <div class="p-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <div class="bullet"></div>
+                <span class="text-sm font-medium uppercase">PERFORMANCE WAVE</span>
             </div>
-
+            <div class="text-sm text-muted-foreground">
+                Based on Eagle Coins
+            </div>
+        </div>
+    </div>
+    <div class="bg-accent p-4">
+        <div class="chart-container" style="height: 250px;">
+            <svg id="performanceWave" class="w-full h-full" viewBox="0 0 800 250">
+                <!-- Grid Lines (matching your existing style) -->
+                <line x1="0" y1="40" x2="800" y2="40" class="chart-grid" />
+                <line x1="0" y1="90" x2="800" y2="90" class="chart-grid" />
+                <line x1="0" y1="140" x2="800" y2="140" class="chart-grid" />
+                <line x1="0" y1="190" x2="800" y2="190" class="chart-grid" />
+                
+                <!-- Wave Background Area -->
+                <defs>
+                    <linearGradient id="waveGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="5%" stop-color="var(--chart-2)" stop-opacity="0.1"/>
+                        <stop offset="95%" stop-color="var(--chart-2)" stop-opacity="0.05"/>
+                    </linearGradient>
+                    
+                    <clipPath id="waveClip">
+                        <path id="wavePath" d="M0,190 Q100,190 200,180 Q300,170 400,160 Q500,150 600,140 Q700,130 800,120 L800,250 L0,250 Z"></path>
+                    </clipPath>
+                    
+                    <!-- Pulsing effect filter -->
+                    <filter id="pulseEffect" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+                        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="pulse"/>
+                    </filter>
+                </defs>
+                
+                <!-- Pulsing Background Glow -->
+                <circle id="pulseGlow" cx="400" cy="160" r="0" fill="var(--chart-2)" opacity="0.1" filter="url(#pulseEffect)">
+                    <animate attributeName="r" values="0;80;0" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                
+                <!-- Animated Wave Pattern with pulse -->
+                <g clip-path="url(#waveClip)">
+                    <!-- Main Wave Pattern with pulse animation -->
+                    <path id="wavePattern" d="M-200,150 Q-100,140 0,150 Q100,160 200,150 Q300,140 400,150 Q500,160 600,150 Q700,140 800,150 Q900,160 1000,150" 
+                          fill="none" stroke="var(--chart-2)" stroke-width="2" stroke-opacity="0.3">
+                        <animate attributeName="stroke-width" values="2;3;2" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="stroke-opacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite"/>
+                    </path>
+                    
+                    <!-- Second Wave with offset pulse -->
+                    <path id="wavePattern2" d="M-200,160 Q-100,170 0,160 Q100,150 200,160 Q300,170 400,160 Q500,150 600,160 Q700,170 800,160 Q900,150 1000,160" 
+                          fill="none" stroke="var(--chart-2)" stroke-width="2" stroke-opacity="0.2">
+                        <animate attributeName="stroke-width" values="2;2.5;2" dur="2.5s" repeatCount="indefinite" begin="0.3s"/>
+                        <animate attributeName="stroke-opacity" values="0.2;0.4;0.2" dur="2.5s" repeatCount="indefinite" begin="0.3s"/>
+                    </path>
+                    
+                    <!-- Third Wave with different pulse -->
+                    <path id="wavePattern3" d="M-200,140 Q-100,130 0,140 Q100,150 200,140 Q300,130 400,140 Q500,150 600,140 Q700,130 800,140 Q900,150 1000,140" 
+                          fill="none" stroke="var(--chart-2)" stroke-width="2" stroke-opacity="0.15">
+                        <animate attributeName="stroke-width" values="2;2.3;2" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+                        <animate attributeName="stroke-opacity" values="0.15;0.3;0.15" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+                    </path>
+                </g>
+                
+                <!-- Wave Fill Area with gentle pulse -->
+                <path id="waveFill" d="M0,190 Q100,190 200,180 Q300,170 400,160 Q500,150 600,140 Q700,130 800,120 L800,250 L0,250 Z" 
+                      fill="url(#waveGradient)" stroke="none">
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="4s" repeatCount="indefinite"/>
+                </path>
+                
+                <!-- Performance Level Indicator with dynamic pulse -->
+                <g id="performanceIndicator">
+                    <!-- Pulsing outer ring -->
+                    <circle id="pulseRing" cx="400" cy="160" r="15" fill="none" stroke="var(--chart-2)" stroke-width="1" stroke-opacity="0.3">
+                        <animate attributeName="r" values="15;20;15" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="stroke-opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- Main indicator -->
+                    <circle cx="400" cy="160" r="8" fill="var(--chart-2)" stroke="white" stroke-width="2">
+                        <animate attributeName="r" values="8;10;8" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="fill" values="var(--chart-2);#4ade80;var(--chart-2)" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- Center dot -->
+                    <circle cx="400" cy="160" r="3" fill="white">
+                        <animate attributeName="r" values="3;4;3" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+                
+                <!-- Performance Line with flow animation -->
+                <path id="performanceLine" d="M0,190 Q100,190 200,180 Q300,170 400,160 Q500,150 600,140 Q700,130 800,120" 
+                      fill="none" stroke="var(--chart-2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                      stroke-dasharray="1000" stroke-dashoffset="1000">
+                    <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="1.5s" fill="freeze" begin="0.5s"/>
+                    <animate attributeName="stroke-width" values="3;3.5;3" dur="2s" repeatCount="indefinite" begin="2s"/>
+                </path>
+                
+                <!-- Data Points with pulsing effect -->
+                <circle cx="0" cy="190" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" opacity="0" id="point1">
+                    <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="0.5s"/>
+                    <animate attributeName="r" values="4;5;4" dur="2s" repeatCount="indefinite" begin="2s"/>
+                </circle>
+                <circle cx="200" cy="180" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" opacity="0" id="point2">
+                    <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="0.8s"/>
+                    <animate attributeName="r" values="4;5;4" dur="2s" repeatCount="indefinite" begin="2.3s"/>
+                </circle>
+                <circle cx="400" cy="160" r="6" fill="var(--chart-2)" stroke="white" stroke-width="2" opacity="0" id="point3">
+                    <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.1s"/>
+                    <animate attributeName="r" values="6;8;6" dur="1.5s" repeatCount="indefinite" begin="2.6s"/>
+                </circle>
+                <circle cx="600" cy="140" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" opacity="0" id="point4">
+                    <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.4s"/>
+                    <animate attributeName="r" values="4;5;4" dur="2s" repeatCount="indefinite" begin="2.9s"/>
+                </circle>
+                <circle cx="800" cy="120" r="4" fill="var(--chart-2)" stroke="white" stroke-width="2" opacity="0" id="point5">
+                    <animate attributeName="opacity" from="0" to="1" dur="0.3s" fill="freeze" begin="1.7s"/>
+                    <animate attributeName="r" values="4;5;4" dur="2s" repeatCount="indefinite" begin="3.2s"/>
+                </circle>
+                
+                <!-- Current Value Display with pulse -->
+                <g transform="translate(400, 100)">
+                    <rect x="-50" y="-25" width="100" height="50" rx="8" fill="var(--card)" stroke="var(--chart-2)" stroke-width="1">
+                        <animate attributeName="stroke-width" values="1;2;1" dur="2s" repeatCount="indefinite" begin="2s"/>
+                    </rect>
+                    <text id="coinValue" text-anchor="middle" dy="5" class="text-xl font-bold fill-foreground">0</text>
+                    <text text-anchor="middle" y="20" class="text-xs fill-muted-foreground">COINS</text>
+                </g>
+                
+                <!-- Performance Labels -->
+                <text x="100" y="70" class="text-xs fill-muted-foreground">BEGINNER</text>
+                <text x="350" y="50" class="text-xs fill-muted-foreground">INTERMEDIATE</text>
+                <text x="600" y="70" class="text-xs fill-muted-foreground">ADVANCED</text>
+                
+                <!-- Energy particles with pulse -->
+                <circle cx="100" cy="100" r="1.5" fill="var(--chart-2)" opacity="0.5">
+                    <animate attributeName="r" values="1.5;2.5;1.5" dur="1.8s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="1.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="700" cy="80" r="1.5" fill="var(--chart-2)" opacity="0.5">
+                    <animate attributeName="r" values="1.5;2.5;1.5" dur="2.2s" repeatCount="indefinite" begin="0.5s"/>
+                    <animate attributeName="opacity" values="0.5;0.8;0.5" dur="2.2s" repeatCount="indefinite" begin="0.5s"/>
+                </circle>
+                <circle cx="300" cy="120" r="1" fill="var(--chart-2)" opacity="0.4">
+                    <animate attributeName="r" values="1;2;1" dur="2.5s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+                <circle cx="500" cy="90" r="1" fill="var(--chart-2)" opacity="0.4">
+                    <animate attributeName="r" values="1;2;1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+                </circle>
+            </svg>
+        </div>
+    </div>
+</div>
             <!-- Security Status -->
             <div class="grid grid-cols-1">
                 <div class="card animate-slideUp" style="animation-delay: 0.5s; min-height: 300px;">
@@ -2019,35 +2186,21 @@ $totalUsers = count($allUsers);
             </div>
 
             <!-- Notifications -->
-           <!-- In the Notifications section (around line ~1800), update the badge section: -->
             <div class="card">
                 <div class="p-4 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-sm font-medium uppercase">
-                        <span>Notifications</span><br><br>
-                        <span class="badge badge-destructive" id="notify-count">0</span> <!-- Changed this line -->
+                        <span>Notifications</span>
+                        <span class="badge badge-destructive" id="notify-count">0</span>
                     </div>
                 </div>
-                <div class="bg-accent p-3 space-y-2" id="notification-list">
-                    <!-- Existing notifications here -->
-                    <!-- Add this default notification at the top: -->
-                    <!-- <div class="group p-3 rounded-lg border border-border/30 bg-background/50">
-                        <div class="flex items-start gap-3">
-                            <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-primary"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="flex items-center gap-2 flex-1">
-                                        <h4 class="text-sm font-medium">WELCOME <?php echo strtoupper(htmlspecialchars($userName)); ?></h4>
-                                        <span class="badge badge-secondary text-xs">INFO</span>
-                                    </div>
-                                    <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 clear-notify">clear</button>
-                                </div>
-                                <div class="flex items-center justify-between mt-2">
-                                    <span class="text-xs text-muted-foreground">Just now</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                    <!-- Existing notifications end -->
+                <!-- Add notification container here -->
+                <div id="notification-container" class="p-4 pt-0">
+                    <div id="notification-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                    <div id="view-all-container" class="hidden mt-3 text-center border-t border-border pt-3">
+                        <button id="view-all-notifications" class="button button-ghost button-sm text-xs">
+                            View All (4+)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2058,30 +2211,83 @@ $totalUsers = count($allUsers);
 class NotificationSystem {
     constructor() {
         this.notifications = [];
+        this.shownNotificationIds = new Set(); // Track shown notification IDs
         this.loadNotifications();
         this.setupEventListeners();
-        // Removed startSimulation() to prevent duplicate notifications
+        
+        // Load already shown notifications from localStorage
+        const shownIds = localStorage.getItem('shown_notification_ids');
+        if (shownIds) {
+            this.shownNotificationIds = new Set(JSON.parse(shownIds));
+        }
     }
     
     loadNotifications() {
-        // Load from localStorage or initialize with default
         const saved = localStorage.getItem('user_notifications');
         if (saved) {
             this.notifications = JSON.parse(saved);
         } else {
             // Initial welcome notification
+            const welcomeId = this.generateNotificationId('welcome');
             this.notifications = [{
-                id: Date.now(),
+                id: welcomeId,
+                uniqueId: welcomeId,
                 title: 'WELCOME TO PROWORLDZ',
                 message: 'Your academic journey begins now!',
                 type: 'info',
                 time: 'Just now',
                 read: false
             }];
-            this.saveNotifications();
+            this.shownNotificationIds.add(welcomeId);
+            this.saveShownIds();
         }
         this.renderNotifications();
         this.updateCount();
+    }
+    
+    // Generate a unique ID for each notification type
+    generateNotificationId(type, data = '') {
+        return `${type}_${data}_${new Date().toDateString()}`; // Daily unique ID
+    }
+    
+    saveShownIds() {
+        localStorage.setItem('shown_notification_ids', JSON.stringify(Array.from(this.shownNotificationIds)));
+    }
+    
+    addNotification(title, message, type = 'info', uniqueId = null) {
+        // Generate unique ID if not provided
+        const notificationId = uniqueId || this.generateNotificationId(type, title + message);
+        
+        // Check if this notification was already shown today
+        if (this.shownNotificationIds.has(notificationId)) {
+            console.log('Notification already shown:', notificationId);
+            return false; // Don't add duplicate
+        }
+        
+        const notification = {
+            id: Date.now(),
+            uniqueId: notificationId, // Add unique identifier
+            title: title,
+            message: message,
+            type: type,
+            time: 'Just now',
+            read: false
+        };
+        
+        this.notifications.unshift(notification);
+        if (this.notifications.length > 50) {
+            this.notifications.pop();
+        }
+        
+        // Mark this notification ID as shown
+        this.shownNotificationIds.add(notificationId);
+        this.saveShownIds();
+        this.saveNotifications();
+        this.renderNotifications();
+        this.updateCount();
+        this.showNotificationToast(notification);
+        
+        return true;
     }
     
     saveNotifications() {
@@ -2108,6 +2314,28 @@ class NotificationSystem {
         this.updateCount();
         this.showNotificationToast(notification);
     }
+    // Add this method to NotificationSystem class
+cleanupOldNotificationIds() {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    // Filter out IDs older than 7 days
+    const currentIds = Array.from(this.shownNotificationIds);
+    const recentIds = currentIds.filter(id => {
+        // Extract date from ID if possible, or keep if can't parse
+        const parts = id.split('_');
+        const datePart = parts[parts.length - 1];
+        try {
+            const idDate = new Date(datePart);
+            return idDate >= oneWeekAgo;
+        } catch {
+            return true; // Keep if can't parse date
+        }
+    });
+    
+    this.shownNotificationIds = new Set(recentIds);
+    this.saveShownIds();
+}
     
     showNotificationToast(notification) {
         // Create toast notification
@@ -2117,7 +2345,7 @@ class NotificationSystem {
         toast.style.maxWidth = '350px';
         toast.innerHTML = `
             <div class="flex items-start gap-3">
-                <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-${notification.type === 'info' ? 'primary' : notification.type === 'success' ? 'success' : 'warning'}"></div>
+                <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0" style="background-color: ${notification.type === 'info' ? 'var(--primary)' : notification.type === 'success' ? 'var(--success)' : 'var(--warning)'}"></div>
                 <div class="flex-1">
                     <div class="flex items-center justify-between gap-2 mb-1">
                         <h4 class="text-sm font-semibold">${notification.title}</h4>
@@ -2150,6 +2378,76 @@ class NotificationSystem {
             }
         }, 5000);
     }
+
+    showAllNotifications() {
+    const container = document.getElementById('notification-list');
+    const viewAllContainer = document.getElementById('view-all-container');
+    
+    if (!container || !viewAllContainer) return;
+    
+    // Clear container
+    container.innerHTML = '';
+    
+    // Add all notifications
+    this.notifications.forEach(notification => {
+        const notice = document.createElement('div');
+        notice.className = 'group p-3 rounded-lg border border-border bg-background cursor-pointer notification-item';
+        notice.setAttribute('data-notification-id', notification.id);
+        
+        // Determine color based on type
+        let dotColor = 'bg-primary';
+        let badgeType = 'badge-secondary';
+        
+        switch(notification.type) {
+            case 'success':
+                dotColor = 'bg-success';
+                badgeType = 'badge-outline-success';
+                break;
+            case 'warning':
+                dotColor = 'bg-warning';
+                badgeType = 'badge-outline-warning';
+                break;
+            case 'error':
+                dotColor = 'bg-destructive';
+                badgeType = 'badge-destructive';
+                break;
+        }
+        
+        notice.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 ${dotColor}"></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <div class="flex items-center gap-2 flex-1">
+                            <h4 class="text-sm font-semibold">${notification.title}</h4>
+                            <span class="badge ${badgeType} text-xs">${notification.type.toUpperCase()}</span>
+                        </div>
+                        <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 clear-notify">clear</button>
+                    </div>
+                    <p class="text-xs text-muted-foreground line-clamp-2">${notification.message}</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xs text-muted-foreground">${notification.time}</span>
+                        ${!notification.read ? '<span class="text-xs text-primary">NEW</span>' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(notice);
+    });
+    
+    // Change button to "Show Less"
+    viewAllContainer.innerHTML = `
+        <button id="show-less-notifications" class="button button-ghost button-sm text-xs">
+            Show Less
+        </button>
+    `;
+    
+    // Handle "Show Less" click
+    document.getElementById('show-less-notifications').onclick = () => {
+        this.renderNotifications();
+    };
+}
     
     markAsRead(id) {
         const notification = this.notifications.find(n => n.id === id);
@@ -2175,68 +2473,83 @@ class NotificationSystem {
     }
     
     renderNotifications() {
-        const container = document.getElementById('notification-list');
-        if (!container) return;
+    const container = document.getElementById('notification-list');
+    const viewAllContainer = document.getElementById('view-all-container');
+    const viewAllBtn = document.getElementById('view-all-notifications');
+    
+    if (!container || !viewAllContainer) return;
+    
+    // Clear all content
+    container.innerHTML = '';
+    
+    // Check if we have more than 4 notifications
+    const hasMoreThanFour = this.notifications.length > 4;
+    const notificationsToShow = hasMoreThanFour ? 
+        this.notifications.slice(0, 4) : this.notifications;
+    
+    // Add notifications (limited to 4 if there are more)
+    notificationsToShow.forEach(notification => {
+        const notice = document.createElement('div');
+        notice.className = 'group p-3 rounded-lg border border-border bg-background cursor-pointer notification-item';
+        notice.setAttribute('data-notification-id', notification.id);
         
-        // Clear all content
-        container.innerHTML = '';
+        // Determine color based on type
+        let dotColor = 'bg-primary';
+        let badgeType = 'badge-secondary';
         
-        // Add dynamic notifications
-        this.notifications.forEach(notification => {
-            const notice = document.createElement('div');
-            notice.className = 'group p-3 rounded-lg border border-border bg-background cursor-pointer';
-            notice.setAttribute('data-notification-id', notification.id);
-            
-            // Determine color based on type
-            let dotColor = 'bg-primary';
-            let badgeType = 'badge-secondary';
-            
-            switch(notification.type) {
-                case 'success':
-                    dotColor = 'bg-success';
-                    badgeType = 'badge-outline-success';
-                    break;
-                case 'warning':
-                    dotColor = 'bg-warning';
-                    badgeType = 'badge-outline-warning';
-                    break;
-                case 'error':
-                    dotColor = 'bg-destructive';
-                    badgeType = 'badge-destructive';
-                    break;
-            }
-            
-            notice.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 ${dotColor}"></div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between gap-2 mb-1">
-                            <div class="flex items-center gap-2 flex-1">
-                                <h4 class="text-sm font-semibold">${notification.title}</h4>
-                                <span class="badge ${badgeType} text-xs">${notification.type.toUpperCase()}</span>
-                            </div>
-                            <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 clear-notify">clear</button>
+        switch(notification.type) {
+            case 'success':
+                dotColor = 'bg-success';
+                badgeType = 'badge-outline-success';
+                break;
+            case 'warning':
+                dotColor = 'bg-warning';
+                badgeType = 'badge-outline-warning';
+                break;
+            case 'error':
+                dotColor = 'bg-destructive';
+                badgeType = 'badge-destructive';
+                break;
+        }
+        
+        notice.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full mt-2 flex-shrink-0 ${dotColor}"></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <div class="flex items-center gap-2 flex-1">
+                            <h4 class="text-sm font-semibold">${notification.title}</h4>
+                            <span class="badge ${badgeType} text-xs">${notification.type.toUpperCase()}</span>
                         </div>
-                        <p class="text-xs text-muted-foreground line-clamp-2">${notification.message}</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="text-xs text-muted-foreground">${notification.time}</span>
-                            ${!notification.read ? '<span class="text-xs text-primary">NEW</span>' : ''}
-                        </div>
+                        <button class="button button-ghost button-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs h-6 px-2 clear-notify">clear</button>
+                    </div>
+                    <p class="text-xs text-muted-foreground line-clamp-2">${notification.message}</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xs text-muted-foreground">${notification.time}</span>
+                        ${!notification.read ? '<span class="text-xs text-primary">NEW</span>' : ''}
                     </div>
                 </div>
-            `;
-            
-            container.appendChild(notice);
-        });
+            </div>
+        `;
         
-        // Add clear all button if there are notifications
-        if (this.notifications.length > 0) {
-            const clearAllBtn = document.createElement('div');
-            clearAllBtn.className = 'text-center mt-3';
-            clearAllBtn.innerHTML = '<button class="button button-ghost button-sm text-xs" id="clear-all-notify">Clear All</button>';
-            container.appendChild(clearAllBtn);
-        }
+        container.appendChild(notice);
+    });
+    
+    // Show/Hide "View All" button with dynamic count
+    if (hasMoreThanFour) {
+        viewAllContainer.classList.remove('hidden');
+        const hiddenCount = this.notifications.length - 4;
+        viewAllBtn.textContent = `View All (${hiddenCount}+)`;
+        viewAllBtn.setAttribute('data-hidden-count', hiddenCount);
+    } else {
+        viewAllContainer.classList.add('hidden');
     }
+    
+    // Handle "View All" click
+    if (viewAllBtn) {
+        viewAllBtn.onclick = () => this.showAllNotifications();
+    }
+}
     
     updateCount() {
         const unreadCount = this.notifications.filter(n => !n.read).length;
@@ -2267,9 +2580,178 @@ class NotificationSystem {
 }
 
 // ===== UTILITY FUNCTIONS =====
+
+/// ===== PERFORMANCE WAVE =====
+function initializePerformanceWave() {
+    const eagleCoins = <?php echo $eagleCoins; ?>;
+    const maxCoins = <?php echo $maxCoins; ?>;
+    
+    // Calculate performance level
+    let performancePercent;
+    
+    if (maxCoins === 0) {
+        performancePercent = 50;
+    } else {
+        // Use logarithmic scale for better distribution
+        const logCoins = Math.log10(eagleCoins + 1);
+        const logMax = Math.log10(maxCoins + 1);
+        performancePercent = (logCoins / logMax) * 100;
+    }
+    
+    performancePercent = Math.min(Math.max(performancePercent, 0), 100);
+    
+    // Calculate pulse intensity based on performance (0.5 to 2)
+    const pulseIntensity = 0.5 + (performancePercent / 100) * 1.5;
+    
+    // Calculate wave height based on performance
+    const waveHeight = 190 - (performancePercent * 70 / 100);
+    
+    setTimeout(() => {
+        // Update coin counter with pulse effect
+        const coinValue = document.getElementById('coinValue');
+        if (coinValue) {
+            let current = 0;
+            const duration = 2000;
+            const steps = 100;
+            const increment = eagleCoins / steps;
+            
+            const countUp = () => {
+                for (let i = 0; i <= steps; i++) {
+                    setTimeout(() => {
+                        current += increment;
+                        if (current >= eagleCoins) {
+                            current = eagleCoins;
+                        }
+                        coinValue.textContent = Math.floor(current).toLocaleString();
+                        
+                        // Add subtle pulse to the number as it counts up
+                        if (i % 10 === 0) {
+                            coinValue.style.transform = `scale(${1 + (pulseIntensity * 0.1)})`;
+                            setTimeout(() => {
+                                coinValue.style.transform = 'scale(1)';
+                            }, 100);
+                        }
+                    }, i * (duration / steps));
+                }
+            };
+            
+            setTimeout(countUp, 1000);
+        }
+        
+        // Adjust animations based on pulse intensity
+        const adjustAnimation = (elementId, attribute, baseValues) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                // Scale animation values based on pulse intensity
+                const values = baseValues.split(';').map(val => {
+                    if (attribute === 'r' || attribute === 'stroke-width') {
+                        // For numeric values, scale by pulse intensity
+                        const num = parseFloat(val);
+                        return `${num * pulseIntensity}`;
+                    } else if (attribute === 'stroke-opacity' || attribute === 'opacity') {
+                        // For opacity, increase contrast
+                        const num = parseFloat(val);
+                        return Math.min(num * (1 + (pulseIntensity - 1) * 0.3), 1);
+                    }
+                    return val;
+                }).join(';');
+                
+                // Update the animation
+                element.querySelector('animate').setAttribute('values', values);
+            }
+        };
+        
+        // Update pulse glow based on performance
+        const pulseGlow = document.getElementById('pulseGlow');
+        if (pulseGlow) {
+            const maxRadius = 80 * pulseIntensity;
+            pulseGlow.querySelector('animate').setAttribute('values', `0;${maxRadius};0`);
+        }
+        
+        // Update wave patterns
+        adjustAnimation('wavePattern', 'stroke-width', '2;3;2');
+        adjustAnimation('wavePattern', 'stroke-opacity', '0.3;0.5;0.3');
+        
+        adjustAnimation('wavePattern2', 'stroke-width', '2;2.5;2');
+        adjustAnimation('wavePattern2', 'stroke-opacity', '0.2;0.4;0.2');
+        
+        adjustAnimation('wavePattern3', 'stroke-width', '2;2.3;2');
+        adjustAnimation('wavePattern3', 'stroke-opacity', '0.15;0.3;0.15');
+        
+        // Update performance indicator pulse
+        const pulseRing = document.getElementById('pulseRing');
+        if (pulseRing) {
+            const maxRadius = 20 * pulseIntensity;
+            pulseRing.querySelector('animate').setAttribute('values', `15;${maxRadius};15`);
+        }
+        
+        // Update wave position based on performance
+        const wavePath = document.getElementById('wavePath');
+        const waveFill = document.getElementById('waveFill');
+        const performanceLine = document.getElementById('performanceLine');
+        const performanceIndicator = document.getElementById('performanceIndicator');
+        
+        if (wavePath && waveFill && performanceLine && performanceIndicator) {
+            // Create dynamic wave curve based on performance
+            const cp1Y = 190 - (performancePercent * 60 / 100);
+            const cp2Y = 190 - (performancePercent * 40 / 100);
+            
+            const waveD = `M0,190 Q100,${cp1Y} 200,${waveHeight-10} Q300,${waveHeight} 400,${waveHeight} Q500,${waveHeight} 600,${waveHeight+10} Q700,${cp2Y} 800,120 L800,250 L0,250 Z`;
+            const lineD = `M0,190 Q100,${cp1Y} 200,${waveHeight-10} Q300,${waveHeight} 400,${waveHeight} Q500,${waveHeight} 600,${waveHeight+10} Q700,${cp2Y} 800,120`;
+            
+            wavePath.setAttribute('d', waveD);
+            waveFill.setAttribute('d', waveD);
+            performanceLine.setAttribute('d', lineD);
+            
+            // Update indicator position
+            const circles = performanceIndicator.querySelectorAll('circle');
+            circles.forEach(circle => {
+                circle.setAttribute('cy', waveHeight);
+            });
+        }
+        
+        // Update data points position
+        const points = ['point1', 'point2', 'point3', 'point4', 'point5'];
+        const pointYValues = [190, waveHeight-10, waveHeight, waveHeight+10, 120];
+        
+        points.forEach((pointId, index) => {
+            const point = document.getElementById(pointId);
+            if (point) {
+                point.setAttribute('cy', pointYValues[index]);
+            }
+
+
+
+        });
+        
+        // Add wave movement animation
+        const wavePatterns = ['wavePattern', 'wavePattern2', 'wavePattern3'];
+        wavePatterns.forEach((id, index) => {
+            const wave = document.getElementById(id);
+            if (wave) {
+                const speed = 3 + index + (pulseIntensity * 0.5);
+                wave.style.animation = `waveMove ${speed}s linear infinite`;
+            }
+        });
+        
+        // Add CSS for wave movement
+        if (!document.querySelector('#waveAnimationStyle')) {
+            const style = document.createElement('style');
+            style.id = 'waveAnimationStyle';
+            style.textContent = `
+                @keyframes waveMove {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(200px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+    }, 500);
+}
 function formatTime(date) {
     return date.toLocaleTimeString('en-US', {
-        hour12: false,
+        hour12: true,
         hour: '2-digit',
         minute: '2-digit'
     });
@@ -2296,69 +2778,111 @@ function formatDate(date) {
 }
 
 // ===== INITIALIZE ON DOM LOAD =====
+// ===== INITIALIZE ON DOM LOAD =====
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize notification system
     window.notificationSystem = new NotificationSystem();
     
-    // Add initial notifications
-    window.notificationSystem.addNotification('PROFILE LOADED', `Welcome back, <?php echo htmlspecialchars($userName); ?>!`, 'info');
+    // Get PHP notification data
+    const notificationData = <?php echo json_encode($notificationData); ?>;
     
-    <?php if ($assignmentsCount > 0): ?>
-    window.notificationSystem.addNotification('ASSIGNMENTS', `You have completed <?php echo $assignmentsCount; ?> assignments.`, 'success');
-    <?php endif; ?>
+    // Show notifications based on changes
+    setTimeout(() => {
+        // 1. Welcome back message (only once per session)
+        if (notificationData.showWelcome) {
+            const welcomeId = window.notificationSystem.generateNotificationId(
+                'welcome_back', 
+                notificationData.userName
+            );
+            window.notificationSystem.addNotification(
+                'WELCOME BACK',
+                `Welcome back, ${notificationData.userName}!`,
+                'info',
+                welcomeId
+            );
+        }
+        
+        // 2. Rank improvement notification (only if rank actually improved)
+        if (notificationData.rankChange > 0) {
+            const rankId = window.notificationSystem.generateNotificationId(
+                'rank_improvement',
+                `${notificationData.prevRank}_to_${notificationData.currentRank}`
+            );
+            window.notificationSystem.addNotification(
+                'RANK IMPROVED!',
+                `You moved up ${notificationData.rankChange} position(s)! Now ranked #${notificationData.currentRank}.`,
+                'success',
+                rankId
+            );
+        }
+        
+        // 3. New coins earned notification
+        if (notificationData.coinsChange > 0) {
+            const coinsId = window.notificationSystem.generateNotificationId(
+                'coins_earned',
+                `+${notificationData.coinsChange}_${new Date().toDateString()}`
+            );
+            window.notificationSystem.addNotification(
+                'COINS EARNED',
+                `You earned ${notificationData.coinsChange} new Eagle Coins! Total: ${notificationData.currentCoins}.`,
+                'success',
+                coinsId
+            );
+        }
+        
+        // 4. New assignments completed
+        if (notificationData.assignmentsChange > 0) {
+            const assignmentsId = window.notificationSystem.generateNotificationId(
+                'assignments_completed',
+                `+${notificationData.assignmentsChange}`
+            );
+            window.notificationSystem.addNotification(
+                'ASSIGNMENTS COMPLETED',
+                `You completed ${notificationData.assignmentsChange} new assignment(s)! Total: ${notificationData.currentAssignments}.`,
+                'success',
+                assignmentsId
+            );
+        }
+        
+        // 5. Current status notifications (show only once per day)
+        const dailyStatusId = window.notificationSystem.generateNotificationId('daily_status');
+        window.notificationSystem.addNotification(
+            'CURRENT STATUS',
+            `Rank: #${notificationData.currentRank} | Coins: ${notificationData.currentCoins} | Assignments: ${notificationData.currentAssignments}`,
+            'info',
+            dailyStatusId
+        );
+        
+    }, 1000);
     
-    <?php if ($rank <= 10): ?>
-    window.notificationSystem.addNotification('LEADERBOARD', `You are ranked #<?php echo $rank; ?> on the leaderboard!`, 'success');
-    <?php endif; ?>
+    // Initialize performance wave
+    initializePerformanceWave();
     
-    // Update time and date
+    // Update date/time
     function updateDateTime() {
         const now = new Date();
         const indiaTime = new Intl.DateTimeFormat('en-IN', {
             timeZone: 'Asia/Kolkata',
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit',
-            hour12: false
+            hour12: true
         }).format(now);
         
         document.getElementById('current-time').textContent = indiaTime;
         
-        // Update date
         const dateInfo = formatDate(now);
         document.getElementById('day-of-week').textContent = dateInfo.dayOfWeek;
         document.getElementById('full-date').textContent = dateInfo.fullDate;
     }
-
-    // Update immediately and every second
+    
     updateDateTime();
     setInterval(updateDateTime, 1000);
-
-    // Animate elements on load
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                if (!entry.target.classList.contains('animate-fadeIn') && 
-                    !entry.target.classList.contains('animate-slideUp')) {
-                    entry.target.classList.add('animate-fadeIn');
-                }
-            }
-        });
-    }, observerOptions);
-
-    // Observe all cards for animation
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => observer.observe(card));
-
-    // Demo: Add a test notification after 3 seconds
-    setTimeout(() => {
-        window.notificationSystem.addNotification('SYSTEM ONLINE', 'All systems are running optimally.', 'info');
-    }, 3000);
+    
+    // Remove the demo notification from setTimeout
+    // (commented out or removed)
+    // setTimeout(() => {
+    //     window.notificationSystem.addNotification('SYSTEM ONLINE', 'All systems are running optimally.', 'info');
+    // }, 3000);
 });
 
 // Make addNotification globally available

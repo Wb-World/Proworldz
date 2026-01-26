@@ -1667,7 +1667,7 @@ $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
                                 </svg>
                                 <span class="nav-label">Assignments</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
+                            <a href="maintanance.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
                                 </svg>
@@ -1682,7 +1682,7 @@ $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
                                 </svg>
                                 <span class="nav-label">Leaderboard</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
+                            <a href="maintanance.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
                                 </svg>
@@ -1694,13 +1694,15 @@ $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
                                 </svg>
                                 <span class="nav-label">Contact support</span>
                             </a>
-                            <a href="#" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
-                                    <!-- Font Awesome Dragon (simpler) -->
-                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
-                                </svg>
-                                <span class="nav-label">Drago Tool</span>
-                            </a>
+                            <a href="https://dragotool.shop/"
+   class="nav-item"
+   target="_blank"
+   rel="noopener noreferrer">
+    <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
+        <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
+    </svg>
+    <span class="nav-label">Drago Tool</span>
+</a>
                             <a href="logout.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
                                     <!-- Font Awesome Sign-out icon -->

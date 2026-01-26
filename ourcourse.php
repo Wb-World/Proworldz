@@ -1,9 +1,57 @@
 <?php
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit();
+}
+
+// ===== WHATSAPP SENDING FUNCTIONALITY =====
+$notification_message = '';
+$notification_type = '';
+$whatsapp_link = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && isset($_POST['message'])) {
+    // Get form data
+    $name = trim($_POST['name']);
+    $email = isset($_POST['email']) ? trim($_POST['email']) : 'No email provided';
+    $subject = isset($_POST['subject']) ? trim($_POST['subject']) : 'Message from ProWorldz Contact Form';
+    $message = trim($_POST['message']);
+    
+    // Basic validation
+    if (empty($name) || empty($message)) {
+        $notification_message = 'Please fill in all required fields.';
+        $notification_type = 'error';
+    } else {
+        // Your WhatsApp number (with country code, without +)
+        $whatsapp_number = '919944994778';
+        
+        // Format the message for WhatsApp
+        $whatsapp_text = "📱 *NEW CONTACT FORM SUBMISSION*\n" .
+            "────────────────────\n" .
+            "👤 *Name:* $name\n" .
+            "📧 *Email:* $email\n" .
+            "📝 *Subject:* $subject\n" .
+            "────────────────────\n" .
+            "💬 *Message:*\n" .
+            "$message\n" .
+            "────────────────────\n" .
+            "⏰ *Time:* " . date('Y-m-d H:i:s') . "\n" .
+            "🌐 *From:* ProWorldz Website";
+        
+        // Create WhatsApp URL
+        $whatsapp_link = "https://wa.me/$whatsapp_number?text=" . urlencode($whatsapp_text);
+        
+        // Store in database (recommended)
+        $notification_message = 'Thank you! Your message has been saved. Click below to send via WhatsApp:';
+        $notification_type = 'success';
+        
+        // Log submission to file
+        $log_message = date('Y-m-d H:i:s') . " | $name | $email | $subject" . PHP_EOL;
+        file_put_contents('whatsapp_submissions.log', $log_message, FILE_APPEND);
+        
+        // Clear form data
+        $_POST = array();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -11,7 +59,7 @@ if (!isset($_SESSION['id'])) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Courses | ProWorldz</title>
+<title>Contact Us | ProWorldz</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -165,10 +213,9 @@ body {
     color: var(--sidebar-primary-foreground);
 }
 
-/* .nav-item.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-} */
+.nav-item.disabled {
+    /* opacity: 0.5; */
+}
 
 .nav-item.disabled:hover {
     background-color: transparent;
@@ -199,7 +246,7 @@ body {
 /* Page Header */
 .page-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     position: relative;
 }
 
@@ -210,7 +257,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     letter-spacing: -0.02em;
 }
 
@@ -222,29 +269,26 @@ body {
     line-height: 1.6;
 }
 
-/* ===== COURSE GRID ===== */
-.course-grid {
+/* ===== CONTACT CONTAINER ===== */
+.contact-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
     margin-bottom: 3rem;
 }
 
-/* ===== COURSE CARD ===== */
-.course-card {
+/* ===== CONTACT INFO ===== */
+.contact-info {
     background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
+    padding: 3rem;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    overflow: hidden;
     box-shadow: var(--shadow-xl);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
 }
 
-.course-card::before {
+.contact-info::before {
     content: '';
     position: absolute;
     top: 0;
@@ -252,68 +296,170 @@ body {
     right: 0;
     height: 4px;
     background: var(--gradient-primary);
-    opacity: 0;
-    transition: opacity 0.3s ease;
 }
 
-.course-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-2xl);
-    border-color: var(--primary);
-}
-
-.course-card:hover::before {
-    opacity: 1;
-}
-
-.course-img {
-    height: 180px;
-    overflow: hidden;
+.contact-info h2 {
+    font-family: 'Rebels', monospace;
+    font-size: 2.25rem;
+    color: var(--foreground);
+    margin-bottom: 1.5rem;
     position: relative;
 }
 
-.course-img img {
+.contact-info > p {
+    color: var(--muted-foreground);
+    font-size: 1.125rem;
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.info-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.5s;
 }
 
-.course-card:hover .course-img img {
-    transform: scale(1.05);
+.info-box:hover::before {
+    left: 100%;
 }
 
-.course-content {
-    padding: 2rem;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+.info-box:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    transform: translateX(8px);
 }
 
-.course-content h3 {
-    font-family: 'Rebels', monospace;
+.info-box i {
     font-size: 1.5rem;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: var(--gradient-subtle);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.info-box:hover i {
+    background: var(--gradient-primary);
+    color: var(--primary-foreground);
+    transform: scale(1.1);
+}
+
+.info-box p {
     color: var(--foreground);
-    margin-bottom: 0.75rem;
-    line-height: 1.3;
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin: 0;
 }
 
-.course-content p {
+/* ===== CONTACT FORM ===== */
+.contact-form {
+    background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
+    padding: 3rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+}
+
+.contact-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+.contact-form h2 {
+    font-family: 'Rebels', monospace;
+    font-size: 2.25rem;
+    color: var(--foreground);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.form-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
     color: var(--muted-foreground);
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-    flex-grow: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;
 }
 
-.course-btn {
+.form-group input,
+.form-group textarea {
     width: 100%;
-    padding: 0.875rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 4px);
+    color: var(--foreground);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 0.7;
+}
+
+.form-group textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 1.125rem;
     background: var(--gradient-primary);
     color: var(--primary-foreground);
     border: none;
     border-radius: calc(var(--radius) - 4px);
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -323,7 +469,7 @@ body {
     overflow: hidden;
 }
 
-.course-btn::before {
+.submit-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -334,13 +480,118 @@ body {
     transition: left 0.5s;
 }
 
-.course-btn:hover::before {
+.submit-btn:hover::before {
     left: 100%;
 }
 
-.course-btn:hover {
-    transform: translateY(-2px);
+.submit-btn:hover {
+    transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.submit-btn i {
+    margin-right: 0.75rem;
+}
+
+/* ===== CTA SECTION ===== */
+.contact-cta {
+    background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
+    padding: 4rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    text-align: center;
+    margin: 0 auto 4rem;
+    max-width: 800px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+}
+
+.contact-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+}
+
+.contact-cta h2 {
+    font-family: 'Rebels', monospace;
+    font-size: 2.5rem;
+    color: var(--foreground);
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.contact-cta h2 span {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.125rem 2.5rem;
+    background: var(--gradient-primary);
+    color: var(--primary-foreground);
+    text-decoration: none;
+    border-radius: calc(var(--radius) - 4px);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cta-btn:hover::before {
+    left: 100%;
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.cta-btn i {
+    transition: transform 0.3s ease;
+}
+
+.cta-btn:hover i {
+    transform: translateX(5px);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted-foreground);
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+    font-size: 0.875rem;
 }
 
 /* ===== TV NOISE EFFECT ===== */
@@ -381,6 +632,99 @@ body {
     90% { background-position: -10% 10%; }
 }
 
+/* ===== NOTIFICATION ===== */
+.notification {
+    position: fixed;
+    top: 100px;
+    right: 2rem;
+    padding: 1.25rem 1.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    z-index: 10000;
+    animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 400px;
+    box-shadow: var(--shadow-2xl);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+}
+
+.notification.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(30, 144, 255, 0.9));
+    color: white;
+}
+
+.notification.error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(255, 107, 129, 0.9));
+    color: white;
+}
+
+.notification span {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.close-notification {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.close-notification:hover {
+    opacity: 1;
+}
+
+.whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: #25D366;
+    color: white !important;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid #128C7E;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+.whatsapp-btn:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+}
+
+.whatsapp-btn i {
+    font-size: 1.2rem;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInUp {
     from {
@@ -398,6 +742,11 @@ body {
     animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+.animate-fadeIn.delay-1 { animation-delay: 0.1s; }
+.animate-fadeIn.delay-2 { animation-delay: 0.2s; }
+.animate-fadeIn.delay-3 { animation-delay: 0.3s; }
+.animate-fadeIn.delay-4 { animation-delay: 0.4s; }
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1400px) {
     .desktop-container {
@@ -405,9 +754,14 @@ body {
         grid-template-columns: 240px 1fr;
     }
     
-    .course-grid {
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
+    .contact-container {
+        gap: 2rem;
+    }
+    
+    .contact-info,
+    .contact-form,
+    .contact-cta {
+        padding: 2.5rem;
     }
 }
 
@@ -422,9 +776,9 @@ body {
         display: none;
     }
     
-    .course-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        max-width: 1200px;
+    .contact-container {
+        grid-template-columns: 1fr;
+        max-width: 700px;
         margin-left: auto;
         margin-right: auto;
     }
@@ -444,16 +798,38 @@ body {
         padding: 0 1rem;
     }
     
-    .course-content h3 {
-        font-size: 1.3rem;
+    .contact-info h2,
+    .contact-form h2,
+    .contact-cta h2 {
+        font-size: 1.875rem;
     }
     
-    .course-content {
-        padding: 1.5rem;
+    .contact-info,
+    .contact-form,
+    .contact-cta {
+        padding: 2rem;
     }
     
-    .course-img {
-        height: 160px;
+    .contact-cta {
+        padding: 2.5rem 2rem;
+    }
+    
+    .contact-cta h2 {
+        font-size: 1.75rem;
+    }
+    
+    .info-box {
+        padding: 1.25rem;
+    }
+    
+    .info-box i {
+        width: 45px;
+        height: 45px;
+        font-size: 1.25rem;
+    }
+    
+    .info-box p {
+        font-size: 1rem;
     }
 }
 
@@ -463,24 +839,30 @@ body {
     }
     
     .page-header {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
     
     .page-header h1 {
         font-size: 2rem;
     }
     
-    .course-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+    .contact-info,
+    .contact-form {
+        padding: 1.75rem 1.25rem;
     }
     
-    .course-content {
-        padding: 1.25rem;
+    .contact-cta {
+        padding: 2rem 1.25rem;
     }
     
-    .course-btn {
-        padding: 0.75rem;
+    .form-group input,
+    .form-group textarea {
+        padding: 0.875rem 1rem;
+    }
+    
+    .submit-btn,
+    .cta-btn {
+        padding: 1rem 2rem;
     }
 }
 
@@ -489,8 +871,10 @@ body {
         font-size: 1.75rem;
     }
     
-    .course-content h3 {
-        font-size: 1.2rem;
+    .contact-info h2,
+    .contact-form h2,
+    .contact-cta h2 {
+        font-size: 1.5rem;
     }
 }
 
@@ -528,10 +912,11 @@ body {
         min-width: 100%;
     }
     
-    .course-card {
+    .contact-info,
+    .contact-form,
+    .contact-cta {
         border: 1px solid #000;
         box-shadow: none;
-        break-inside: avoid;
     }
 }
 </style>
@@ -560,7 +945,6 @@ body {
             </div>
         </div>
 
-        <!-- Navigation Sections -->
         <div class="card">
                 <div class="p-3">
                     <!-- Tools Section -->
@@ -579,7 +963,7 @@ body {
                                 </svg>
                                 <span class="nav-label">Laboratory</span>
                             </a>
-                            <a href="ourcourse.php" class="nav-item">
+                           <a href="ourcourse.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
                                     <!-- Book icon -->
                                     <path stroke-width="1.5" d="M16.667 15V5.833a2.5 2.5 0 0 0-2.5-2.5H5.833a2.5 2.5 0 0 0-2.5 2.5v10a2.5 2.5 0 0 0 2.5 2.5h10"/>
@@ -600,7 +984,7 @@ body {
                                 </svg>
                                 <span class="nav-label">Assignments</span>
                             </a>
-                            <a href="#" class="nav-item">
+                            <a href="maintanance.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
                                 </svg>
@@ -615,25 +999,28 @@ body {
                                 </svg>
                                 <span class="nav-label">Leaderboard</span>
                             </a>
-                            <a href="#" class="nav-item">
+                            <a href="maintanance.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
                                 </svg>
                                 <span class="nav-label">Security status</span>
                             </a>
-                            <a href="contactus.php" class="nav-item">
+                            <a href="contactus.php" class="nav-item active">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
                                 </svg>
                                 <span class="nav-label">Contact support</span>
                             </a>
-                            <a href="#" class="nav-item">
+                           <a href="https://dragotool.shop/"
+                            class="nav-item"
+                            target="_blank"
+                            rel="noopener noreferrer">
                                 <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
-                                    <!-- Font Awesome Dragon (simpler) -->
                                     <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
                                 </svg>
                                 <span class="nav-label">Drago Tool</span>
                             </a>
+
                             <a href="logout.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
                                     <!-- Font Awesome Sign-out icon -->
@@ -651,170 +1038,66 @@ body {
     <div class="desktop-main">
         <!-- HEADER -->
         <section class="page-header animate-fadeIn">
-            <h1>Available Courses</h1>
-            <p>Master cutting-edge technologies with our comprehensive courses</p>
+            <h1>Contact ProWorldz</h1>
+            <p>Let's connect and build your future in technology</p>
         </section>
 
-        <!-- COURSES GRID -->
-        <section class="course-grid">
-            <!-- Course 1: Secure X -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.1s">
-                <div class="course-img">
-                    <img src="images/jai-bro/secure-x.png" alt="Secure X Course">
+        <!-- CONTACT CONTAINER -->
+        <div class="contact-container">
+            <!-- CONTACT INFO -->
+            <div class="contact-info animate-fadeIn delay-1">
+                <h2>Get in Touch</h2>
+                <p>Have questions about our courses or platform? Send us a message and our team will reach out to you.</p>
+
+                <div class="info-box animate-fadeIn delay-2">
+                    <i class="fa-solid fa-envelope"></i>
+                    <p>proworldz0311@gmail.com</p>
                 </div>
-                <div class="course-content">
-                    <h3>Secure X</h3>
-                    <p>Master advanced cybersecurity techniques, digital defense strategies, and learn to protect systems from sophisticated cyber threats and vulnerabilities.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=securex'">
-                        Course Details
-                    </button>
+
+                <div class="info-box animate-fadeIn delay-3">
+                    <i class="fa-solid fa-phone"></i>
+                    <p>+91 98765 43210</p>
+                </div>
+
+                <div class="info-box animate-fadeIn delay-4">
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                    <p>India</p>
                 </div>
             </div>
 
-            <!-- Course 2: AI Verse Web Labs -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.2s">
-                <div class="course-img">
-                    <img src="images/jai-bro/ai.png" alt="AI Verse Web Labs">
+            <!-- CONTACT FORM -->
+            <form class="contact-form animate-fadeIn delay-2" id="contactForm" method="POST">
+                <h2>Send Message</h2>
+                
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your full name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
                 </div>
-                <div class="course-content">
-                    <h3>AI Verse Web Labs</h3>
-                    <p>Build intelligent web applications using AI-driven development, machine learning integration, and automated web engineering workflows.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=aiverse'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
 
-            <!-- Course 3: Hunt Elite -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.3s">
-                <div class="course-img">
-                    <img src="images/jai-bro/hunt-elite.png" alt="Hunt Elite Course">
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" required placeholder="Enter your message here..."><?php echo isset($_POST['message']) ? htmlspecialchars($_POST['message']) : ''; ?></textarea>
                 </div>
-                <div class="course-content">
-                    <h3>Hunt Elite</h3>
-                    <p>Professional bug bounty hunting and exploit analysis. Learn advanced penetration testing, vulnerability assessment, and ethical hacking techniques.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=huntelite'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
 
-            <!-- Course 4: Creative Craft -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.1s">
-                <div class="course-img">
-                    <img src="images/jai-bro/creative-craft.png" alt="Creative Craft">
-                </div>
-                <div class="course-content">
-                    <h3>Creative Craft</h3>
-                    <p>Master strategic visual communication design, branding, UI/UX principles, and create compelling digital experiences that drive engagement.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=creativecraft'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send Message
+                </button>
+            </form>
+        </div>
 
-            <!-- Course 5: Py Desk Systems -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.2s">
-                <div class="course-img">
-                    <img src="images/jai-bro/py-desk.png" alt="Py Desk Systems">
-                </div>
-                <div class="course-content">
-                    <h3>Py Desk Systems</h3>
-                    <p>Develop enterprise-grade desktop applications with Python. Master GUI frameworks, database integration, and system-level programming.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=pydesk'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
 
-            <!-- Course 6: Biz Dev -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.3s">
-                <div class="course-img">
-                    <img src="images/jai-bro/biz.png" alt="Biz Dev">
-                </div>
-                <div class="course-content">
-                    <h3>Biz Dev</h3>
-                    <p>Combine business strategy with software development. Learn to build scalable tech solutions while understanding market needs and business models.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=bizdev'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
-
-            <!-- Course 7: Code Foundry -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.1s">
-                <div class="course-img">
-                    <img src="images/jai-bro/code-f.png" alt="Code Foundry">
-                </div>
-                <div class="course-content">
-                    <h3>Code Foundry</h3>
-                    <p>Professional programming language mastery. Deep dive into multiple languages, best practices, and advanced software engineering concepts.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=codefoundry'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
-
-            <!-- Course 8: Startup Gene Labs -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.2s">
-                <div class="course-img">
-                    <img src="images/jai-bro/startup.png" alt="Startup Gene Labs">
-                </div>
-                <div class="course-content">
-                    <h3>Startup Gene Labs</h3>
-                    <p>Venture creation and startup scaling. Learn to build, fund, and grow tech startups from idea to successful enterprise with proven methodologies.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=startupgene'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
-
-            <!-- Course 9: CLI++ Systems -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.3s">
-                <div class="course-img">
-                    <img src="images/jai-bro/cli.png" alt="CLI++ Systems">
-                </div>
-                <div class="course-content">
-                    <h3>CLI++ Systems</h3>
-                    <p>C++ command-line tool engineering for Linux. Build powerful, efficient system tools and utilities using advanced C++ programming techniques.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=clipp'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
-
-            <!-- Course 10: APMan -->
-            <div class="course-card animate-fadeIn" style="animation-delay: 0.1s">
-                <div class="course-img">
-                    <img src="images/jai-bro/app.png" alt="APMan">
-                </div>
-                <div class="course-content">
-                    <h3>APMan</h3>
-                    <p>Master API development, design, and management. Build RESTful and GraphQL APIs, implement security, and create scalable API architectures.</p>
-                    <button class="course-btn" onclick="location.href='course-details.php?course=apman'">
-                        Course Details
-                    </button>
-                </div>
-            </div>
-        </section>
+        <!-- FOOTER -->
+        <footer class="footer animate-fadeIn delay-4">
+            <p>&copy; 2026 ProWorldz. All rights reserved.</p>
+        </footer>
     </div>
 </div>
 
 <script>
 // DOM Elements
-const navItems = document.querySelectorAll('.nav-item');
-
-// Navigation active states
-navItems.forEach(item => {
-    item.addEventListener('click', function(e) {
-        if (!this.classList.contains('disabled')) {
-            // Remove active class from all items
-            navItems.forEach(i => i.classList.remove('active'));
-            // Add active class to clicked item
-            this.classList.add('active');
-        }
-    });
-});
+const contactForm = document.getElementById('contactForm');
+const submitBtn = document.getElementById('submitBtn');
 
 // Animation observer
 const observer = new IntersectionObserver((entries) => {
@@ -834,14 +1117,125 @@ document.querySelectorAll('.animate-fadeIn').forEach(el => {
     observer.observe(el);
 });
 
-// Course card hover effects
-document.querySelectorAll('.course-card').forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px)';
+// Add hover effects to info boxes
+document.querySelectorAll('.info-box').forEach(box => {
+    box.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateX(8px)';
     });
     
-    card.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
+    box.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateX(0)';
+    });
+});
+
+// Form submission
+contactForm.addEventListener('submit', function(e) {
+    // Get form values
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const message = document.getElementById('message').value.trim();
+    
+    // Form validation
+    if (!name || !subject || !message) {
+        showNotification('Please fill in all required fields', 'error');
+        e.preventDefault();
+        return;
+    }
+    
+    // Email validation (if provided)
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        e.preventDefault();
+        return;
+    }
+    
+    // Show loading state
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+    submitBtn.disabled = true;
+    
+    // Form will submit to PHP
+    // JavaScript will handle the success/error response
+});
+
+// Notification function
+function showNotification(message, type, whatsappLink = null) {
+    // Remove existing notification
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    let notificationHTML = `
+        <span>${message}</span>
+        <button class="close-notification">&times;</button>
+    `;
+    
+    if (whatsappLink) {
+        notificationHTML += `
+            <a href="${whatsappLink}" target="_blank" class="whatsapp-btn">
+                <i class="fab fa-whatsapp"></i> Send via WhatsApp
+            </a>
+        `;
+    }
+    
+    notification.innerHTML = notificationHTML;
+    
+    // Add close button event
+    const closeBtn = notification.querySelector('.close-notification');
+    closeBtn.addEventListener('click', () => {
+        notification.style.animation = 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) reverse';
+        setTimeout(() => notification.remove(), 400);
+    });
+    
+    // Auto-remove after 8 seconds (longer for WhatsApp button)
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) reverse';
+            setTimeout(() => notification.remove(), 400);
+        }
+    }, 8000);
+    
+    // Add to document
+    document.body.appendChild(notification);
+}
+
+// Add hover effects to form inputs
+document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+        const label = this.parentElement.querySelector('label');
+        if (label) {
+            label.style.color = 'var(--primary)';
+        }
+    });
+    
+    input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+        if (!this.value) {
+            const label = this.parentElement.querySelector('label');
+            if (label) {
+                label.style.color = '';
+            }
+        }
+    });
+});
+
+// Navigation active states
+const navItems = document.querySelectorAll('.nav-item');
+navItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+        if (!this.classList.contains('disabled')) {
+            // Remove active class from all items
+            navItems.forEach(i => i.classList.remove('active'));
+            // Add active class to clicked item
+            this.classList.add('active');
+        }
     });
 });
 
@@ -859,6 +1253,17 @@ window.addEventListener('load', () => {
             header.style.transform = 'translateY(0)';
         }, 100);
     }
+    
+    // Show PHP notification if exists
+    <?php if (!empty($notification_message)): ?>
+        setTimeout(() => {
+            showNotification(
+                '<?php echo addslashes($notification_message); ?>', 
+                '<?php echo $notification_type; ?>',
+                <?php echo !empty($whatsapp_link) ? "'" . addslashes($whatsapp_link) . "'" : 'null'; ?>
+            );
+        }, 500);
+    <?php endif; ?>
 });
 </script>
 </body>

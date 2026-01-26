@@ -706,6 +706,7 @@ function showAccessDenied() {
         btn.innerHTML = 'Login';
         btn.style.background = '';
         document.querySelector('.auth-box').style.boxShadow = '';
+        window.location.reload();
     }, 2000);
 }
 
