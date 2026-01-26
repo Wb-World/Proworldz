@@ -176,7 +176,7 @@ class DBconfig {
 
         $allowedFields = [
             'id', 'name', 'gender', 'phone', 'email',
-            'IPADDR', 'eagle_coins', 'assignments', 'course'
+            'IPADDR', 'eagle_coins', 'assignments', 'course','assigns_complete'
         ];
 
         $validFields = array_intersect($requestedFields, $allowedFields);
