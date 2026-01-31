@@ -82,6 +82,7 @@ foreach ($allUsers as $user) {
 if ($maxCoins === 0) {
     $maxCoins = $eagleCoins ?: 1;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
@@ -2137,7 +2138,7 @@ if ($maxCoins === 0) {
                                     align-items: center;
                                     justify-content: center;
                                 ">
-                                    <img src="images/image-new.png" alt="Eagle Protector" 
+                                    <img src="images/" alt="Eagle Protector" 
                                         style="
                                             max-height: 35cap;margin-bottom: 6cap;
                                             margin-right: 70cap;
@@ -2260,7 +2261,7 @@ class NotificationSystem {
         
         // Check if this notification was already shown today
         if (this.shownNotificationIds.has(notificationId)) {
-            console.log('Notification already shown:', notificationId);
+            // console.log('Notification already shown:', notificationId);
             return false; // Don't add duplicate
         }
         

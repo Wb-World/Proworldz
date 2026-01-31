@@ -8,6 +8,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 $db = new DBconfig();
 $conn = $db->check_con();
+$userid = $_SESSION['id'];
 
 if(!is_string($conn)){
     if($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -39,7 +40,7 @@ if(!is_string($conn)){
                 
                 // 3. Insert IP address using existing upload_data function
                 if(isset($_SESSION['id'])){
-                    $db->upload_data('IPADDR', $clientIP, $_SESSION['id']);
+                    $db->upload_data('IPADDR', $clientIP,$userid);
                     
                     echo json_encode([
                         'result' => $datas['id']
@@ -87,7 +88,6 @@ function validateEmailWithZeroBounce($email, $apiKey) {
     }
 }
 
-// Get client IP using ipify API
 function getClientIP() {
     $ipifyUrl = "https://api.ipify.org?format=json";
     

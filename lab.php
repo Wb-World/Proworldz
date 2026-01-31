@@ -9,7 +9,6 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit();
 }
-
 $userId = $_SESSION['id'];
 
 // Create database connection
@@ -18,6 +17,7 @@ $db = new DBconfig();
 // Get user name for display
 $userName = $db->getNamebyId($userId);
 $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
+
 ?>
 
 <!DOCTYPE html>
@@ -1622,7 +1622,7 @@ $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
                         </div>
                         <div class="flex-1">
                             <div class="text-2xl font-display"><?php echo htmlspecialchars($userName ?? 'User'); ?></div>
-                            <div class="text-xs uppercase text-muted-foreground">paranthe aagurom</div>
+                            <div class="text-xs uppercase text-muted-foreground"><?= $_SESSION['c-course']; ?></div>
                         </div>
                     </div>
                 </div>
@@ -1741,7 +1741,7 @@ $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
                 <!-- Lab 1: Compilers and Interpreters -->
                 <div class="lab-card animate-fadeIn">
                     <div class="lab-img" style="height: 50cap;">
-                        <img src="images/ep.png" alt="Compilers">
+                        <img src="images/eaglone/ep.png" alt="Compilers">
                     </div>
                     <div class="lab-content">
                         <h3>Compilers and Interpreters</h3>
@@ -1755,7 +1755,7 @@ $userInitial = strtoupper(substr($userName ? $userName : 'U', 0, 2));
                 <!-- Lab 2: Linux Terminal -->
                 <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
                     <div class="lab-img" style="height: 50cap;">
-                        <img src="images/es.png" alt="linux terminal">
+                        <img src="images/eaglone/es.png" alt="linux terminal">
                     </div>
                     <div class="lab-content">
                         <h3>Linux Terminal</h3>

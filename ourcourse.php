@@ -4,62 +4,13 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit();
 }
-
-// ===== WHATSAPP SENDING FUNCTIONALITY =====
-$notification_message = '';
-$notification_type = '';
-$whatsapp_link = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name']) && isset($_POST['message'])) {
-    // Get form data
-    $name = trim($_POST['name']);
-    $email = isset($_POST['email']) ? trim($_POST['email']) : 'No email provided';
-    $subject = isset($_POST['subject']) ? trim($_POST['subject']) : 'Message from ProWorldz Contact Form';
-    $message = trim($_POST['message']);
-    
-    // Basic validation
-    if (empty($name) || empty($message)) {
-        $notification_message = 'Please fill in all required fields.';
-        $notification_type = 'error';
-    } else {
-        // Your WhatsApp number (with country code, without +)
-        $whatsapp_number = '919944994778';
-        
-        // Format the message for WhatsApp
-        $whatsapp_text = "📱 *NEW CONTACT FORM SUBMISSION*\n" .
-            "────────────────────\n" .
-            "👤 *Name:* $name\n" .
-            "📧 *Email:* $email\n" .
-            "📝 *Subject:* $subject\n" .
-            "────────────────────\n" .
-            "💬 *Message:*\n" .
-            "$message\n" .
-            "────────────────────\n" .
-            "⏰ *Time:* " . date('Y-m-d H:i:s') . "\n" .
-            "🌐 *From:* ProWorldz Website";
-        
-        // Create WhatsApp URL
-        $whatsapp_link = "https://wa.me/$whatsapp_number?text=" . urlencode($whatsapp_text);
-        
-        // Store in database (recommended)
-        $notification_message = 'Thank you! Your message has been saved. Click below to send via WhatsApp:';
-        $notification_type = 'success';
-        
-        // Log submission to file
-        $log_message = date('Y-m-d H:i:s') . " | $name | $email | $subject" . PHP_EOL;
-        file_put_contents('whatsapp_submissions.log', $log_message, FILE_APPEND);
-        
-        // Clear form data
-        $_POST = array();
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us | ProWorldz</title>
+<title>Our Courses | ProWorldz</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -214,7 +165,8 @@ body {
 }
 
 .nav-item.disabled {
-    /* opacity: 0.5; */
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .nav-item.disabled:hover {
@@ -269,319 +221,188 @@ body {
     line-height: 1.6;
 }
 
-/* ===== CONTACT CONTAINER ===== */
-.contact-container {
+/* ===== COURSES CONTAINER ===== */
+.courses-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2.5rem;
     margin-bottom: 3rem;
 }
 
-/* ===== CONTACT INFO ===== */
-.contact-info {
+/* Center the grid on desktop */
+@media (min-width: 769px) {
+    .courses-container {
+        grid-template-columns: repeat(3, 380px);
+        justify-content: center;
+    }
+}
+
+/* ===== COURSE CARD ===== */
+.course-card {
     background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
-    padding: 3rem;
-    border-radius: var(--radius);
+    border-radius: 20px;
     border: 1px solid var(--border);
-    position: relative;
     overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
     box-shadow: var(--shadow-xl);
 }
 
-.contact-info::before {
+.course-card::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
 }
 
-.contact-info h2 {
-    font-family: 'Rebels', monospace;
-    font-size: 2.25rem;
-    color: var(--foreground);
-    margin-bottom: 1.5rem;
+.course-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-2xl);
+}
+
+.course-card:hover::after {
+    opacity: 1;
+}
+
+.course-image {
     position: relative;
-}
-
-.contact-info > p {
-    color: var(--muted-foreground);
-    font-size: 1.125rem;
-    line-height: 1.8;
-    margin-bottom: 2.5rem;
-}
-
-.info-box {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    border-radius: calc(var(--radius) - 2px);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid transparent;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+    height: 220px;
     overflow: hidden;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 131, 244, 0.05) 100%);
 }
 
-.info-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
+.course-image img {
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    transition: left 0.5s;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.info-box:hover::before {
-    left: 100%;
-}
-
-.info-box:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--primary);
-    transform: translateX(8px);
-}
-
-.info-box i {
-    font-size: 1.5rem;
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    background: var(--gradient-subtle);
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-}
-
-.info-box:hover i {
-    background: var(--gradient-primary);
-    color: var(--primary-foreground);
+.course-card:hover .course-image img {
     transform: scale(1.1);
 }
 
-.info-box p {
-    color: var(--foreground);
-    font-size: 1.125rem;
-    font-weight: 500;
-    margin: 0;
-}
-
-/* ===== CONTACT FORM ===== */
-.contact-form {
-    background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
-    padding: 3rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
-}
-
-.contact-form::before {
-    content: '';
+.course-badge {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
-}
-
-.contact-form h2 {
-    font-family: 'Rebels', monospace;
-    font-size: 2.25rem;
-    color: var(--foreground);
-    margin-bottom: 2rem;
-    position: relative;
-}
-
-.form-group {
-    margin-bottom: 1.75rem;
-    position: relative;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--muted-foreground);
-    font-size: 0.875rem;
-    font-weight: 500;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(10, 10, 10, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary-light);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: color 0.3s ease;
 }
 
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 1rem 1.25rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) - 4px);
+.course-body {
+    padding: 2rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-body h3 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
     color: var(--foreground);
-    font-family: inherit;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color 0.3s ease;
+    font-family: 'Rebels', monospace;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+.course-card:hover .course-body h3 {
+    color: var(--primary-light);
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.course-body p {
     color: var(--muted-foreground);
-    opacity: 0.7;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    flex-grow: 1;
+    font-size: 0.95rem;
 }
 
-.form-group textarea {
-    min-height: 150px;
-    resize: vertical;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 1.125rem;
+.course-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
     background: var(--gradient-primary);
     color: var(--primary-foreground);
-    border: none;
-    border-radius: calc(var(--radius) - 4px);
-    font-size: 1rem;
+    text-decoration: none;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    cursor: pointer;
+    font-size: 0.9rem;
+    border-radius: 10px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.submit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
     width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: none;
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
 }
 
-.submit-btn:hover::before {
-    left: 100%;
+.course-action:hover {
+    background: var(--primary);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    transform: translateX(5px);
 }
 
-.submit-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
+.course-action i {
+    transition: transform 0.3s ease;
 }
 
-.submit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
+.course-action:hover i {
+    transform: translateX(5px);
 }
 
-.submit-btn i {
-    margin-right: 0.75rem;
-}
-
-/* ===== CTA SECTION ===== */
-.contact-cta {
-    background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
-    padding: 4rem;
+/* ===== STATS SECTION ===== */
+.stats-section {
+    padding: 6rem 2rem;
+    background: var(--card);
     border-radius: var(--radius);
     border: 1px solid var(--border);
+    margin-bottom: 3rem;
+}
+
+.stats-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+}
+
+.stat-item {
     text-align: center;
-    margin: 0 auto 4rem;
-    max-width: 800px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
 }
 
-.contact-cta::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--gradient-primary);
-}
-
-.contact-cta h2 {
-    font-family: 'Rebels', monospace;
-    font-size: 2.5rem;
-    color: var(--foreground);
-    margin-bottom: 1.5rem;
-    position: relative;
-}
-
-.contact-cta h2 span {
+.stat-number {
+    font-size: 3rem;
+    font-weight: 800;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    margin-bottom: 0.5rem;
+    font-family: 'Rebels', monospace;
 }
 
-.cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.125rem 2.5rem;
-    background: var(--gradient-primary);
-    color: var(--primary-foreground);
-    text-decoration: none;
-    border-radius: calc(var(--radius) - 4px);
+.stat-label {
     font-size: 1rem;
-    font-weight: 600;
+    color: var(--muted-foreground);
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.cta-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.cta-btn:hover::before {
-    left: 100%;
-}
-
-.cta-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-}
-
-.cta-btn i {
-    transition: transform 0.3s ease;
-}
-
-.cta-btn:hover i {
-    transform: translateX(5px);
 }
 
 /* ===== FOOTER ===== */
@@ -632,99 +453,6 @@ body {
     90% { background-position: -10% 10%; }
 }
 
-/* ===== NOTIFICATION ===== */
-.notification {
-    position: fixed;
-    top: 100px;
-    right: 2rem;
-    padding: 1.25rem 1.75rem;
-    border-radius: calc(var(--radius) - 2px);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    z-index: 10000;
-    animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    max-width: 400px;
-    box-shadow: var(--shadow-2xl);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-}
-
-.notification.success {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(30, 144, 255, 0.9));
-    color: white;
-}
-
-.notification.error {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(255, 107, 129, 0.9));
-    color: white;
-}
-
-.notification span {
-    flex: 1;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.close-notification {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-}
-
-.close-notification:hover {
-    opacity: 1;
-}
-
-.whatsapp-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px 20px;
-    background: #25D366;
-    color: white !important;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: 2px solid #128C7E;
-    margin-top: 10px;
-    width: 100%;
-    text-align: center;
-}
-
-.whatsapp-btn:hover {
-    background: #128C7E;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
-}
-
-.whatsapp-btn i {
-    font-size: 1.2rem;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
 /* ===== ANIMATIONS ===== */
 @keyframes fadeInUp {
     from {
@@ -742,10 +470,17 @@ body {
     animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.animate-fadeIn.delay-1 { animation-delay: 0.1s; }
-.animate-fadeIn.delay-2 { animation-delay: 0.2s; }
-.animate-fadeIn.delay-3 { animation-delay: 0.3s; }
-.animate-fadeIn.delay-4 { animation-delay: 0.4s; }
+/* Stagger animations for course cards */
+.course-card:nth-child(1) { animation-delay: 0.1s; }
+.course-card:nth-child(2) { animation-delay: 0.2s; }
+.course-card:nth-child(3) { animation-delay: 0.3s; }
+.course-card:nth-child(4) { animation-delay: 0.4s; }
+.course-card:nth-child(5) { animation-delay: 0.5s; }
+.course-card:nth-child(6) { animation-delay: 0.6s; }
+.course-card:nth-child(7) { animation-delay: 0.7s; }
+.course-card:nth-child(8) { animation-delay: 0.8s; }
+.course-card:nth-child(9) { animation-delay: 0.9s; }
+.course-card:nth-child(10) { animation-delay: 1s; }
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1400px) {
@@ -754,14 +489,15 @@ body {
         grid-template-columns: 240px 1fr;
     }
     
-    .contact-container {
+    .courses-container {
         gap: 2rem;
     }
-    
-    .contact-info,
-    .contact-form,
-    .contact-cta {
-        padding: 2.5rem;
+}
+
+@media (max-width: 1200px) {
+    .courses-container {
+        grid-template-columns: repeat(2, 1fr);
+        justify-content: center;
     }
 }
 
@@ -776,9 +512,9 @@ body {
         display: none;
     }
     
-    .contact-container {
-        grid-template-columns: 1fr;
-        max-width: 700px;
+    .courses-container {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        max-width: 800px;
         margin-left: auto;
         margin-right: auto;
     }
@@ -798,38 +534,18 @@ body {
         padding: 0 1rem;
     }
     
-    .contact-info h2,
-    .contact-form h2,
-    .contact-cta h2 {
-        font-size: 1.875rem;
+    .courses-container {
+        grid-template-columns: 1fr;
+        max-width: 500px;
     }
     
-    .contact-info,
-    .contact-form,
-    .contact-cta {
-        padding: 2rem;
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
     }
     
-    .contact-cta {
-        padding: 2.5rem 2rem;
-    }
-    
-    .contact-cta h2 {
-        font-size: 1.75rem;
-    }
-    
-    .info-box {
-        padding: 1.25rem;
-    }
-    
-    .info-box i {
-        width: 45px;
-        height: 45px;
-        font-size: 1.25rem;
-    }
-    
-    .info-box p {
-        font-size: 1rem;
+    .stat-number {
+        font-size: 2.5rem;
     }
 }
 
@@ -846,35 +562,27 @@ body {
         font-size: 2rem;
     }
     
-    .contact-info,
-    .contact-form {
-        padding: 1.75rem 1.25rem;
+    .course-body {
+        padding: 1.5rem;
     }
     
-    .contact-cta {
-        padding: 2rem 1.25rem;
+    .course-body h3 {
+        font-size: 1.4rem;
     }
     
-    .form-group input,
-    .form-group textarea {
-        padding: 0.875rem 1rem;
+    .stats-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
-    .submit-btn,
-    .cta-btn {
-        padding: 1rem 2rem;
+    .stat-number {
+        font-size: 2rem;
     }
 }
 
 @media (max-width: 360px) {
     .page-header h1 {
         font-size: 1.75rem;
-    }
-    
-    .contact-info h2,
-    .contact-form h2,
-    .contact-cta h2 {
-        font-size: 1.5rem;
     }
 }
 
@@ -895,30 +603,6 @@ body {
 .desktop-main::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
 }
-
-/* Print Styles */
-@media print {
-    body {
-        background: white;
-        color: black;
-    }
-    
-    .desktop-sidebar {
-        display: none;
-    }
-    
-    .desktop-container {
-        grid-template-columns: 1fr;
-        min-width: 100%;
-    }
-    
-    .contact-info,
-    .contact-form,
-    .contact-cta {
-        border: 1px solid #000;
-        box-shadow: none;
-    }
-}
 </style>
 </head>
 <body>
@@ -938,166 +622,278 @@ body {
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <div class="text-2xl font-display">PROWORLDZ</div>
-                        <div class="text-xs uppercase text-muted-foreground">Education Platform</div>
+                        <div class="text-2xl font-display"><?= $_SESSION['c-user']; ?></div>
+                        <div class="text-xs uppercase text-muted-foreground"><?= $_SESSION['c-course']; ?></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="card">
-                <div class="p-3">
-                    <!-- Tools Section -->
-                    <div class="nav-section">
-                        <div class="space-y-1" style="height: 45cap;">
-                            <a href="dashboard.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
-                                </svg>
-                                <span class="nav-label">Overview</span>
-                            </a>
-                            <a href="lab.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-width="1.667" d="M16.228 3.772c1.31 1.31-.416 5.16-3.856 8.6-3.44 3.44-7.29 5.167-8.6 3.856-1.31-1.31.415-5.16 3.855-8.6 3.44-3.44 7.29-5.167 8.6-3.856Z"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M16.228 16.228c-1.31 1.31-5.161-.416-8.601-3.855-3.44-3.44-5.166-7.29-3.856-8.601 1.31-1.31 5.162.416 8.601 3.855 3.44 3.44 5.166 7.29 3.856 8.601Z"/>
-                                </svg>
-                                <span class="nav-label">Laboratory</span>
-                            </a>
-                           <a href="ourcourse.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
-                                    <!-- Book icon -->
-                                    <path stroke-width="1.5" d="M16.667 15V5.833a2.5 2.5 0 0 0-2.5-2.5H5.833a2.5 2.5 0 0 0-2.5 2.5v10a2.5 2.5 0 0 0 2.5 2.5h10"/>
-                                    <path stroke-width="1.5" d="M6.667 3.333v13.334"/>
-                                    <path stroke-width="1.5" d="M10 6.667h3.333"/>
-                                    <path stroke-width="1.5" d="M10 10h3.333"/>
-                                </svg>
-                                <span class="nav-label">Courses</span>
-                            </a>
-                            <a href="assignment.php" class="nav-item disabled">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
-                                    <!-- Book -->
-                                    <path stroke-width="1.5" d="M16.667 16.667V5a2.5 2.5 0 0 0-2.5-2.5H6.667a2.5 2.5 0 0 0-2.5 2.5v11.667"/>
-                                    <path stroke-width="1.5" d="M6.667 2.5v15"/>
-                                    <!-- Pencil -->
-                                    <path stroke-width="1.5" d="M11.667 4.167l4.166 4.166" stroke-linecap="round"/>
-                                    <path stroke-width="1.5" d="M13.333 8.333l-2.5 2.5-2.5-2.5 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <span class="nav-label">Assignments</span>
-                            </a>
-                            <a href="maintanance.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
-                                </svg>
-                                <span class="nav-label">Devices</span>
-                            </a>
-                            <a href="leaderboard.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
-                                    <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
-                                </svg>
-                                <span class="nav-label">Leaderboard</span>
-                            </a>
-                            <a href="maintanance.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
-                                </svg>
-                                <span class="nav-label">Security status</span>
-                            </a>
-                            <a href="contactus.php" class="nav-item active">
-                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-                                    <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
-                                </svg>
-                                <span class="nav-label">Contact support</span>
-                            </a>
-                           <a href="https://dragotool.shop/"
-                            class="nav-item"
-                            target="_blank"
-                            rel="noopener noreferrer">
-                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
-                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
-                                </svg>
-                                <span class="nav-label">Drago Tool</span>
-                            </a>
+            <div class="p-3">
+                <!-- Tools Section -->
+                <div class="nav-section">
+                    <div class="space-y-1" style="height: 45cap;">
+                        <a href="dashboard.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
+                            </svg>
+                            <span class="nav-label">Overview</span>
+                        </a>
+                        <a href="lab.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-width="1.667" d="M16.228 3.772c1.31 1.31-.416 5.16-3.856 8.6-3.44 3.44-7.29 5.167-8.6 3.856-1.31-1.31.415-5.16 3.855-8.6 3.44-3.44 7.29-5.167 8.6-3.856Z"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M16.228 16.228c-1.31 1.31-5.161-.416-8.601-3.855-3.44-3.44-5.166-7.29-3.856-8.601 1.31-1.31 5.162.416 8.601 3.855 3.44 3.44 5.166 7.29 3.856 8.601Z"/>
+                            </svg>
+                            <span class="nav-label">Laboratory</span>
+                        </a>
+                       <a href="ourcourse.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                <!-- Book icon -->
+                                <path stroke-width="1.5" d="M16.667 15V5.833a2.5 2.5 0 0 0-2.5-2.5H5.833a2.5 2.5 0 0 0-2.5 2.5v10a2.5 2.5 0 0 0 2.5 2.5h10"/>
+                                <path stroke-width="1.5" d="M6.667 3.333v13.334"/>
+                                <path stroke-width="1.5" d="M10 6.667h3.333"/>
+                                <path stroke-width="1.5" d="M10 10h3.333"/>
+                            </svg>
+                            <span class="nav-label">Courses</span>
+                        </a>
+                        <a href="assignment.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                <!-- Book -->
+                                <path stroke-width="1.5" d="M16.667 16.667V5a2.5 2.5 0 0 0-2.5-2.5H6.667a2.5 2.5 0 0 0-2.5 2.5v11.667"/>
+                                <path stroke-width="1.5" d="M6.667 2.5v15"/>
+                                <!-- Pencil -->
+                                <path stroke-width="1.5" d="M11.667 4.167l4.166 4.166" stroke-linecap="round"/>
+                                <path stroke-width="1.5" d="M13.333 8.333l-2.5 2.5-2.5-2.5 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="nav-label">Assignments</span>
+                        </a>
+                        <a href="maintanance.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
+                            </svg>
+                            <span class="nav-label">Devices</span>
+                        </a>
+                        <a href="leaderboard.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
+                                <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
+                            </svg>
+                            <span class="nav-label">Leaderboard</span>
+                        </a>
+                        <a href="maintanance.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
+                            </svg>
+                            <span class="nav-label">Security status</span>
+                        </a>
+                        <a href="contactus.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
+                            </svg>
+                            <span class="nav-label">Contact support</span>
+                        </a>
+                       <a href="https://dragotool.shop/"
+                        class="nav-item"
+                        target="_blank"
+                        rel="noopener noreferrer">
+                            <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
+                                <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
+                            </svg>
+                            <span class="nav-label">Drago Tool</span>
+                        </a>
 
-                            <a href="logout.php" class="nav-item">
-                                <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
-                                    <!-- Font Awesome Sign-out icon -->
-                                    <path d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z"/>
-                                </svg>
-                                <span class="nav-label">Logout</span>
-                            </a>
-                        </div>
+                        <a href="logout.php" class="nav-item">
+                            <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
+                                <!-- Font Awesome Sign-out icon -->
+                                <path d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z"/>
+                            </svg>
+                            <span class="nav-label">Logout</span>
+                        </a>
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 
     <!-- Main Content Area -->
     <div class="desktop-main">
         <!-- HEADER -->
         <section class="page-header animate-fadeIn">
-            <h1>Contact ProWorldz</h1>
-            <p>Let's connect and build your future in technology</p>
+            <h1>Our Courses</h1>
+            <p>Comprehensive programs designed by industry experts to transform you into a sought-after technology professional.</p>
         </section>
 
-        <!-- CONTACT CONTAINER -->
-        <div class="contact-container">
-            <!-- CONTACT INFO -->
-            <div class="contact-info animate-fadeIn delay-1">
-                <h2>Get in Touch</h2>
-                <p>Have questions about our courses or platform? Send us a message and our team will reach out to you.</p>
-
-                <div class="info-box animate-fadeIn delay-2">
-                    <i class="fa-solid fa-envelope"></i>
-                    <p>proworldz0311@gmail.com</p>
+        <!-- COURSES GRID -->
+        <div class="courses-container">
+            <!-- Secure X -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/secure-x.png" alt="Secure X">
+                    <div class="course-badge">Advanced</div>
                 </div>
-
-                <div class="info-box animate-fadeIn delay-3">
-                    <i class="fa-solid fa-phone"></i>
-                    <p>+91 98765 43210</p>
-                </div>
-
-                <div class="info-box animate-fadeIn delay-4">
-                    <i class="fa-solid fa-map-marker-alt"></i>
-                    <p>India</p>
+                <div class="course-body">
+                    <h3>Secure X</h3>
+                    <p>Master advanced cybersecurity techniques and digital defense strategies. Learn to protect systems from sophisticated cyber threats and vulnerabilities.</p>
+                    <button onclick="window.location.href='course-details/secure-x.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- CONTACT FORM -->
-            <form class="contact-form animate-fadeIn delay-2" id="contactForm" method="POST">
-                <h2>Send Message</h2>
-                
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" required placeholder="Enter your full name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>">
+            <!-- AI Verse Web Labs -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/ai.png" alt="AI Verse Web Labs">
+                    <div class="course-badge">Professional</div>
                 </div>
-
-                <div class="form-group">
-                    <label for="message">Your Message</label>
-                    <textarea id="message" name="message" required placeholder="Enter your message here..."><?php echo isset($_POST['message']) ? htmlspecialchars($_POST['message']) : ''; ?></textarea>
+                <div class="course-body">
+                    <h3>AI Verse Web Labs</h3>
+                    <p>Build intelligent web applications using AI-driven development, machine learning integration, and automated engineering workflows.</p>
+                    <button onclick="window.location.href='course-details/Ai.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
+            </div>
 
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Send Message
-                </button>
-            </form>
+            <!-- Hunt Elite -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/hunt-elite.png" alt="Hunt Elite">
+                    <div class="course-badge">Expert</div>
+                </div>
+                <div class="course-body">
+                    <h3>Hunt Elite</h3>
+                    <p>Professional bug bounty hunting and exploit analysis. Learn advanced penetration testing and ethical hacking techniques.</p>
+                    <button onclick="window.location.href='course-details/Hunt.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Creative Craft -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/creative-craft.png" alt="Creative Craft">
+                    <div class="course-badge">Creative</div>
+                </div>
+                <div class="course-body">
+                    <h3>Creative Craft</h3>
+                    <p>Master strategic visual communication design, branding, and UI/UX principles to create compelling digital experiences.</p>
+                    <button onclick="window.location.href='course-details/Canva.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Py Desk Systems -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/py-desk.png" alt="Py Desk Systems">
+                    <div class="course-badge">Development</div>
+                </div>
+                <div class="course-body">
+                    <h3>Py Desk Systems</h3>
+                    <p>Develop enterprise-grade desktop applications with Python. Master GUI frameworks and system-level programming.</p>
+                    <button onclick="window.location.href='course-details/py.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Biz Dev -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/biz.png" alt="Biz Dev">
+                    <div class="course-badge">Business</div>
+                </div>
+                <div class="course-body">
+                    <h3>Biz Dev</h3>
+                    <p>Combine business strategy with software development. Build scalable tech solutions while understanding market needs.</p>
+                    <button onclick="window.location.href='course-details/biz.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Code Foundry -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/code-f.png" alt="Code Foundry">
+                    <div class="course-badge">Fundamental</div>
+                </div>
+                <div class="course-body">
+                    <h3>Code Foundry</h3>
+                    <p>Professional programming language mastery. Deep dive into best practices and advanced software engineering concepts.</p>
+                    <button onclick="window.location.href='course-details/Code.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Startup Gene Labs -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/startup.png" alt="Startup Gene Labs">
+                    <div class="course-badge">Entrepreneurship</div>
+                </div>
+                <div class="course-body">
+                    <h3>Startup Gene Labs</h3>
+                    <p>Venture creation and startup scaling. Build, fund, and grow tech startups from idea to successful enterprise.</p>
+                    <button onclick="window.location.href='course-details/startup.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CLI++ Systems -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/cli.png" alt="CLI++ Systems">
+                    <div class="course-badge">Systems</div>
+                </div>
+                <div class="course-body">
+                    <h3>CLI++ Systems</h3>
+                    <p>C++ command-line tool engineering for Linux. Build powerful system tools using advanced programming techniques.</p>
+                    <button onclick="window.location.href='course-details/CLI.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- API Man -->
+            <div class="course-card animate-fadeIn">
+                <div class="course-image">
+                    <img src="images/jai-bro/app.png" alt="API Man">
+                    <div class="course-badge">Backend</div>
+                </div>
+                <div class="course-body">
+                    <h3>API Man</h3>
+                    <p>Master API development and management. Build RESTful and GraphQL APIs with scalable architecture patterns.</p>
+                    <button onclick="window.location.href='course-details/api.pdf'" class="course-action">
+                        View Details
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-
-
-        <!-- FOOTER -->
-        <footer class="footer animate-fadeIn delay-4">
-            <p>&copy; 2026 ProWorldz. All rights reserved.</p>
-        </footer>
     </div>
 </div>
 
 <script>
 // DOM Elements
-const contactForm = document.getElementById('contactForm');
-const submitBtn = document.getElementById('submitBtn');
+const courseCards = document.querySelectorAll('.course-card');
 
 // Animation observer
 const observer = new IntersectionObserver((entries) => {
@@ -1117,112 +913,16 @@ document.querySelectorAll('.animate-fadeIn').forEach(el => {
     observer.observe(el);
 });
 
-// Add hover effects to info boxes
-document.querySelectorAll('.info-box').forEach(box => {
-    box.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateX(8px)';
+// Add hover effects to course cards
+courseCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+        this.style.boxShadow = '0 25px 50px rgba(220, 38, 38, 0.3)';
     });
     
-    box.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateX(0)';
-    });
-});
-
-// Form submission
-contactForm.addEventListener('submit', function(e) {
-    // Get form values
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const subject = document.getElementById('subject').value.trim();
-    const message = document.getElementById('message').value.trim();
-    
-    // Form validation
-    if (!name || !subject || !message) {
-        showNotification('Please fill in all required fields', 'error');
-        e.preventDefault();
-        return;
-    }
-    
-    // Email validation (if provided)
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showNotification('Please enter a valid email address', 'error');
-        e.preventDefault();
-        return;
-    }
-    
-    // Show loading state
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-    submitBtn.disabled = true;
-    
-    // Form will submit to PHP
-    // JavaScript will handle the success/error response
-});
-
-// Notification function
-function showNotification(message, type, whatsappLink = null) {
-    // Remove existing notification
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-    
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    
-    let notificationHTML = `
-        <span>${message}</span>
-        <button class="close-notification">&times;</button>
-    `;
-    
-    if (whatsappLink) {
-        notificationHTML += `
-            <a href="${whatsappLink}" target="_blank" class="whatsapp-btn">
-                <i class="fab fa-whatsapp"></i> Send via WhatsApp
-            </a>
-        `;
-    }
-    
-    notification.innerHTML = notificationHTML;
-    
-    // Add close button event
-    const closeBtn = notification.querySelector('.close-notification');
-    closeBtn.addEventListener('click', () => {
-        notification.style.animation = 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) reverse';
-        setTimeout(() => notification.remove(), 400);
-    });
-    
-    // Auto-remove after 8 seconds (longer for WhatsApp button)
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.style.animation = 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) reverse';
-            setTimeout(() => notification.remove(), 400);
-        }
-    }, 8000);
-    
-    // Add to document
-    document.body.appendChild(notification);
-}
-
-// Add hover effects to form inputs
-document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => {
-    input.addEventListener('focus', function() {
-        this.parentElement.classList.add('focused');
-        const label = this.parentElement.querySelector('label');
-        if (label) {
-            label.style.color = 'var(--primary)';
-        }
-    });
-    
-    input.addEventListener('blur', function() {
-        this.parentElement.classList.remove('focused');
-        if (!this.value) {
-            const label = this.parentElement.querySelector('label');
-            if (label) {
-                label.style.color = '';
-            }
-        }
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+        this.style.boxShadow = 'var(--shadow-xl)';
     });
 });
 
@@ -1254,16 +954,24 @@ window.addEventListener('load', () => {
         }, 100);
     }
     
-    // Show PHP notification if exists
-    <?php if (!empty($notification_message)): ?>
-        setTimeout(() => {
-            showNotification(
-                '<?php echo addslashes($notification_message); ?>', 
-                '<?php echo $notification_type; ?>',
-                <?php echo !empty($whatsapp_link) ? "'" . addslashes($whatsapp_link) . "'" : 'null'; ?>
-            );
-        }, 500);
-    <?php endif; ?>
+    // Animate stats
+    const stats = document.querySelectorAll('.stat-number');
+    stats.forEach(stat => {
+        const target = parseInt(stat.textContent.replace(/[^0-9]/g, ''));
+        const suffix = stat.textContent.replace(/[0-9]/g, '');
+        
+        let current = 0;
+        const increment = target / 50;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                stat.textContent = target + suffix;
+                clearInterval(timer);
+            } else {
+                stat.textContent = Math.floor(current) + suffix;
+            }
+        }, 30);
+    });
 });
 </script>
 </body>

@@ -1,38 +1,40 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit();
 }
 
-// Include DB config
-require_once 'api/dbconf.php'; // Adjust path as needed
+require_once '../api/dbconf.php';
 
 $userId = $_SESSION['id'];
 $db = new DBconfig();
 
-// Function to update eagle coins
-function updateEagleCoins($userId, $db) {
-    // Get current eagle coins
-    $userInfo = $db->getUserInfo($userId, ['eagle_coins']);
-    $currentCoins = isset($userInfo['eagle_coins']) ? $userInfo['eagle_coins'] : 0;
-    
-    // Add 0.50 eagle coins
-    $newCoins = $currentCoins + 0.50;
-    
-    // Update in database
-    $db->updateUserEagleCoins($userId, $newCoins);
-    
-    return $newCoins;
+$info = $db->getUserInfo($userId, ['eagle_coins']);
+$limit = 120;
+
+$coin = (int)$info['eagle_coins'];
+
+if (!isset($_SESSION['page_start_time'])) {
+    $_SESSION['page_start_time'] = time();
 }
 
-// If this is a periodic update request
-if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
-    $newCoins = updateEagleCoins($userId, $db);
-    echo json_encode(['success' => true, 'new_coins' => $newCoins]);
-    exit();
+$elapsed = time() - $_SESSION['page_start_time'];
+
+if ($elapsed >= $limit) {
+
+    // ✅ increment correctly
+    $coin++;
+    
+    // reset timer
+    $_SESSION['page_start_time'] = time();
+
+    // update DB
+    $db->updateUserEagleCoins($userId, $coin);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -523,19 +525,47 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
 
         /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes coinSpin {
+            0% {
+                transform: rotateY(0deg) scale(1);
+            }
+            50% {
+                transform: rotateY(180deg) scale(1.2);
+            }
+            100% {
+                transform: rotateY(360deg) scale(1);
+            }
         }
 
         .animate-fadeIn {
@@ -548,6 +578,10 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
 
         .animate-pulse {
             animation: pulse 2s infinite;
+        }
+
+        .animate-coin-spin {
+            animation: coinSpin 1s ease-in-out;
         }
 
         /* ===== CUSTOM SCROLLBAR ===== */
@@ -567,6 +601,78 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--muted-foreground);
+        }
+
+        /* ===== COIN NOTIFICATION ===== */
+        .coin-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #000;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+
+        .coin-notification.show {
+            transform: translateX(0);
+        }
+
+        .coin-notification i {
+            font-size: 1.5rem;
+            animation: coinSpin 2s infinite;
+        }
+
+        .coin-notification .coin-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .coin-notification .coin-amount {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .coin-notification .coin-message {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .coin-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            background: rgba(26, 29, 36, 0.9);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .coin-timer .timer-label {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .coin-timer .timer-display {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 1.125rem;
+        }
+
+        .coin-timer .timer-icon {
+            color: var(--warning);
         }
 
         /* ===== PYTHON INTERPRETER SPECIFIC STYLES ===== */
@@ -649,7 +755,8 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
             }
         }
 
-        .editor-section, .output-section {
+        .editor-section,
+        .output-section {
             background: linear-gradient(135deg, var(--card) 0%, rgba(26, 29, 36, 0.9) 100%);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -662,7 +769,8 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .editor-section::before, .output-section::before {
+        .editor-section::before,
+        .output-section::before {
             content: '';
             position: absolute;
             top: 0;
@@ -672,7 +780,8 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
             background: linear-gradient(to right, var(--primary), #8b5cf6);
         }
 
-        .editor-section:hover, .output-section:hover {
+        .editor-section:hover,
+        .output-section:hover {
             transform: translateY(-2px);
             border-color: var(--primary);
             box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
@@ -906,7 +1015,8 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
                 min-height: 700px;
             }
 
-            .editor-section, .output-section {
+            .editor-section,
+            .output-section {
                 padding: 1.25rem;
             }
 
@@ -922,10 +1032,25 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
                 padding: 0.5rem 0.75rem;
                 font-size: 0.8rem;
             }
+
+            .coin-notification {
+                left: 20px;
+                right: 20px;
+                width: calc(100% - 40px);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Coin Notification -->
+    <div class="coin-notification" id="coinNotification">
+        <i class="fas fa-coins"></i>
+        <div class="coin-info">
+            <div class="coin-amount">+1 Eagle Coin</div>
+            <div class="coin-message">Earned for 2 minutes of activity</div>
+        </div>
+    </div>
+
     <div class="desktop-container">
         <!-- Main Content Area -->
         <div class="desktop-main">
@@ -933,33 +1058,36 @@ if (isset($_GET['update_coins']) && $_GET['update_coins'] == 'true') {
             <div class="card interpreter-header">
                 <div class="interpreter-hero">
                     <h1 class="font-display">Python Interpreter</h1>
-                    <p>Write, execute, and debug Python 3.11 code directly in your browser with full standard library support</p>
-                    
-                    <!-- <div class="environment-info">
-                        <div class="env-item">
-                            <i class="fab fa-python"></i>
-                            <span>Python 3.11</span>
-                        </div>
-                        <div class="env-item">
-                            <i class="fas fa-microchip"></i>
-                            <span>Pyodide v0.24.1</span>
-                        </div>
-                        <div class="env-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Browser-Safe Execution</span>
-                        </div>
-                        <div class="env-item">
-                            <i class="fas fa-bolt"></i>
-                            <span>WebAssembly Runtime</span>
-                        </div>
-                    </div> -->
+                    <a href="../lab.php"
+                    style="
+                        display:inline-flex;
+                        align-items:center;
+                        gap:0.5rem;
+                        padding:0.6rem 1.2rem;
+                        margin-top:1rem;
+                        background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                        color:#ffffff;
+                        text-decoration:none;
+                        font-size:0.9rem;
+                        font-weight:600;
+                        letter-spacing:0.05em;
+                        border-radius:0.5rem;
+                        border:1px solid rgba(255,255,255,0.15);
+                        box-shadow:0 6px 18px rgba(99,102,241,0.35);
+                        transition:all 0.25s ease;
+                    "
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(99,102,241,0.5)'"
+                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(99,102,241,0.35)'">
+                    ← Back to Lab
+                    </a>
+
                 </div>
             </div>
 
             <!-- Interpreter Grid -->
             <div class="interpreter-grid">
                 <!-- Code Editor -->
-                <div class="editor-section" style="height: 100cap;">
+                <div class="editor-section">
                     <div class="section-header">
                         <h3><i class="fas fa-code"></i> Code Editor</h3>
                         <div class="status-indicator">
@@ -1031,9 +1159,9 @@ if __name__ == "__main__":
                     <div class="shortcut-hint">
                         <i class="fas fa-keyboard"></i>
                         <div>
-                            <strong>Keyboard Shortcuts:</strong> 
-                            <kbd>Ctrl</kbd> + <kbd>Enter</kbd> Run Code • 
-                            <kbd>Tab</kbd> Indent • 
+                            <strong>Keyboard Shortcuts:</strong>
+                            <kbd>Ctrl</kbd> + <kbd>Enter</kbd> Run Code •
+                            <kbd>Tab</kbd> Indent •
                             <kbd>Shift</kbd> + <kbd>Tab</kbd> Outdent
                         </div>
                     </div>
@@ -1055,7 +1183,7 @@ if __name__ == "__main__":
             <div class="controls-section">
                 <div class="controls-grid">
                     <button onclick="runPython()" class="button button-lg button-default" id="runBtn">
-                        <i class="fas fa-play"></i> Execute Code
+                        <i class="fas fa-play"></i>  Execute Code
                     </button>
                     <button onclick="clearCode()" class="button button-lg button-secondary">
                         <i class="fas fa-eraser"></i> Clear Editor
@@ -1067,14 +1195,6 @@ if __name__ == "__main__":
                         <i class="fas fa-download"></i> Save Script
                     </button>
                 </div>
-                <!-- <div class="shortcut-hint">
-                    <i class="fas fa-info-circle"></i>
-                    <div>
-                        <strong>Features:</strong> Full Python 3.11 Standard Library • 
-                        Math, Statistics, Random Modules • Safe Browser Execution • 
-                        Real-time Output • Error Handling with Traceback
-                    </div>
-                </div> -->
             </div>
         </div>
     </div>
@@ -1084,7 +1204,82 @@ if __name__ == "__main__":
         let isInitialized = false;
         let codeTextarea = null;
         let executionStartTime = 0;
+        let coinTimerInterval = null;
+        let secondsRemaining = 120; // 2 minutes in seconds
+        let isPageActive = true;
 
+        // Coin tracking functions
+        function updateTimerDisplay() {
+            const minutes = Math.floor(secondsRemaining / 60);
+            const seconds = secondsRemaining % 60;
+            document.getElementById('timerDisplay').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startCoinTimer() {
+            if (coinTimerInterval) clearInterval(coinTimerInterval);
+
+            // Set initial time
+            secondsRemaining = 120;
+            updateTimerDisplay();
+
+            // Start timer
+            coinTimerInterval = setInterval(() => {
+                if (isPageActive && secondsRemaining > 0) {
+                    secondsRemaining--;
+                    updateTimerDisplay();
+
+                    // Check if time's up
+                    if (secondsRemaining === 0) {
+                        awardCoin();
+                    }
+                }
+            }, 1000);
+        }
+
+        function awardCoin() {
+            // Make AJAX call to award coin
+            fetch('?update_coins=true')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.coins_awarded > 0) {
+                        showCoinNotification();
+                        // Reset timer for next coin
+                        secondsRemaining = 120;
+                        updateTimerDisplay();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error awarding coin:', error);
+                    // Still reset timer even if error
+                    secondsRemaining = 120;
+                    updateTimerDisplay();
+                });
+        }
+
+        function showCoinNotification() {
+            const notification = document.getElementById('coinNotification');
+            notification.classList.add('show');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Track page visibility
+        document.addEventListener('visibilitychange', function() {
+            isPageActive = !document.hidden;
+        });
+
+        // Initialize coin timer on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startCoinTimer();
+            setupEditor();
+            initializePyodide();
+        });
+
+        // Original Pyodide functions
         async function initializePyodide() {
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
@@ -1098,34 +1293,33 @@ if __name__ == "__main__":
                 output.textContent = 'Initializing WebAssembly Python environment...\nLoading Pyodide v0.24.1...';
 
                 pyodide = await loadPyodide();
-                
+
                 // Load additional packages if needed
                 await pyodide.loadPackage(['numpy', 'micropip']);
-                
+
                 isInitialized = true;
-                
+
                 statusDot.className = 'status-dot';
                 statusText.textContent = 'Python 3.11 Ready';
                 runBtn.disabled = false;
                 output.innerHTML = '<span class="output-success">✓ Python 3.11 environment initialized successfully!</span>\n' +
-                                  '<span class="output-info">Standard library modules loaded.</span>\n' +
-                                  '<span class="output-info">Write your Python code in the editor and press Execute.</span>';
-                
+                    '<span class="output-info">Standard library modules loaded.</span>\n' +
+                    '<span class="output-info">Write your Python code in the editor and press Execute.</span>';
+
             } catch (error) {
                 statusDot.className = 'status-dot error';
                 statusText.textContent = 'Initialization Failed';
                 output.innerHTML = '<span class="output-error">✗ Failed to initialize Python environment.</span>\n\n' +
-                                 'Error: ' + error.message + '\n\n' +
-                                 '<span class="output-info">Please check your internet connection and refresh the page.</span>';
-                console.error('Pyodide initialization error:', error);
+                    'Error: ' + error.message + '\n\n' +
+                    '<span class="output-info">Please check your internet connection and refresh the page.</span>';
             }
         }
 
         function setupEditor() {
             codeTextarea = document.getElementById('code');
-            
+
             if (!codeTextarea) return;
-            
+
             // Update character and line count
             function updateStats() {
                 const text = codeTextarea.value;
@@ -1134,31 +1328,31 @@ if __name__ == "__main__":
                 document.getElementById('lineCount').textContent = `Lines: ${lines}`;
                 document.getElementById('charCount').textContent = `Characters: ${chars}`;
             }
-            
+
             codeTextarea.addEventListener('input', updateStats);
             updateStats(); // Initial count
-            
+
             codeTextarea.addEventListener('keydown', function(e) {
                 if (e.key === 'Tab') {
                     e.preventDefault();
                     const start = this.selectionStart;
                     const end = this.selectionEnd;
-                    
+
                     this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
                     this.selectionStart = this.selectionEnd = start + 4;
                     updateStats();
                 }
-                
+
                 if (e.ctrlKey && e.key === 'Enter') {
                     e.preventDefault();
                     runPython();
                 }
-                
+
                 if (e.shiftKey && e.key === 'Tab') {
                     e.preventDefault();
                     const start = this.selectionStart;
                     const before = this.value.substring(0, start);
-                    
+
                     if (before.endsWith('    ')) {
                         this.value = this.value.substring(0, start - 4) + this.value.substring(start);
                         this.selectionStart = this.selectionEnd = start - 4;
@@ -1206,26 +1400,26 @@ sys.stderr = io.StringIO()
 try:
     # User code
 ${code.split("\n").map(l => "    " + l).join("\n")}
-    
+
     # Get captured output
     stdout_output = sys.stdout.getvalue()
     stderr_output = sys.stderr.getvalue()
-    
+
     # Restore original stdout/stderr
     sys.stdout = old_stdout
     sys.stderr = old_stderr
-    
+
     # Combine outputs
     if stderr_output:
         result = "STDERR:\\n" + stderr_output + "\\nSTDOUT:\\n" + stdout_output
     else:
         result = stdout_output
-        
+
 except Exception as e:
     # Restore original stdout/stderr
     sys.stdout = old_stdout
     sys.stderr = old_stderr
-    
+
     # Format error with traceback
     tb = traceback.format_exception(type(e), e, e.__traceback__)
     result = "ERROR:\\n" + ''.join(tb)
@@ -1237,7 +1431,7 @@ result
                 const result = await pyodide.runPythonAsync(wrappedCode);
                 const executionEndTime = performance.now();
                 const executionDuration = (executionEndTime - executionStartTime).toFixed(2);
-                
+
                 if (result.startsWith('ERROR:')) {
                     output.innerHTML = `<span class="output-error">${escapeHtml(result)}</span>`;
                     statusDot.className = 'status-dot error';
@@ -1255,18 +1449,18 @@ result
                     statusDot.className = 'status-dot';
                     statusText.textContent = 'Execution Complete';
                 }
-                
+
                 executionTime.textContent = `${executionDuration}ms`;
-                
+
             } catch (err) {
                 const executionEndTime = performance.now();
                 const executionDuration = (executionEndTime - executionStartTime).toFixed(2);
-                
+
                 output.innerHTML = `<span class="output-error">FATAL ERROR: ${escapeHtml(err.toString())}</span>`;
                 statusDot.className = 'status-dot error';
                 statusText.textContent = 'Fatal Error';
                 executionTime.textContent = `${executionDuration}ms`;
-                
+
             } finally {
                 runBtn.disabled = false;
                 runBtn.innerHTML = '<i class="fas fa-play"></i> Execute Code';
@@ -1297,7 +1491,7 @@ result
                 alert('No code to save!');
                 return;
             }
-            
+
             const blob = new Blob([code], { type: 'text/x-python' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1314,11 +1508,6 @@ result
             div.textContent = text;
             return div.innerHTML;
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEditor();
-            initializePyodide();
-        });
     </script>
 </body>
 </html>

@@ -1,14 +1,31 @@
 <?php
+function getClientIP() {
+    // Try external API first
+    try {
+        $response = @file_get_contents("https://api.ipify.org?format=json");
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            if (isset($data['ip'])) {
+                return $data['ip'];
+            }
+        }
+    } catch (Exception $e) {
+        // Continue to fallback methods
+    }
+    
+    // Fallback to server variables
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+    
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $forwarded = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $ip = trim($forwarded[0]);
+    } elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
+        $ip = $_SERVER['HTTP_X_REAL_IP'];
+    }
+    
+    return $_SERVER['REMOTE_ADDR'];
+}
 
-// echo random_int(100000,999999);
-$a = file_get_contents('https://phoneintelligence.abstractapi.com/v1/?api_key=99007ad35f2c49e7a6039487b7e3b3ce&phone=919944994778');
-$d = json_decode($a,true);
-print_r($d);
-// print_r($d).'<br>';
-// echo $d['email_deliverability']['status'];
-// echo $d['email_deliverability']['status_detail'];
-// echo $d['email_deliverability']['is_format_valid'];
-// echo $d['email_sender']['email_provider_name'];
-// echo $d['email_sender']['organization_name'];
-// echo $d['email_deliverability']['status_detatil'].;
-//  [status] => deliverable [status_detail] => valid_email [is_format_valid]
+echo getClientIP();

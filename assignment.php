@@ -14,6 +14,7 @@ if (!isset($_SESSION['id'])) {
 }
 
 $userId = $_SESSION['id'];
+
 // Create database connection with error handling
 try {
     $db = new DBconfig();
@@ -26,6 +27,53 @@ try {
     die("Database error: " . $e->getMessage());
 }
 
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment'])) {
+    $assignmentTitle = $_POST['assignmentTitle'] ?? '';
+    $projectLink = $_POST['projectLink'] ?? '';
+    $coins = $_POST['coins'] ?? 0;
+    
+    if (!empty($assignmentTitle) && !empty($projectLink)) {
+        // 1. Add to waiting assignments in database
+        $db->upload_waiting_assign($userId, $assignmentTitle);
+        
+        // 2. Send to Discord - FIXED METHOD
+        $discordWebhook = 'https://discord.com/api/webhooks/1466008772072702098/tgU1oW1SkiqZZ9FD3-s9dR4gdzjBN7n839_RICXRlv0_XMBCnjb_jI1h8oyeUwr1NaqC';
+        
+        // Simple text message that always works
+        $message = "**New Assignment Submission**\n\n" .
+                   "**Assignment:** " . htmlspecialchars($assignmentTitle) . "\n" .
+                   "**User:** <@hathim0012169>\n" .
+                   "**Project Link:** " . htmlspecialchars($projectLink) . "\n" .
+                   "**Coins Earned:** " . htmlspecialchars($coins) . "\n\n" .
+                   "Submitted at: " . date('Y-m-d H:i:s');
+        
+        // Send using POST - most reliable method
+        $data = ['content' => $message];
+        $options = [
+            'http' => [
+                'header'  => "Content-Type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data),
+                'ignore_errors' => true // Don't fail on HTTP errors
+            ]
+        ];
+        
+        $context = stream_context_create($options);
+        
+        // Try to send to Discord (ignore if it fails)
+        try {
+            @file_get_contents($discordWebhook, false, $context);
+        } catch (Exception $e) {
+            // Silent fail - don't break the user experience
+        }
+        
+        // 3. Reload page to show updated status
+        header("Location: assignment.php?success=1");
+        exit();
+    }
+}
+
 // Get user information
 $userInfo = $db->getUserInfo($userId, ['name', 'course', 'assignments', 'eagle_coins']);
 $userName = isset($userInfo['name']) ? $userInfo['name'] : 'User';
@@ -36,6 +84,15 @@ $assignmentsData = isset($userInfo['assignments']) ? $userInfo['assignments'] : 
 $assignmentsArray = !empty($assignmentsData) ? explode(',', $assignmentsData) : [];
 $assignmentsArray = array_filter($assignmentsArray); // Remove empty values
 $hasAssignments = !empty($assignmentsArray);
+
+// Get waiting assignments - SAFE VERSION
+try {
+    $waitingAssignments = $db->get_waiting_assign($userId);
+    $waitingAssignments = is_array($waitingAssignments) ? $waitingAssignments : [];
+} catch (Exception $e) {
+    // If there's an error (like missing column), use empty array
+    $waitingAssignments = [];
+}
 
 // Get assignment titles based on course
 $assignmentTitles = [];
@@ -55,6 +112,9 @@ if ($course !== "Not enrolled") {
         $assignmentTitles = ["Make portfolio website for you", "Project Documentation", "Final Project Submission"];
     }
 }
+
+// Check for success message
+$successMessage = isset($_GET['success']) ? "Assignment submitted successfully!" : "";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -105,6 +165,7 @@ body {
     --primary-foreground: #ffffff;
     --muted-foreground: #94a3b8;
     --success: #10b981;
+    --warning: #f59e0b;
     
     --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
     --gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 131, 244, 0.1) 100%);
@@ -243,6 +304,23 @@ body {
     line-height: 1.6;
 }
 
+/* Success Message */
+.success-message {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 1rem;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* ===== ASSIGNMENT LIST ===== */
 .assignment-list {
     display: flex;
@@ -290,6 +368,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    flex: 1;
 }
 
 .assignment-icon {
@@ -308,6 +387,10 @@ body {
     color: var(--primary-foreground);
 }
 
+.assignment-details {
+    flex: 1;
+}
+
 .assignment-details h3 {
     font-family: 'Rebels', monospace;
     font-size: 1.5rem;
@@ -321,24 +404,33 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.assignment-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    color: var(--muted-foreground);
-    font-size: 0.875rem;
-}
-
-.assignment-meta span {
+/* Coin Reward Styles */
+.coin-reward {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.coin-reward .coin-amount {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--warning);
+}
+
+.coin-reward img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
 }
 
 /* Assignment Right Content */
 .assignment-right {
     display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 1rem;
+    min-width: 180px;
 }
 
 /* ===== BUTTONS ===== */
@@ -356,6 +448,8 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    text-align: center;
 }
 
 .submit-btn:hover {
@@ -366,11 +460,36 @@ body {
 .submit-btn.completed {
     background: var(--success);
     cursor: default;
+    opacity: 0.7;
 }
 
 .submit-btn.completed:hover {
     transform: none;
     box-shadow: none;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    width: 100%;
+}
+
+.status-badge.pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.completed {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 /* ===== NO ASSIGNMENT PAGE ===== */
@@ -409,6 +528,135 @@ body {
     line-height: 1.6;
 }
 
+/* ===== MODAL STYLES ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.95) 100%);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-2xl);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.github-logo {
+    width: 48px;
+    height: 48px;
+    color: var(--foreground);
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.2));
+}
+
+.modal-body {
+    margin-bottom: 1.5rem;
+}
+
+.project-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background-color: rgba(248, 250, 252, 0.05);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+    color: var(--foreground);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.project-input::placeholder {
+    color: var(--muted-foreground);
+}
+
+.project-input:focus {
+    outline: none;
+    background-color: rgba(248, 250, 252, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.modal-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.modal-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: calc(var(--radius) - 4px);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.modal-btn-cancel {
+    background-color: rgba(248, 250, 252, 0.05);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+}
+
+.modal-btn-cancel:hover {
+    background-color: rgba(248, 250, 252, 0.1);
+}
+
+.modal-btn-submit {
+    background: var(--gradient-primary);
+    color: var(--primary-foreground);
+}
+
+.modal-btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Hidden form for submission */
+.hidden-form {
+    display: none;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1024px) {
     .desktop-container {
@@ -438,7 +686,7 @@ body {
     .assignment-card {
         flex-direction: column;
         gap: 1.5rem;
-        align-items: flex-start;
+        align-items: stretch;
     }
     
     .assignment-left {
@@ -447,7 +695,11 @@ body {
     
     .assignment-right {
         width: 100%;
-        justify-content: flex-end;
+        align-items: stretch;
+    }
+    
+    .submit-btn {
+        width: 100%;
     }
 }
 
@@ -476,6 +728,23 @@ body {
         width: 200px;
         height: 200px;
     }
+    
+    .assignment-details h3 {
+        font-size: 1.25rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-btn {
+        width: 100%;
+    }
 }
 
 /* Custom Scrollbar */
@@ -492,6 +761,11 @@ body {
     border-radius: 3px;
 }
 
+/* Utility Classes */
+.gap-2 { gap: 0.5rem; }
+.mt-2 { margin-top: 0.5rem; }
+.font-bold { font-weight: 700; }
+.text-lg { font-size: 1.125rem; }
 </style>
 </head>
 <body>
@@ -543,7 +817,7 @@ body {
                                 </svg>
                                 <span class="nav-label">Courses</span>
                             </a>
-                            <a href="assignment.php" class="nav-item">
+                            <a href="assignment.php" class="nav-item active">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
                                     <!-- Book -->
                                     <path stroke-width="1.5" d="M16.667 16.667V5a2.5 2.5 0 0 0-2.5-2.5H6.667a2.5 2.5 0 0 0-2.5 2.5v11.667"/>
@@ -587,7 +861,7 @@ body {
    rel="noopener noreferrer">
     <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
         <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
-    </svg>
+                                </svg>
     <span class="nav-label">Drago Tool</span>
 </a>
 
@@ -611,6 +885,7 @@ body {
             <p>Track and submit your course assignments</p>
         </div>
 
+
         <?php if (!$hasAssignments || empty($assignmentTitles)): ?>
             <!-- NO ASSIGNMENTS FOUND -->
             <div class="no-assignment-container">
@@ -623,8 +898,14 @@ body {
         <?php else: ?>
             <!-- ASSIGNMENT LIST -->
             <div class="assignment-list">
-                <?php foreach ($assignmentTitles as $index => $assignmentTitle): 
+                <?php 
+                // Define coin values for each assignment (12, 15, 7 coins)
+                $coinValues = [12, 15, 7];
+                
+                foreach ($assignmentTitles as $index => $assignmentTitle): 
                     $isSubmitted = in_array($assignmentTitle, $assignmentsArray);
+                    $isWaiting = in_array($assignmentTitle, $waitingAssignments);
+                    $coins = isset($coinValues[$index]) ? $coinValues[$index] : 10; // Default to 10 if not set
                 ?>
                     <div class="assignment-card" id="assignment-card-<?php echo $index + 1; ?>">
                         <div class="assignment-left">
@@ -634,20 +915,26 @@ body {
                             <div class="assignment-details">
                                 <h3><?php echo htmlspecialchars($assignmentTitle); ?></h3>
                                 <p><?php echo htmlspecialchars($course); ?></p>
-                                <div class="assignment-meta">
-                                    <span><i class="fa-regular fa-calendar"></i> Dec 28, 2024</span>
-                                    <span><i class="fa-solid fa-star"></i> 100 pts</span>
+                                
+                                <!-- Coin Reward Display -->
+                                <div class="coin-reward">
+                                    <span class="coin-amount"><?php echo $coins; ?></span>
+                                    <img src="images/coin.png" alt="Coin" style="width: 20px; height: 20px;">
+                                    <span class="text-muted-foreground" style="font-size: 0.875rem;">Eagle Coins Reward</span>
                                 </div>
                             </div>
                         </div>
                         <div class="assignment-right">
-                            <?php if ($isSubmitted): ?>
+                            <?php if ($isSubmitted || $isWaiting): ?>
+                                <div class="status-badge completed">
+                                    <i class="fa-solid fa-circle-check mr-2"></i>Submitted
+                                </div>
                                 <button class="submit-btn completed" disabled>
-                                    <i class="fa-solid fa-circle-check"></i> Submitted
+                                    Submitted
                                 </button>
                             <?php else: ?>
-                                <button class="submit-btn" onclick="openSubmitModal('<?php echo addslashes($assignmentTitle); ?>')">
-                                    Submit
+                                <button class="submit-btn" onclick="openSubmitModal('<?php echo addslashes($assignmentTitle); ?>', <?php echo $coins; ?>)">
+                                    Submit Assignment
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -658,11 +945,89 @@ body {
     </main>
 </div>
 
+<!-- Submit Modal -->
+<div id="submitModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <svg class="github-logo" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v 3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+        </div>
+        <div class="modal-body">
+            <input 
+                type="text" 
+                id="projectLink" 
+                class="project-input" 
+                placeholder="paste your project link"
+                required
+            >
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" type="button" onclick="closeSubmitModal()">Cancel</button>
+            <button class="modal-btn modal-btn-submit" type="button" onclick="submitAssignment()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for submission -->
+<form method="POST" id="hiddenForm" class="hidden-form">
+    <input type="hidden" name="submit_assignment" value="1">
+    <input type="hidden" name="assignmentTitle" id="formAssignmentTitle">
+    <input type="hidden" name="coins" id="formCoins">
+    <input type="hidden" name="projectLink" id="formProjectLink">
+</form>
+
 <script>
-function openSubmitModal(assignmentTitle) {
-    alert('Submit assignment: ' + assignmentTitle);
-    // You can implement modal functionality here if needed
+let currentAssignmentData = { title: '', coins: 0 };
+
+function openSubmitModal(assignmentTitle, coins) {
+    currentAssignmentData = { title: assignmentTitle, coins: coins };
+    document.getElementById('submitModal').classList.add('active');
+    document.getElementById('projectLink').focus();
+    document.getElementById('projectLink').value = '';
 }
+
+function closeSubmitModal() {
+    document.getElementById('submitModal').classList.remove('active');
+    document.getElementById('projectLink').value = '';
+}
+
+function submitAssignment() {
+    const projectLink = document.getElementById('projectLink').value.trim();
+    
+    if (!projectLink) {
+        alert('Please enter a project link');
+        return;
+    }
+    
+    // Validate URL format
+    try {
+        new URL(projectLink);
+    } catch (e) {
+        alert('Please enter a valid URL');
+        return;
+    }
+    
+    // Set form values and submit
+    document.getElementById('formAssignmentTitle').value = currentAssignmentData.title;
+    document.getElementById('formCoins').value = currentAssignmentData.coins;
+    document.getElementById('formProjectLink').value = projectLink;
+    document.getElementById('hiddenForm').submit();
+}
+
+// Close modal when pressing Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeSubmitModal();
+    }
+});
+
+// Close modal when clicking outside
+document.getElementById('submitModal')?.addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeSubmitModal();
+    }
+});
 </script>
 </body>
 </html>

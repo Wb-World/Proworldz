@@ -945,7 +945,7 @@ session_start();
             }, 3000);
             
             // In a real application, you would send an AJAX request to update the name in the database
-            console.log('Name updated to:', newName);
+            // console.log('Name updated to:', newName);
             
             // Simulate API call
             simulateApiCall(newName);

@@ -1095,7 +1095,7 @@
                         this.useDemoData();
                     }
                 } catch (error) {
-                    console.error('Error loading user data:', error);
+                    // console.error('Error loading user data:', error);
                     this.showToast('Connection error. Using offline data.', 'warning');
                     this.updateSystemStatus('warning', 'Offline mode');
                     // Use demo data as fallback
@@ -1249,7 +1249,7 @@
                         this.updateSystemStatus('error', 'Save failed');
                     }
                 } catch (error) {
-                    console.error('Error saving changes:', error);
+                    // console.error('Error saving changes:', error);
                     this.showToast('Network error. Changes saved locally.', 'warning');
                     this.updateSystemStatus('warning', 'Local save only');
                     
@@ -1292,7 +1292,7 @@
                     syncStatus.className = 'badge badge-outline-warning';
                 }
                 
-                console.log(`System Status: ${message}`);
+                // console.log(`System Status: ${message}`);
             }
 
             showToast(message, type = 'success') {

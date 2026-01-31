@@ -176,7 +176,7 @@ class DBconfig {
 
         $allowedFields = [
             'id', 'name', 'gender', 'phone', 'email',
-            'IPADDR', 'eagle_coins', 'assignments', 'course','assigns_complete'
+            'IPADDR', 'eagle_coins', 'assignments', 'course','assigns_complete','device'
         ];
 
         $validFields = array_intersect($requestedFields, $allowedFields);
@@ -209,9 +209,9 @@ class DBconfig {
         
         // Check if it's a decimal number and bind accordingly
         if (is_float($newCoins)) {
-            $stmt->bind_param("di", $newCoins, $userId); // 'd' for double/float
+            $stmt->bind_param("is", $newCoins, $userId); // 'd' for double/float
         } else {
-            $stmt->bind_param("ii", $newCoins, $userId); // 'i' for integer
+            $stmt->bind_param("is", $newCoins, $userId); // 'i' for integer
         }
         
         $result = $stmt->execute();
@@ -247,37 +247,84 @@ class DBconfig {
     }
 
     public function upload_data($column_name, $value, $id) {
-    if (empty($column_name) || $value === null || empty($id)) {
-        return false;
+        if (empty($column_name) || $value === null || empty($id)) {
+            return false;
+        }
+        
+        $allowedFields = [
+            'name', 'gender', 'phone', 'email', 
+            'IPADDR', 'eagle_coins', 'assignments', 'course', 'assigns_complete','device'
+        ];
+        
+        if (!in_array($column_name, $allowedFields)) {
+            return false;
+        }
+        
+        $sql = "UPDATE users SET $column_name = ? WHERE id = ?";
+        $stmt = $this->con->prepare($sql);
+        
+        if (!$stmt) {
+            return false;
+        }
+        
+        $type = '';
+        if (is_int($value)) {
+            $type = 'i';
+        } elseif (is_float($value)) {
+            $type = 'd';
+        } else {
+            $type = 's';
+        }
+        
+        $stmt->bind_param($type . 's', $value, $id);
+        
+        return $stmt->execute();
     }
-    
-    $allowedFields = [
-        'name', 'gender', 'phone', 'email', 
-        'IPADDR', 'eagle_coins', 'assignments', 'course', 'assigns_complete'
-    ];
-    
-    if (!in_array($column_name, $allowedFields)) {
-        return false;
+
+    public function upload_waiting_assign($userId, $assignmentTitle) {
+        if (empty($userId) || empty($assignmentTitle)) {
+            return false;
+        }
+        
+        $existing = $this->get_waiting_assign($userId);
+        $existing[] = $assignmentTitle;
+        $jsonData = json_encode($existing);
+        
+        $sql = "UPDATE users SET waiting_assigns = ? WHERE id = ?";
+        $stmt = $this->con->prepare($sql);
+        
+        if (!$stmt) {
+            return false;
+        }
+        
+        $stmt->bind_param("ss", $jsonData, $userId);
+        return $stmt->execute();
     }
-    
-    $sql = "UPDATE users SET $column_name = ? WHERE id = ?";
-    $stmt = $this->con->prepare($sql);
-    
-    if (!$stmt) {
-        return false;
+
+    public function get_waiting_assign($userId) {
+        if (empty($userId)) {
+            return [];
+        }
+        
+        $sql = "SELECT waiting_assigns FROM users WHERE id = ? LIMIT 1";
+        $stmt = $this->con->prepare($sql);
+        
+        if (!$stmt) {
+            return [];
+        }
+        
+        $stmt->bind_param("s", $userId);
+        $stmt->execute();
+        
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        if (!$row || empty($row['waiting_assigns'])) {
+            return [];
+        }
+        
+        $data = json_decode($row['waiting_assigns'], true);
+        return is_array($data) ? $data : [];
     }
-    
-    $type = '';
-    if (is_int($value)) {
-        $type = 'i';
-    } elseif (is_float($value)) {
-        $type = 'd';
-    } else {
-        $type = 's';
-    }
-    
-    $stmt->bind_param($type . 'i', $value, $id);
-    
-    return $stmt->execute();
-}
+
 }

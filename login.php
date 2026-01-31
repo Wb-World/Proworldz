@@ -1,30 +1,57 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <title>Login | PROWORLDZ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* ===== CSS RESET & BASE ===== */
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        border-color: rgba(229, 231, 235, 0.3);
-        outline-color: rgba(156, 163, 175, 0.5);
-        overscroll-behavior: none;
+    }
+
+    :root {
+        --primary-red: #ffffff;
+        --primary-red-hover: #e0e0e0;
+        --secondary-red: #d0d0d0;
+        --accent-red: #a0a0a0;
+        --dark-bg: #000000;
+        --darker-bg: #050505;
+        --card-bg: #111111;
+        --card-hover: #1a1a1a;
+        --text-primary: #ffffff;
+        --text-secondary: #a3a3a3;
+        --text-muted: #737373;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --border-hover: rgba(255, 255, 255, 0.2);
+        --success: #ffffff;
+        --danger: #ffffff;
+        
+        --shadow-glow: 0 0 40px rgba(255, 255, 255, 0.1);
+        --shadow-intense: 0 20px 60px rgba(255, 255, 255, 0.15);
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-fast: all 0.2s ease;
+    }
+
+    html {
+        scroll-behavior: smooth;
     }
 
     body {
-        font-family: 'Roboto Mono', monospace;
-        background-color: #0d1015;
-        color: #f8fafc;
+        font-family: 'Inter', sans-serif;
+        background: var(--dark-bg);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         min-height: 100vh;
-        overflow-x: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -32,116 +59,28 @@
         position: relative;
     }
 
-    /* ===== CUSTOM FONTS ===== */
-    @font-face {
-        font-family: "Rebels";
-        src: url("https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2") format("woff2");
-        font-weight: normal;
-        font-style: normal;
-        font-display: swap;
+    h1, h2, h3, h4 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        line-height: 1.2;
     }
 
-    /* ===== CUSTOM PROPERTIES (CSS Variables) ===== */
-    :root {
-        --radius: 0.625rem;
-        --background: #0d1015;
-        --foreground: #f8fafc;
-        --card: #1a1d24;
-        --card-foreground: #f8fafc;
-        --popover: #1a1d24;
-        --popover-foreground: #f8fafc;
-        --primary: #6366f1;
-        --primary-light: #8183f4;
-        --primary-foreground: #ffffff;
-        --secondary: #2d3748;
-        --secondary-foreground: #f8fafc;
-        --muted: #2d3748;
-        --muted-foreground: #94a3b8;
-        --accent: rgba(248, 250, 252, 0.05);
-        --accent-foreground: #f8fafc;
-        --border: rgba(255, 255, 255, 0.1);
-        --input: rgba(255, 255, 255, 0.15);
-        --ring: rgba(148, 163, 184, 0.5);
-        
-        --success: #10b981;
-        --destructive: #ef4444;
-        --warning: #f59e0b;
-        
-        --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-        --gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 131, 244, 0.1) 100%);
-        --gradient-dark: linear-gradient(135deg, var(--background) 0%, var(--card) 100%);
-        
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-
-    /* ===== TV NOISE EFFECT ===== */
-    .tv-noise {
+    /* ===== BACKGROUND EFFECTS ===== */
+    .bg-effects {
         position: fixed;
         inset: 0;
-        background: 
-            repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.1) 0px,
-                rgba(0, 0, 0, 0.1) 1px,
-                transparent 1px,
-                transparent 2px
-            ),
-            repeating-linear-gradient(
-                90deg,
-                rgba(0, 0, 0, 0.1) 0px,
-                rgba(0, 0, 0, 0.1) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-        opacity: 0.05;
-        pointer-events: none;
-        z-index: 1;
-        animation: tvNoise 0.1s infinite;
-    }
-
-    @keyframes tvNoise {
-        0%, 100% { background-position: 0 0; }
-        10% { background-position: -5% -10%; }
-        20% { background-position: -15% 5%; }
-        30% { background-position: 7% -25%; }
-        40% { background-position: 20% 25%; }
-        50% { background-position: -25% 10%; }
-        60% { background-position: 15% 5%; }
-        70% { background-position: 0 15%; }
-        80% { background-position: 25% 35%; }
-        90% { background-position: -10% 10%; }
-    }
-
-    /* ===== GLOW EFFECTS ===== */
-    .glow {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
         pointer-events: none;
         z-index: 0;
     }
 
-    .glow-1 {
-        top: 20%;
-        left: 10%;
-        animation: pulse 4s infinite;
-    }
-
-    .glow-2 {
-        bottom: 20%;
-        right: 10%;
-        animation: pulse 4s infinite reverse;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.3; }
-        50% { transform: scale(1.1); opacity: 0.5; }
+    .bg-effects::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: 
+            linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 50%, transparent 100%),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.01) 2px, rgba(255, 255, 255, 0.01) 4px);
+        opacity: 0.5;
     }
 
     /* ===== AUTH CONTAINER ===== */
@@ -154,13 +93,14 @@
 
     /* ===== AUTH BOX ===== */
     .auth-box {
-        background: linear-gradient(145deg, var(--card) 0%, rgba(26, 29, 36, 0.95) 100%);
+        background: var(--card-bg);
         padding: 3rem;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-2xl);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-glow);
         position: relative;
         overflow: hidden;
+        transition: var(--transition-smooth);
     }
 
     .auth-box::before {
@@ -170,123 +110,99 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: var(--gradient-primary);
+        background: linear-gradient(90deg, var(--primary-red), var(--secondary-red));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s ease;
     }
 
-    .auth-box::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-        transition: left 0.6s;
+    .auth-box:hover::before {
+        transform: scaleX(1);
     }
 
-    .auth-box:hover::after {
-        left: 100%;
+    .auth-box:hover {
+        background: var(--card-hover);
+        border-color: var(--border-hover);
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-intense);
     }
 
     /* ===== BRAND ===== */
     .brand {
         text-align: center;
         margin-bottom: 2.5rem;
-        position: relative;
-        z-index: 1;
     }
 
-    .brand-logo {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        background: var(--gradient-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.25rem;
-        font-family: 'Rebels', monospace;
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary-foreground);
-        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .logo-img {
+        width: 150px;
+        height: 150px;
+        object-fit: contain;
+        margin: 0 auto 1.5rem;
+        filter: brightness(1.2);
+        transition: var(--transition-smooth);
     }
 
-    .brand-logo::before {
-        content: '';
-        position: absolute;
-        inset: 2px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        z-index: -1;
-    }
-
-    .brand-logo:hover {
-        transform: scale(1.05) rotate(5deg);
-        box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+    .logo-img:hover {
+        transform: rotate(10deg) scale(1.1);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
     }
 
     .brand h1 {
-        font-family: 'Rebels', monospace;
         font-size: 2rem;
-        font-weight: 700;
-        background: var(--gradient-primary);
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--text-primary) 0%, var(--secondary-red) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        letter-spacing: 0.02em;
         margin-bottom: 0.5rem;
     }
 
     .brand p {
-        color: var(--muted-foreground);
+        color: var(--text-secondary);
         font-size: 0.875rem;
-        letter-spacing: 0.05em;
         text-transform: uppercase;
+        letter-spacing: 0.1em;
     }
 
     /* ===== FORM ===== */
     .form-group {
         position: relative;
         margin-bottom: 1.75rem;
-        z-index: 1;
     }
 
     .form-group input {
         width: 100%;
         padding: 1rem 1.25rem;
-        background: var(--input);
-        border: 1px solid var(--border);
-        border-radius: calc(var(--radius) - 2px);
-        color: var(--foreground);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
         font-size: 0.95rem;
-        font-family: 'Roboto Mono', monospace;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: 'Inter', sans-serif;
+        transition: var(--transition-smooth);
         padding-right: 3rem;
     }
 
     .form-group input:focus {
         outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        border-color: var(--primary-red);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
         transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.08);
     }
 
     .form-group input::placeholder {
-        color: var(--muted-foreground);
-        opacity: 0.7;
+        color: var(--text-muted);
     }
 
     .form-group label {
         position: absolute;
         top: 1rem;
         left: 1.25rem;
-        color: var(--muted-foreground);
+        color: var(--text-secondary);
         font-size: 0.95rem;
         pointer-events: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: var(--transition-smooth);
         background: transparent;
     }
 
@@ -295,9 +211,9 @@
         top: -0.75rem;
         left: 0.75rem;
         font-size: 0.75rem;
-        color: var(--primary);
+        color: var(--text-primary);
         padding: 0 0.5rem;
-        background: var(--card);
+        background: var(--card-bg);
     }
 
     /* ===== PASSWORD TOGGLE ===== */
@@ -308,16 +224,15 @@
         transform: translateY(-50%);
         background: none;
         border: none;
-        color: var(--muted-foreground);
+        color: var(--text-secondary);
         cursor: pointer;
         font-size: 1rem;
         padding: 0.25rem;
-        transition: all 0.3s ease;
-        z-index: 2;
+        transition: var(--transition-fast);
     }
 
     .password-toggle:hover {
-        color: var(--primary);
+        color: var(--text-primary);
         transform: translateY(-50%) scale(1.1);
     }
 
@@ -326,20 +241,19 @@
         width: 100%;
         padding: 1rem;
         border: none;
-        border-radius: calc(var(--radius) - 2px);
-        background: var(--gradient-primary);
-        color: var(--primary-foreground);
+        border-radius: 10px;
+        background: linear-gradient(135deg, #ffffff 0%, #d0d0d0 100%);
+        color: #000000;
         font-size: 1rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         cursor: pointer;
         margin-top: 0.5rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        font-family: 'Roboto Mono', monospace;
+        transition: var(--transition-smooth);
+        font-family: 'Space Grotesk', sans-serif;
         position: relative;
         overflow: hidden;
-        z-index: 1;
     }
 
     .btn-login::before {
@@ -358,40 +272,37 @@
     }
 
     .btn-login:hover {
+        background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+        box-shadow: var(--shadow-intense);
         transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
     }
 
     .btn-login:disabled {
         opacity: 0.6;
         cursor: not-allowed;
-        transform: none !important;
-        box-shadow: none !important;
+        transform: none;
+        box-shadow: none;
     }
 
     /* ===== ERROR / LOADING ===== */
     .error {
         text-align: center;
-        color: var(--destructive);
+        color: var(--text-primary);
         font-size: 0.875rem;
         margin: 0.75rem 0;
         display: none;
-        background: rgba(239, 68, 68, 0.1);
+        background: rgba(255, 255, 255, 0.05);
         padding: 0.75rem;
-        border-radius: calc(var(--radius) - 4px);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        position: relative;
-        z-index: 1;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .loading {
         text-align: center;
-        color: var(--primary);
+        color: var(--text-primary);
         font-size: 0.875rem;
         margin: 0.75rem 0;
         display: none;
-        position: relative;
-        z-index: 1;
     }
 
     .loading::after {
@@ -400,8 +311,8 @@
         width: 1rem;
         height: 1rem;
         margin-left: 0.5rem;
-        border: 2px solid var(--border);
-        border-top-color: var(--primary);
+        border: 2px solid var(--border-color);
+        border-top-color: var(--text-primary);
         border-radius: 50%;
         animation: spin 1s linear infinite;
         vertical-align: middle;
@@ -409,51 +320,6 @@
 
     @keyframes spin {
         to { transform: rotate(360deg); }
-    }
-
-    /* ===== FOOTER ===== */
-    .auth-footer {
-        text-align: center;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--border);
-        position: relative;
-        z-index: 1;
-    }
-
-    .auth-footer p {
-        color: var(--muted-foreground);
-        font-size: 0.875rem;
-        margin-bottom: 0.75rem;
-        letter-spacing: 0.025em;
-    }
-
-    .switch-link {
-        color: var(--primary);
-        font-weight: 600;
-        text-decoration: none;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .switch-link:hover {
-        color: var(--primary-light);
-        text-decoration: none;
-        gap: 0.75rem;
-    }
-
-    .switch-link::after {
-        content: '→';
-        transition: transform 0.3s ease;
-    }
-
-    .switch-link:hover::after {
-        transform: translateX(3px);
     }
 
     /* ===== ANIMATIONS ===== */
@@ -470,7 +336,7 @@
 
     .animate-fadeIn {
         opacity: 0;
-        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: fadeInUp 0.6s ease forwards;
     }
 
     .animate-delay-1 { animation-delay: 0.1s; }
@@ -480,26 +346,25 @@
 
     /* ===== RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
-        body {
-            padding: 15px;
-        }
-        
         .auth-box {
             padding: 2.5rem;
+        }
+        
+        .logo-img {
+            width: 70px;
+            height: 70px;
         }
         
         .brand h1 {
             font-size: 1.75rem;
         }
-        
-        .brand-logo {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-        }
     }
 
     @media (max-width: 480px) {
+        body {
+            padding: 15px;
+        }
+        
         .auth-box {
             padding: 2rem;
         }
@@ -528,10 +393,9 @@
             padding: 1.75rem 1.5rem;
         }
         
-        .brand-logo {
-            width: 50px;
-            height: 50px;
-            font-size: 1.25rem;
+        .logo-img {
+            width: 60px;
+            height: 60px;
             margin-bottom: 1rem;
         }
         
@@ -540,45 +404,20 @@
         }
     }
 
-    /* ===== SYSTEM STATUS INDICATOR ===== */
-    .system-status {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--muted-foreground);
-        font-size: 0.75rem;
-        z-index: 10;
-    }
-
-    .status-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--success);
-        animation: statusPulse 2s infinite;
-    }
-
-    @keyframes statusPulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
+    /* Font weight enforcement */
+    body, h1, h2, h3, h4, h5, h6, p, span, div, li, a, button, input {
+        font-weight: 700 !important;
     }
   </style>
 </head>
 <body>
-  <!-- TV Noise Effect -->
-  <div class="tv-noise"></div>
-  
-  <!-- Glow Effects -->
-  <div class="glow glow-1"></div>
-  <div class="glow glow-2"></div>
+  <!-- Background Effects -->
+  <div class="bg-effects"></div>
 
   <div class="auth-container">
     <div class="auth-box animate-fadeIn">
       <div class="brand">
-        <div class="brand-logo animate-fadeIn">P</div>
+        <img src="images/eaglone/e-welcome-gen.png" alt="ProWorldz Logo" class="logo-img animate-fadeIn">
         <h1 class="animate-fadeIn animate-delay-1">PROWORLDZ</h1>
         <p class="animate-fadeIn animate-delay-2">Access your professional learning dashboard</p>
       </div>
@@ -607,12 +446,11 @@
       <button type="submit" class="btn-login animate-fadeIn animate-delay-4" onclick="login()" id="loginBtn">
         <i class="fas fa-sign-in-alt"></i> Login
       </button>
-
     </div>
   </div>
 
 <script>
-  // Enhanced password toggle
+  // Password toggle
   document.getElementById('togglePassword').addEventListener('click', function() {
     const passwordInput = document.getElementById('passw-login');
     const icon = this.querySelector('i');
@@ -621,14 +459,14 @@
     
     if (type === 'password') {
       icon.className = 'fas fa-eye';
-      this.style.color = 'var(--muted-foreground)';
+      this.style.color = 'var(--text-secondary)';
     } else {
       icon.className = 'fas fa-eye-slash';
-      this.style.color = 'var(--primary)';
+      this.style.color = 'var(--text-primary)';
     }
   });
 
-  // Add focus effects to form inputs
+  // Form focus effects
   const inputs = document.querySelectorAll('.form-group input');
   inputs.forEach(input => {
     input.addEventListener('focus', function() {
@@ -639,6 +477,8 @@
       this.parentElement.style.transform = 'translateY(0)';
     });
   });
+
+  // Login function
   function login(){
     let datas = new FormData();
     let mail = document.getElementById('mail-login').value;
@@ -660,91 +500,65 @@
     .then(data => {
         console.log('API Response:', data);
         console.log('Result value:', data['result']);
-        // Check for invalid email (PHP returns ['result' => 203])
+
         if(data['result'] === 203) {
             alert('Invalid email found');
             showAccessDenied();
             window.location.reload();
         } 
-        // Check for session error (PHP returns ['result' => 'Try again'])
         else if(typeof data['result'] === 'string' && data['result'].toLowerCase() === 'try again') {
             alert(data['result']);
             showAccessDenied();
             window.location.reload();
         } 
-        // Check for invalid credentials (PHP returns ['result' => null])
         else if(data['result'] === null) {
             showAccessDenied();
             window.location.reload();
         } 
-        // SUCCESS - PHP returns ['result' => user_id] (a numeric ID)
         else if(data['result'] !== null && data['result'].includes('PWZ')) {
             document.getElementById('loginBtn').innerHTML =
                 '<i class="fas fa-check"></i> Access Granted';
             document.getElementById('loginBtn').style.background = 'var(--success)';
 
-            // Add success glow to form
+            // Success effect
             document.querySelector('.auth-box').style.boxShadow =
-                '0 0 40px rgba(16, 185, 129, 0.3)';
+                '0 0 40px rgba(255, 255, 255, 0.3)';
 
-            // Redirect after brief delay
             setTimeout(() => {
                 location.replace('dashboard.php');
             }, 1000);
         }
-        // Handle any unexpected response
         else {
-            console.error('Unexpected response format:', data);
             showAccessDenied();
-            // window.location.reload();
         }
     })
     .catch(err => {
         console.error('Network/Server Error:', err);
         showAccessDenied();
-        // window.location.reload();
     })
     .finally(() => {
-        // Always clean up UI
         document.getElementById('loading').style.display = 'none';
         document.getElementById('loginBtn').disabled = false;
     });
-}
+  }
 
-/* =========================
-   ACCESS DENIED HANDLER
-   ========================= */
-function showAccessDenied() {
+  // Access denied handler
+  function showAccessDenied() {
     const btn = document.getElementById('loginBtn');
-
     btn.innerHTML = '<i class="fas fa-times"></i> Access Denied';
     btn.style.background = 'var(--danger)';
 
-    // Red glow
     document.querySelector('.auth-box').style.boxShadow =
-        '0 0 40px rgba(239, 68, 68, 0.35)';
+        '0 0 40px rgba(255, 255, 255, 0.2)';
 
-    // Reset button after 2 sec (optional UX)
     setTimeout(() => {
         btn.innerHTML = 'Login';
         btn.style.background = '';
         document.querySelector('.auth-box').style.boxShadow = '';
-        // window.location.reload();
     }, 2000);
-}
+  }
 
-  // Add shake animation for errors
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // Add enter key support for login
+  // Enter key support
   document.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       const loginBtn = document.getElementById('loginBtn');
@@ -754,25 +568,9 @@ function showAccessDenied() {
     }
   });
 
-  // Initialize animations
+  // Animation on load
   window.addEventListener('load', function() {
     document.body.classList.add('loaded');
-    
-    // Add subtle background movement
-    document.addEventListener('mousemove', function(e) {
-      const x = e.clientX / window.innerWidth;
-      const y = e.clientY / window.innerHeight;
-      
-      const glow1 = document.querySelector('.glow-1');
-      const glow2 = document.querySelector('.glow-2');
-      
-      if (glow1) {
-        glow1.style.transform = `translate(${x * 20}px, ${y * 20}px)`;
-      }
-      if (glow2) {
-        glow2.style.transform = `translate(${-x * 20}px, ${-y * 20}px)`;
-      }
-    });
   });
 </script>
 </body>
