@@ -327,4 +327,122 @@ class DBconfig {
         return is_array($data) ? $data : [];
     }
 
+    public function upload_tasks($userId, $taskNameToRemove) {
+    if(empty($userId) || empty($taskNameToRemove)) return false;
+    
+    // Get both tasks AND completed columns
+    $sql = "SELECT tasks, completed FROM tasksdb WHERE id = ?";
+    $stmt = $this->con->prepare($sql);
+    if(!$stmt) return false;
+    $stmt->bind_param("s", $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $data = $res->fetch_assoc();
+    $stmt->close();
+    
+    if(!$data || !isset($data['tasks']) || empty($data['tasks'])) return false;
+    
+    // Decode tasks array
+    $tasksArray = json_decode($data['tasks'], true);
+    if(!is_array($tasksArray)) return false;
+    
+    // Get existing completed tasks or initialize empty array
+    $completedArray = [];
+    if(isset($data['completed']) && !empty($data['completed'])) {
+        $completedArray = json_decode($data['completed'], true);
+        if(!is_array($completedArray)) {
+            $completedArray = [];
+        }
+    }
+    
+    $modified = false;
+    $newTasksArray = [];
+    $completedTask = null;
+    
+    foreach($tasksArray as $task) {
+        if(is_string($task) && $task === $taskNameToRemove) {
+            $completedTask = $task;
+            $modified = true;
+            continue;
+        }
+        elseif(is_array($task) && isset($task['title']) && $task['title'] === $taskNameToRemove) {
+            $completedTask = $task;
+            $modified = true;
+            continue;
+        }
+        elseif(is_array($task) && isset($task['name']) && $task['name'] === $taskNameToRemove) {
+            $completedTask = $task;
+            $modified = true;
+            continue;
+        }
+        $newTasksArray[] = $task;
+    }
+    
+    if(!$modified) return false;
+    
+    // Add the completed task to completed array
+    if($completedTask !== null) {
+        $completedArray[] = $completedTask;
+    }
+    
+    // Encode both arrays back to JSON
+    $mod_tasks = json_encode($newTasksArray);
+    $mod_completed = json_encode($completedArray);
+    
+    $updateSql = "UPDATE tasksdb SET tasks = ?, completed = ? WHERE id = ?";
+    $updateStmt = $this->con->prepare($updateSql);
+    if(!$updateStmt) return false;
+    
+    // Pass the JSON encoded completed array, not the plain string
+    $updateStmt->bind_param("sss", $mod_tasks, $mod_completed, $userId);
+    $result = $updateStmt->execute();
+    $updateStmt->close();
+    
+    return $result;
+}
+
+    public function get_tasks($userId, $all) {
+    if(empty($userId)) return $all === 'all' ? [] : ($all === 'total' ? 0 : []);
+    
+    if($all === 'all') {
+        $sql = "SELECT id, tasks, completed, total, description FROM tasksdb WHERE id = ?";
+        $stmt = $this->con->prepare($sql);
+        if(!$stmt) return [];
+        
+        $stmt->bind_param("s", $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $data = $res->fetch_assoc();
+        $stmt->close();
+        
+        return $data ?: [];
+    }
+    
+    $column = $all;
+    if(!in_array($all, ['tasks', 'completed', 'total', 'description', ''])) {
+        $column = 'tasks';
+    }
+    
+    $sql = "SELECT $column FROM tasksdb WHERE id = ?";
+    $stmt = $this->con->prepare($sql);
+    if(!$stmt) return $all === 'total' ? 0 : [];
+    
+    $stmt->bind_param("s", $userId);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $data = $res->fetch_assoc();
+    $stmt->close();
+    
+    if(!$data || !isset($data[$column])) {
+        return $all === 'total' ? 0 : [];
+    }
+    
+    if($all === 'total') {
+        return (int)$data[$column];
+    }
+    
+    $result = json_decode($data[$column], true);
+    return is_array($result) ? $result : [];
+}
+
 }

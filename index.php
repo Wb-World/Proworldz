@@ -1645,7 +1645,7 @@ img {
     <section class="stats">
         <div class="stats-container">
             <div class="stat-item">
-                <div class="stat-number">10K+</div>
+                <div class="stat-number">30K+</div>
                 <div class="stat-label">Active Students</div>
             </div>
             <div class="stat-item">
@@ -1657,7 +1657,8 @@ img {
                 <div class="stat-label">Success Rate</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">24/7</div>
+                <!-- <div class="stat-number">24/7</div> -->
+                 <div style="animation: none !important; font-size: 3rem !important; background: linear-gradient(135deg, var(--primary-red), var(--secondary-red)) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important;margin-bottom:8px">24/7</div>
                 <div class="stat-label">Support Available</div>
             </div>
         </div>

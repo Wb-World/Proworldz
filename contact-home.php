@@ -733,7 +733,7 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, li, a {
                     <i class="fas fa-envelope"></i>
                 </div>
                 <h3>Email</h3>
-                <p>support@proworldz.com</p>
+                <p>Proworldzacademy@gmail.com</p>
             </div>
 
             <div class="contact-card fade-in-up">

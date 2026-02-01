@@ -1718,19 +1718,19 @@
                 <!-- Slide 1 -->
                 <div class="mentor-slide">
                     <div class="mentor-image-container">
-                        <img src="" class="mentor-image" alt="Mentor">
+                        <img src="images/outer/jg.png" class="mentor-image" alt="Mentor">
                     </div>
                     <div class="mentor-content">
                         <h3 class="mentor-name">Jaiganesh.L</h3>
-                        <div class="mentor-role">Senior Cybersecurity Researcher</div>
+                        <div class="mentor-role">Founder and CEO of Secure Worldz</div>
                         <div class="mentor-expertise">
-                            <span class="expertise-tag">Network Security</span>
-                            <span class="expertise-tag">Penetration Testing</span>
-                            <span class="expertise-tag">Ethical Hacking</span>
-                            <span class="expertise-tag">Incident Response</span>
+                            <span class="expertise-tag">Technology speaker</span>
+                            <span class="expertise-tag">Ethical hacker</span>
+                            <span class="expertise-tag">AI developer</span>
+                            <span class="expertise-tag">Business growth speaker</span>
                         </div>
                         <p class="mentor-description">
-                            With over 7+ years of experience in cybersecurity, Alex has worked with Fortune 500 companies to strengthen their security infrastructure. He holds multiple certifications including CISSP, CEH, and OSCP. Alex specializes in vulnerability assessment and penetration testing, having discovered critical security flaws in major financial institutions.
+                            With over 10+ years of experience in cybersecurity, Alex has worked with Fortune 500 companies to strengthen their security infrastructure. He holds multiple certifications including CISSP, CEH, and OSCP. Alex specializes in vulnerability assessment and penetration testing, having discovered critical security flaws in major financial institutions.
                         </p>
                         <div class="mentor-quote">
                             "Security is not a product, but a process. My goal is to teach students how to think like both defender and attacker."
@@ -1745,7 +1745,7 @@
                     </div>
                     <div class="mentor-content">
                         <h3 class="mentor-name">Mohamed hathim.A</h3>
-                        <div class="mentor-role">Senior Cybersecurity Researcher</div>
+                        <div class="mentor-role">CEO of Secure Worldz</div>
                         <div class="mentor-expertise">
                             <span class="expertise-tag">Network Security</span>
                             <span class="expertise-tag">Penetration Testing</span>

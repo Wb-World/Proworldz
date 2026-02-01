@@ -1,974 +1,864 @@
-<?php
-session_start();
-// if(!isset($_SESSION['current-student'])) header("Location: login.php");
-?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programming Tasks | ProWorldz</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Programming Tasks | Proworldz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #6C63FF;
-            --secondary: #36D1DC;
-            --dark: #0F0F23;
-            --card-bg: #16162D;
-            --accent: #FF6B9D;
-            --success: #4ECDC4;
-            --warning: #FFD166;
-            --text: #FFFFFF;
-            --text-secondary: #A0A0C0;
-            --border: #2A2A4A;
-            --glow-primary: rgba(108, 99, 255, 0.4);
-            --glow-secondary: rgba(54, 209, 220, 0.4);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            border-color: rgba(229, 231, 235, 0.3);
+            outline-color: rgba(156, 163, 175, 0.5);
+            overscroll-behavior: none;
         }
 
         body {
-            background-color: var(--dark);
-            color: var(--text);
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0d1015;
+            color: #f8fafc;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-width: 1280px;
+            overflow-x: auto;
+        }
+
+        @font-face {
+            font-family: "Rebels";
+            src: url("https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2") format("woff2");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --radius: 0.625rem;
+            --background: #0d1015;
+            --foreground: #f8fafc;
+            --card: #1a1d24;
+            --card-foreground: #f8fafc;
+            --popover: #1a1d24;
+            --popover-foreground: #f8fafc;
+            --primary: #6366f1;
+            --primary-foreground: #ffffff;
+            --secondary: #2d3748;
+            --secondary-foreground: #f8fafc;
+            --muted: #2d3748;
+            --muted-foreground: #94a3b8;
+            --accent: rgba(248, 250, 252, 0.05);
+            --accent-foreground: #f8fafc;
+            --border: rgba(255, 255, 255, 0.1);
+            --pop: rgba(255, 255, 255, 0.025);
+            --input: rgba(255, 255, 255, 0.15);
+            --ring: rgba(148, 163, 184, 0.5);
+            
+            --success: #10b981;
+            --destructive: #ef4444;
+            --warning: #f59e0b;
+            
+            --chart-1: #6366f1;
+            --chart-2: #10b981;
+            --chart-3: #f59e0b;
+            --chart-4: #8b5cf6;
+            --chart-5: #ec4899;
+            
+            --sidebar: #1a1d24;
+            --sidebar-foreground: #f8fafc;
+            --sidebar-primary: #6366f1;
+            --sidebar-primary-foreground: #ffffff;
+            --sidebar-accent: rgba(248, 250, 252, 0.05);
+            --sidebar-accent-foreground: #f8fafc;
+            --sidebar-border: rgba(255, 255, 255, 0.1);
+            --sidebar-ring: rgba(148, 163, 184, 0.5);
+            
+            --gap: 1.5rem;
+            --sides: 1.5rem;
+            --header-mobile: 3.8rem;
+        }
+
+        .desktop-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--gap);
             min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
+            padding: var(--sides);
+            background-color: var(--background);
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(54, 209, 220, 0.1) 0%, transparent 50%);
-            z-index: -1;
-        }
-
-        .container {
+        .desktop-sidebar {
             display: flex;
-            min-height: 100vh;
+            flex-direction: column;
+            gap: var(--gap);
         }
 
-        .sidebar {
-            width: 250px;
-            background-color: rgba(22, 22, 45, 0.95);
-            padding: 25px 20px;
-            border-right: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            height: 100vh;
-            z-index: 100;
-            transition: width 0.3s ease;
-        }
-
-        .logo {
+        .desktop-main {
             display: flex;
-            align-items: center;
-            margin-bottom: 40px;
-            padding-left: 10px;
+            flex-direction: column;
+            gap: var(--gap);
         }
 
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border-radius: 10px;
-            display: flex;
+        .font-display {
+            font-family: 'Rebels', 'Roboto Mono', monospace;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .hidden { display: none !important; }
+        .block { display: block; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        .rounded-lg { border-radius: var(--radius); }
+        .rounded-md { border-radius: calc(var(--radius) - 2px); }
+        .rounded-sm { border-radius: calc(var(--radius) - 4px); }
+        .rounded-full { border-radius: 9999px; }
+        .border { border-width: 1px; }
+        .border-2 { border-width: 2px; }
+        .border-b { border-bottom-width: 1px; }
+        .border-t { border-top-width: 1px; }
+
+        .bg-background { background-color: var(--background); }
+        .bg-foreground { background-color: var(--foreground); }
+        .bg-primary { background-color: var(--primary); }
+        .bg-secondary { background-color: var(--secondary); }
+        .bg-muted { background-color: var(--muted); }
+        .bg-accent { background-color: var(--accent); }
+        .bg-card { background-color: var(--card); }
+        .bg-success { background-color: var(--success); }
+        .bg-warning { background-color: var(--warning); }
+        .bg-destructive { background-color: var(--destructive); }
+        .bg-sidebar { background-color: var(--sidebar); }
+        .bg-sidebar-primary { background-color: var(--sidebar-primary); }
+        .bg-sidebar-accent { background-color: var(--sidebar-accent); }
+
+        .text-foreground { color: var(--foreground); }
+        .text-primary { color: var(--primary); }
+        .text-primary-foreground { color: var(--primary-foreground); }
+        .text-secondary { color: var(--secondary); }
+        .text-secondary-foreground { color: var(--secondary-foreground); }
+        .text-muted { color: var(--muted); }
+        .text-muted-foreground { color: var(--muted-foreground); }
+        .text-success { color: var(--success); }
+        .text-warning { color: var(--warning); }
+        .text-destructive { color: var(--destructive); }
+        .text-sidebar-foreground { color: var(--sidebar-foreground); }
+        .text-sidebar-primary { color: var(--sidebar-primary); }
+        .text-sidebar-primary-foreground { color: var(--sidebar-primary-foreground); }
+
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-5xl { font-size: 3rem; line-height: 1; }
+
+        .font-normal { font-weight: 400; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+
+        .uppercase { text-transform: uppercase; }
+        .italic { font-style: italic; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+
+        .opacity-0 { opacity: 0; }
+        .opacity-50 { opacity: 0.5; }
+        .opacity-100 { opacity: 1; }
+
+        .cursor-pointer { cursor: pointer; }
+        .select-none { user-select: none; }
+
+        .transition-all { transition: all 0.3s ease; }
+        .transition-colors { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+        .transition-opacity { transition: opacity 0.3s ease; }
+        .transition-transform { transition: transform 0.3s ease; }
+
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-gap { gap: var(--gap); }
+
+        .p-0 { padding: 0; }
+        .p-1 { padding: 0.25rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-auto { margin-top: auto; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .ml-auto { margin-left: auto; }
+        .mr-1 { margin-right: 0.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        .mr-3 { margin-right: 0.75rem; }
+
+        .space-y-1 > * + * { margin-top: 0.25rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+
+        .flex-1 { flex: 1 1 0%; }
+        .flex-col { flex-direction: column; }
+        .flex-row { flex-direction: row; }
+        .items-start { align-items: flex-start; }
+        .items-center { align-items: center; }
+        .items-baseline { align-items: baseline; }
+        .items-stretch { align-items: stretch; }
+        .justify-start { justify-content: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+
+        .min-w-0 { min-width: 0; }
+        .max-w-xs { max-width: 20rem; }
+        .max-w-sm { max-width: 24rem; }
+        .max-w-md { max-width: 28rem; }
+        .max-w-max { max-width: max-content; }
+
+        .w-14 { width: 3.5rem; }
+        .w-16 { width: 4rem; }
+        .w-56 { width: 14rem; }
+        .w-80 { width: 20rem; }
+
+        .h-5 { height: 1.25rem; }
+        .h-6 { height: 1.5rem; }
+        .h-7 { height: 1.75rem; }
+        .h-8 { height: 2rem; }
+        .h-10 { height: 2.5rem; }
+        .h-12 { height: 3rem; }
+        .h-14 { height: 3.5rem; }
+        .h-32 { height: 8rem; }
+
+        .size-3 { width: 0.75rem; height: 0.75rem; }
+        .size-4 { width: 1rem; height: 1rem; }
+        .size-5 { width: 1.25rem; height: 1.25rem; }
+        .size-6 { width: 1.5rem; height: 1.5rem; }
+        .size-7 { width: 1.75rem; height: 1.75rem; }
+        .size-9 { width: 2.25rem; height: 2.25rem; }
+        .size-10 { width: 2.5rem; height: 2.5rem; }
+        .size-12 { width: 3rem; height: 3rem; }
+        .size-14 { width: 3.5rem; height: 3.5rem; }
+        .size-16 { width: 4rem; height: 4rem; }
+
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .badge {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12px;
-            box-shadow: 0 0 15px var(--glow-primary);
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid transparent;
         }
 
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .badge-default {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            border-color: var(--primary);
         }
 
-        .nav-menu {
-            list-style: none;
+        .badge-secondary {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+            border-color: var(--border);
+        }
+
+        .badge-outline {
+            background-color: transparent;
+            color: currentColor;
+            border-color: currentColor;
+        }
+
+        .badge-outline-success {
+            background-color: transparent;
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .badge-outline-warning {
+            background-color: transparent;
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .badge-destructive {
+            background-color: var(--destructive);
+            color: white;
+            border-color: var(--destructive);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: calc(var(--radius) - 2px);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-default {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .button-default:hover:not(:disabled) {
+            background-color: color-mix(in srgb, var(--primary) 90%, black);
+        }
+
+        .button-secondary {
+            background-color: var(--secondary);
+            color: var(--secondary-foreground);
+            border-color: var(--border);
+        }
+
+        .button-secondary:hover:not(:disabled) {
+            background-color: color-mix(in srgb, var(--secondary) 90%, black);
+        }
+
+        .button-ghost {
+            background-color: transparent;
+            color: currentColor;
+        }
+
+        .button-ghost:hover:not(:disabled) {
+            background-color: var(--accent);
+        }
+
+        .button-outline {
+            background-color: transparent;
+            color: currentColor;
+            border-color: currentColor;
+        }
+
+        .button-outline:hover:not(:disabled) {
+            background-color: var(--accent);
+        }
+
+        .button-sm {
+            height: 2rem;
+            padding: 0 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .button-md {
+            height: 2.5rem;
+            padding: 0 1rem;
+            font-size: 0.875rem;
+        }
+
+        .button-lg {
+            height: 3rem;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+        }
+
+        .button-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-title span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--muted-foreground);
         }
 
         .nav-item {
-            margin-bottom: 10px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: calc(var(--radius) - 2px);
+            text-decoration: none;
+            color: var(--sidebar-foreground);
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover {
+            background-color: var(--sidebar-accent);
         }
 
         .nav-item.active {
-            background-color: rgba(108, 99, 255, 0.2);
-            border-left: 3px solid var(--primary);
-        }
-
-        .nav-item:hover:not(.active) {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
+            background-color: var(--sidebar-primary);
+            color: var(--sidebar-primary-foreground);
         }
 
         .nav-icon {
-            margin-right: 15px;
-            font-size: 1.2rem;
-            width: 24px;
-            text-align: center;
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
         }
 
-        .nav-text {
-            transition: opacity 0.3s ease;
+        .nav-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
         }
 
-        .profile-section {
-            position: absolute;
-            bottom: 30px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: rgba(40, 40, 70, 0.5);
-            border-radius: 15px;
-            border: 1px solid var(--border);
-        }
-
-        .profile-img {
-            width: 50px;
-            height: 50px;
+        .bullet {
+            width: 0.5rem;
+            height: 0.5rem;
             border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
+            background-color: var(--muted-foreground);
         }
 
-        .profile-info h4 {
-            font-size: 1rem;
-            margin-bottom: 5px;
+        .bullet-success {
+            background-color: var(--success);
         }
 
-        .profile-info p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .bullet-sm {
+            width: 0.375rem;
+            height: 0.375rem;
         }
 
-        .main-content {
-            flex: 1;
-            margin-left: 250px;
-            padding: 30px;
-            transition: margin-left 0.3s ease;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .page-title h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .page-title p {
-            color: var(--text-secondary);
-            font-size: 1rem;
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        .animate-slideUp {
+            animation: slideUp 0.3s ease-out;
         }
 
-        .profile-avatar-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .animate-slideDown {
+            animation: slideDown 0.3s ease-out;
         }
 
-        .notification-btn {
-            background-color: rgba(40, 40, 70, 0.5);
-            border-radius: 12px;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border);
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
 
-        .notification-btn:hover {
-            background-color: rgba(108, 99, 255, 0.2);
-            transform: translateY(-2px);
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--accent);
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: bold;
-            animation: pulse 2s infinite;
+        ::-webkit-scrollbar-thumb {
+            background: var(--muted);
+            border-radius: 3px;
         }
 
-        .header-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 10px var(--glow-primary);
-        }
-
-        .header-avatar-info {
-            text-align: right;
-        }
-
-        .header-avatar-info h4 {
-            font-size: 1rem;
-            margin-bottom: 3px;
-        }
-
-        .header-avatar-info p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 20px 20px 0 0;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stat-info h3 {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            background: rgba(108, 99, 255, 0.1);
-            color: var(--primary);
-        }
-
-        .tasks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted-foreground);
         }
 
         .task-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
+            background-color: var(--card);
             border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
             transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .task-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 20px 20px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 20cap;
         }
 
         .task-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .task-difficulty-easy {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .task-difficulty-medium {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .task-difficulty-hard {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--destructive);
+        }
+
+        .task-points {
+            background: linear-gradient(45deg, var(--primary), var(--chart-2));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
         }
 
         .task-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 20px;
-        }
-
-        .task-title h3 {
-            font-size: 1.3rem;
-            margin-bottom: 8px;
-            color: var(--text);
-        }
-
-        .task-difficulty {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .difficulty-easy {
-            background: rgba(78, 205, 196, 0.2);
-            color: var(--success);
-        }
-
-        .difficulty-medium {
-            background: rgba(255, 209, 102, 0.2);
-            color: var(--warning);
-        }
-
-        .difficulty-hard {
-            background: rgba(255, 107, 157, 0.2);
-            color: var(--accent);
-        }
-
-        .task-points {
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .task-description {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .task-details {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .task-detail {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .task-detail i {
-            color: var(--primary);
+            gap: 1rem;
         }
 
         .task-actions {
             display: flex;
-            gap: 12px;
+            gap: 0.75rem;
+            margin-top: auto;
         }
 
-        .task-btn {
+        .task-actions .button {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-
-        .solve-btn {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-        }
-
-        .solve-btn:hover {
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px var(--glow-primary);
-        }
-
-        .preview-btn {
-            background: rgba(40, 40, 70, 0.5);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .preview-btn:hover {
-            background: rgba(108, 99, 255, 0.1);
-            border-color: var(--primary);
         }
 
         .completed-badge {
-            background: rgba(78, 205, 196, 0.2);
+            background: rgba(16, 185, 129, 0.15);
             color: var(--success);
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             display: flex;
             align-items: center;
-            gap: 8px;
-            width: 100%;
             justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
         }
-
-        .section-title {
-            font-size: 1.5rem;
+        
+        .eagle-coins {
+            /* background: linear-gradient(45deg, #f59e0b, #d97706); */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
             font-weight: 600;
-            margin: 40px 0 20px;
-            color: var(--text);
-            display: flex;
+            font-size: 0.875rem;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: var(--primary);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--border);
-            margin-top: 30px;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
-        }
-
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .sidebar {
-                width: 220px;
-            }
-            
-            .main-content {
-                margin-left: 220px;
-                padding: 20px;
-            }
-            
-            .tasks-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header-avatar-info {
-                display: none;
-            }
-            
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
-            
-            .header-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body::before {
-                content: 'This dashboard is optimized for desktop devices only.';
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                text-align: center;
-                padding: 20px;
-                background: var(--dark);
-                z-index: 1000;
-            }
-            
-            .container {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .tasks-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .task-header {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .task-actions {
-                flex-direction: column;
-            }
+            gap: 0.5rem;
+            width: fit-content;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar" id="sidebar">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-graduation-cap"></i>
+    <div class="desktop-container">
+        <div class="desktop-sidebar">
+            <div class="card">
+                <div class="p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="size-12 flex items-center justify-center bg-primary rounded-lg">
+                            <svg class="size-8 text-primary-foreground" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 6.559 6.166 8.16l-.22 3.536 1.76 1.587.346 1.729L10 15.42l1.949-.408.345-1.729 1.76-1.587-.22-3.536L10 6.56Zm0-4.039 1.556 1.791 2.326-.691-.833 1.996 2.703 1.131A3.055 3.055 0 0 1 18.8 9.811c0 1.666-1.32 3.018-2.954 3.065l-1.681 1.461-.503 2.42L10 17.48l-3.661-.723-.503-2.42-1.682-1.461C2.52 12.829 1.2 11.477 1.2 9.81A3.055 3.055 0 0 1 4.25 6.747l2.703-1.131-.833-1.996 2.325.691L10 2.52Zm-.597 7.04c0 .754-.566 1.383-1.336 1.383-.785 0-1.367-.629-1.367-1.383h2.703Zm-.597 2.451h2.389L10 13.913 8.806 12.01ZM13.3 9.56c0 .754-.581 1.383-1.367 1.383-.77 0-1.336-.629-1.336-1.383H13.3Zm-10.198.251c0 .519.361.959.832 1.085l.173-2.2A1.111 1.111 0 0 0 3.102 9.81Zm12.964 1.085c.471-.126.833-.566.833-1.085 0-.581-.44-1.052-1.006-1.115l.173 2.2Z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-2xl font-display"><?= $_SESSION['c-user']; ?></div>
+                            <div class="text-xs uppercase text-muted-foreground"><?= $_SESSION['c-course']; ?></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="logo-text">EduDash</div>
             </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="dashboard.php" class="nav-link">
-                        <i class="fas fa-tachometer-alt nav-icon"></i>
-                        <span class="nav-text">Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="ourcourse.php" class="nav-link">
-                        <i class="fas fa-book nav-icon"></i>
-                        <span class="nav-text">Courses</span>
-                    </a>
-                </li>
-                <li class="nav-item active">
-                    <a href="tasks.php" class="nav-link">
-                        <i class="fas fa-tasks nav-icon"></i>
-                        <span class="nav-text">Tasks</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="leaderboard.php" class="nav-link">
-                        <i class="fas fa-chart-line nav-icon"></i>
-                        <span class="nav-text">Leader board</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="lab.php" class="nav-link">
-                        <i class="fas fa-flask nav-icon"></i>
-                        <span class="nav-text">Laboratory</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="setting.php" class="nav-link">
-                        <i class="fas fa-cog nav-icon"></i>
-                        <span class="nav-text">Settings</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="profile-section">
-                <div class="profile-img">
-                    JS
-                </div>
-                <div class="profile-info">
-                    <h4>John Smith</h4>
-                    <p>Eagle Points: 1,250</p>
+
+            <div class="card">
+                <div class="p-3">
+                    <div class="nav-section">
+                        <div class="space-y-1" style="height: 45cap;">
+                            <a href="dashboard.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M5.833 3.333h-2.5v13.334h2.5m8.333-13.334h2.5v13.334h-2.5"/>
+                                </svg>
+                                <span class="nav-label">Overview</span>
+                            </a>
+                            <a href="lab.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-width="1.667" d="M16.228 3.772c1.31 1.31-.416 5.16-3.856 8.6-3.44 3.44-7.29 5.167-8.6 3.856-1.31-1.31.415-5.16 3.855-8.6 3.44-3.44 7.29-5.167 8.6-3.856Z"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M16.228 16.228c-1.31 1.31-5.161-.416-8.601-3.855-3.44-3.44-5.166-7.29-3.856-8.601 1.31-1.31 5.162.416 8.601 3.855 3.44 3.44 5.166 7.29 3.856 8.601Z"/>
+                                </svg>
+                                <span class="nav-label">Laboratory</span>
+                            </a>
+                            <a href="ourcourse.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                    <path stroke-width="1.5" d="M16.667 15V5.833a2.5 2.5 0 0 0-2.5-2.5H5.833a2.5 2.5 0 0 0-2.5 2.5v10a2.5 2.5 0 0 0 2.5 2.5h10"/>
+                                    <path stroke-width="1.5" d="M6.667 3.333v13.334"/>
+                                    <path stroke-width="1.5" d="M10 6.667h3.333"/>
+                                    <path stroke-width="1.5" d="M10 10h3.333"/>
+                                </svg>
+                                <span class="nav-label">Courses</span>
+                            </a>
+                            <a href="assignment.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                    <path stroke-width="1.5" d="M16.667 16.667V5a2.5 2.5 0 0 0-2.5-2.5H6.667a2.5 2.5 0 0 0-2.5 2.5v11.667"/>
+                                    <path stroke-width="1.5" d="M6.667 2.5v15"/>
+                                    <path stroke-width="1.5" d="M11.667 4.167l4.166 4.166" stroke-linecap="round"/>
+                                    <path stroke-width="1.5" d="M13.333 8.333l-2.5 2.5-2.5-2.5 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="nav-label">Assignments</span>
+                            </a>
+                            <a href="assignment.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+    <!-- Book -->
+                                <path stroke-width="1.5" d="M5 3.333h8.333a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5H5V3.333z"/>
+                                <path stroke-width="1.5" d="M13.333 3.333v13.334"/>
+                                
+                                <!-- Pen -->
+                                <path stroke-width="1.5" d="M3.333 14.167l1.667-1.667" stroke-linecap="round"/>
+                                <path stroke-width="1.5" d="M8.333 10l-3.333 3.333" stroke-linecap="round"/>
+                                
+                                <!-- Text lines -->
+                                <path stroke-width="1.2" d="M8.333 7.5h3.334" stroke-linecap="round"/>
+                                <path stroke-width="1.2" d="M8.333 9.167h5" stroke-linecap="round"/>
+                                <path stroke-width="1.2" d="M8.333 10.833h4.167" stroke-linecap="round"/>
+                            </svg>
+                                <span class="nav-label">Tasks</span>
+                            </a>
+                            <a href="maintanance.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>
+                                </svg>
+                                <span class="nav-label">Devices</span>
+                            </a>
+                            <a href="leaderboard.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-width="1.667" d="M10 2.5l3.333 6.667H6.667L10 2.5z"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M3.333 10.833h13.334"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M5.833 13.333h8.334"/>
+                                    <path stroke="currentColor" stroke-width="1.667" d="M7.5 15.833h5"/>
+                                </svg>
+                                <span class="nav-label">Leaderboard</span>
+                            </a>
+                            <a href="maintanance.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 3.333H4.166v7.5h11.667v-7.5H10Zm0 0V1.667m-6.667 12.5 1.25-1.25m12.083 1.25-1.25-1.25M7.5 6.667V7.5m5-.833V7.5M5 10.833V12.5a5 5 0 0 0 10 0v-1.667"/>
+                                </svg>
+                                <span class="nav-label">Security status</span>
+                            </a>
+                            <a href="contactus.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+                                    <path fill="currentColor" d="M17.5 4.167h.833v-.834H17.5v.834Zm0 11.666v.834h.833v-.834H17.5Zm-15 0h-.833v.834H2.5v-.834Zm0-11.666v-.834h-.833v.834H2.5Zm7.5 6.666-.528.645.528.432.528-.432-.528-.645Zm7.5-6.666h-.833v11.666h1.666V4.167H17.5Zm0 11.666V15h-15V16.667h15v-.834Zm-15 0h.833V4.167H1.667v11.666H2.5Zm0-11.666V5h15V3.333h-15v.834Zm7.5 6.666.528-.645-7.084-5.795-.527.645-.528.645 7.083 5.795.528-.645Zm7.083-5.795-.527-.645-7.084 5.795.528.645.528.645 7.083-5.795-.528-.645Z"/>
+                                </svg>
+                                <span class="nav-label">Contact support</span>
+                            </a>
+                            <a href="https://dragotool.shop/"
+                                class="nav-item"
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
+                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
+                                </svg>
+                                <span class="nav-label">Drago Tool</span>
+                            </a>
+
+                            <a href="logout.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
+                                    <path d="M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z"/>
+                                </svg>
+                                <span class="nav-label">Logout</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="main-content" id="mainContent">
-            <div class="header">
-                <div class="page-title">
-                    <h1>Programming Tasks</h1>
-                    <p>Complete challenges to earn Eagle Points and improve your skills</p>
-                </div>
-                
-                <div class="header-actions">
-                    <div class="profile-avatar-container">
-                        <div class="header-avatar">
-                            JS
+
+        <div class="desktop-main">
+            <div class="card animate-fadeIn">
+                <div class="p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="size-9 rounded bg-primary flex items-center justify-center">
+                            <svg class="size-5 text-primary-foreground" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                <path stroke-width="1.5" d="M16.667 16.667V5a2.5 2.5 0 0 0-2.5-2.5H6.667a2.5 2.5 0 0 0-2.5 2.5v11.667"/>
+                                <path stroke-width="1.5" d="M6.667 2.5v15"/>
+                                <path stroke-width="1.5" d="M11.667 4.167l4.166 4.166" stroke-linecap="round"/>
+                                <path stroke-width="1.5" d="M13.333 8.333l-2.5 2.5-2.5-2.5 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </div>
-                        <div class="header-avatar-info">
-                            <h4>John Smith</h4>
-                            <p>Eagle Points: 1,250</p>
-                        </div>
-                        <div class="notification-btn" id="notificationBtn">
-                            <i class="fas fa-bell"></i>
-                            <div class="notification-badge">3</div>
+                        <div>
+                            <h1 class="text-3xl font-display">Programming Tasks</h1>
+                            <div class="text-sm text-muted-foreground">Complete challenges to earn Eagle Points</div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="stats-grid fade-in">
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>Total Eagle Points</h3>
-                            <div class="stat-value">1,250</div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div class="card animate-fadeIn">
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="bullet"></div>
+                            <span class="text-sm font-medium uppercase">Total Tasks</span>
                         </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="bg-accent p-4">
+                        <div class="flex items-center">
+                            <span id="total-tasks" class="text-5xl font-display text-primary">0</span>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-sm font-medium text-muted-foreground tracking-wide">AVAILABLE TASKS</p>
                         </div>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-info">
-                            <h3>Tasks Completed</h3>
-                            <div class="stat-value">8/15</div>
+
+                <div class="card animate-fadeIn" style="animation-delay: 0.1s">
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="bullet bullet-success"></div>
+                            <span class="text-sm font-medium uppercase">Completed</span>
                         </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="bg-accent p-4">
+                        <div class="flex items-center">
+                            <span id="completed-tasks" class="text-5xl font-display text-success">0</span>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-sm font-medium text-muted-foreground tracking-wide">TASKS SOLVED</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <h2 class="section-title"><i class="fas fa-code"></i> Python Challenges</h2>
-            <div class="tasks-grid fade-in">
-                <!-- Task 1 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <div class="task-title">
-                            <h3>Fibonacci Sequence Generator</h3>
-                            <span class="task-difficulty difficulty-easy">Easy</span>
-                        </div>
-                        <div class="task-points">
-                            <i class="fas fa-star"></i> 100 Points
+
+                <div class="card animate-fadeIn" style="animation-delay: 0.2s">
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="bullet"></div>
+                            <span class="text-sm font-medium uppercase">Pendings</span>
                         </div>
                     </div>
-                    
-                    <p class="task-description">
-                        Write a function that generates the first N numbers of the Fibonacci sequence.
-                        The sequence starts with 0 and 1, and each subsequent number is the sum of the previous two.
-                    </p>
-                    
-                    <div class="task-actions">
-                        <button class="task-btn solve-btn" onclick="openTask(1)">
-                            <i class="fas fa-play"></i> Solve Challenge
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Task 2 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <div class="task-title">
-                            <h3>Palindrome Checker</h3>
-                            <span class="task-difficulty difficulty-easy">Easy</span>
+                    <div class="bg-accent p-4">
+                        <div class="flex items-center">
+                            <span id="pendings" class="text-5xl font-display text-warning">0</span>
                         </div>
-                        <div class="task-points">
-                            <i class="fas fa-star"></i> 75 Points
+                        <div class="mt-2">
+                            <p class="text-sm font-medium text-muted-foreground tracking-wide">Pending tasks</p>
                         </div>
-                    </div>
-                    
-                    <p class="task-description">
-                        Create a function that checks if a given string is a palindrome.
-                        A palindrome reads the same forwards and backwards, ignoring case and spaces.
-                    </p>
-                    
-                    <div class="task-actions">
-                        <button class="task-btn solve-btn" onclick="openTask(2)">
-                            <i class="fas fa-play"></i> Solve Challenge
-                        </button>
-    
-                    </div>
-                </div>
-                
-                <!-- Task 3 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <div class="task-title">
-                            <h3>Prime Number Finder</h3>
-                            <span class="task-difficulty difficulty-medium">Medium</span>
-                        </div>
-                        <div class="task-points">
-                            <i class="fas fa-star"></i> 150 Points
-                        </div>
-                    </div>
-                    
-                    <p class="task-description">
-                        Implement a function that finds all prime numbers up to a given limit N.
-                        Use the Sieve of Eratosthenes algorithm for optimal performance.
-                    </p>
-                    
-                    <div class="task-actions">
-                        <button class="task-btn solve-btn" onclick="openTask(3)">
-                            <i class="fas fa-play"></i> Solve Challenge
-                        </button>
-                        
-                    </div>
-                </div>
-                
-                <!-- Task 4 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <div class="task-title">
-                            <h3>Binary Search Algorithm</h3>
-                            <span class="task-difficulty difficulty-medium">Medium</span>
-                        </div>
-                        <div class="task-points">
-                            <i class="fas fa-star"></i> 200 Points
-                        </div>
-                    </div>
-                    
-                    <p class="task-description">
-                        Implement the binary search algorithm to find an element in a sorted list.
-                        Return the index of the element if found, or -1 if not present.
-                    </p>
-                    
-                    <div class="task-actions">
-                        <button class="task-btn solve-btn" onclick="openTask(4)">
-                            <i class="fas fa-play"></i> Solve Challenge
-                        </button>
-                        
-                    </div>
-                </div>
-                
-                <!-- Task 5 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <div class="task-title">
-                            <h3>Matrix Multiplication</h3>
-                            <span class="task-difficulty difficulty-hard">Hard</span>
-                        </div>
-                        <div class="task-points">
-                            <i class="fas fa-star"></i> 300 Points
-                        </div>
-                    </div>
-                    
-                    <p class="task-description">
-                        Write a function that multiplies two matrices together.
-                        Handle edge cases for incompatible dimensions and implement efficient multiplication.
-                    </p>
-                    
-                    
-                    <div class="task-actions">
-                        <button class="task-btn solve-btn" onclick="openTask(5)">
-                            <i class="fas fa-play"></i> Solve Challenge
-                        </button>
-                        
-                    </div>
-                </div>
-                
-                <!-- Task 6 (Completed) -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <div class="task-title">
-                            <h3>FizzBuzz</h3>
-                            <span class="task-difficulty difficulty-easy">Easy</span>
-                        </div>
-                        <div class="task-points">
-                            <i class="fas fa-star"></i> 50 Points
-                        </div>
-                    </div>
-                    
-                    <p class="task-description">
-                        Classic FizzBuzz problem: Print numbers from 1 to N, but for multiples of 3 print "Fizz",
-                        for multiples of 5 print "Buzz", and for multiples of both print "FizzBuzz".
-                    </p>
-                    
-                    <div class="task-details">
-                        <div class="task-detail">
-                            <i class="fas fa-code"></i>
-                            <span>Python</span>
-                        </div>
-                        <div class="task-detail">
-                            <i class="fas fa-clock"></i>
-                            <span>5 min</span>
-                        </div>
-                        <div class="task-detail">
-                            <i class="fas fa-users"></i>
-                            <span>98% solved</span>
-                        </div>
-                    </div>
-                    
-                    <div class="completed-badge">
-                        <i class="fas fa-check-circle"></i> Completed ✓
                     </div>
                 </div>
             </div>
-            
-            <div class="footer">
-                <p>© 2026 ProWorldz copyrights reserved. Complete tasks to earn Eagle Points and climb the leaderboard!</p>
+
+            <div id="showall">
+
             </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                document.querySelectorAll('.fade-in').forEach(el => {
-                    el.style.opacity = '1';
-                });
-            }, 300);
-            
-            const notificationBtn = document.getElementById('notificationBtn');
-            
-            notificationBtn.addEventListener('click', showNotifications);
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (this.querySelector('a').getAttribute('href') !== '#') {
-                        return;
-                    }
-                    e.preventDefault();
-                    document.querySelectorAll('.nav-item').forEach(nav => {
-                        nav.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                });
-            });
-        });
+<script>
 
-        function showNotifications() {
-            const badge = notificationBtn.querySelector('.notification-badge');
-            badge.style.display = 'none';
-            alert('New task available: "Graph Traversal Algorithms" - 250 Eagle Points!\nDaily login bonus: 10 Eagle Points added.\nWeekly challenge starting tomorrow!');
-        }
+function render_tasks(title, e_coins, description) {
+    return `<div class="task-card animate-slideUp" style="animation-delay:0.2s"><div class="task-header"><div class="flex-1"><h3 class="text-lg font-semibold mb-2">${title}</h3></div><div style="display:inline-flex;align-items:center;gap:8px;background-color:#8B4513;color:white;padding:4px 12px;border-radius:20px;"><img src="images/coin.png" alt="coin" style="width:16px;height:16px;"><span style="font-weight:600;">${e_coins}</span></div></div><p class="text-sm text-muted-foreground line-clamp-2">${description}</p><div class="task-actions"><button class="button button-default button-md">Solve</button></div></div>`;
+}
 
-        function openTask(taskId) {
-            const taskTitles = [
-                "Fibonacci Sequence Generator",
-                "Palindrome Checker",
-                "Prime Number Finder",
-                "Binary Search Algorithm",
-                "Matrix Multiplication",
-                "FizzBuzz",
-                "SQL Query Optimizer"
-            ];
-            
-            const taskPoints = [100, 75, 150, 200, 300, 50, 180];
-            
-            alert(`Opening "${taskTitles[taskId-1]}" challenge!\n\nYou can earn ${taskPoints[taskId-1]} Eagle Points for completing this task.\n\nRedirecting to coding environment...`);
-            
-            // In a real implementation, this would redirect to the coding interface
-            // window.location.href = `task_editor.php?task=${taskId}`;
-        }
+fetch('https://proworldz.page.gd/api/tasks.php',{method:'POST',headers:{'Content-Type':'application/json'}})
+.then(info=>info.json())
+.then(data=>{
+    console.log(data.status)
+    infos=data.status;
+    let tasksArray=JSON.parse(infos['tasks']);
+    let description=infos['description'];
+    let completed=0;
+    if(infos['completed']&&infos['completed']!=='null'){
+        try{completed=JSON.parse(infos['completed']).length;}catch(e){completed=0;}
+    }
+    document.getElementById('total-tasks').textContent=parseInt(infos['total']);
+    document.getElementById('completed-tasks').textContent=completed;
+    document.getElementById('pendings').textContent=parseInt(infos['total'])-completed;
+    const showallDiv=document.getElementById('showall');
+    showallDiv.innerHTML='';
+    showallDiv.style.display='grid';
+    showallDiv.style.gridTemplateColumns='repeat(3,1fr)';
+    showallDiv.style.gap='20px';
+    showallDiv.style.justifyItems='center';
+    tasksArray.forEach(taskTitle=>{
+        const reward_ecoins=Math.floor(Math.random()*(20-7))+8;
+        showallDiv.innerHTML+=render_tasks(taskTitle,reward_ecoins,description);
+    });
+}).catch(err=>console.log(err));
 
-        function previewTask(taskId) {
-            const taskPreviews = [
-                "Task Preview: Fibonacci Sequence Generator\n\nWrite a function fibonacci(n) that returns a list containing the first n Fibonacci numbers.\n\nExample:\nfibonacci(5) → [0, 1, 1, 2, 3]\n\nConstraints:\n• 1 ≤ n ≤ 1000\n• Must handle large numbers efficiently",
-                
-                "Task Preview: Palindrome Checker\n\nWrite a function is_palindrome(s) that returns True if the string s is a palindrome, False otherwise.\n\nExample:\nis_palindrome('racecar') → True\nis_palindrome('hello') → False\n\nConstraints:\n• Ignore case and non-alphanumeric characters",
-                
-                "Task Preview: Prime Number Finder\n\nWrite a function find_primes(limit) that returns a list of all prime numbers up to limit.\n\nExample:\nfind_primes(20) → [2, 3, 5, 7, 11, 13, 17, 19]\n\nConstraints:\n• 2 ≤ limit ≤ 10^6\n• Must use Sieve of Eratosthenes",
-                
-                "Task Preview: Binary Search Algorithm\n\nWrite a function binary_search(arr, target) that returns the index of target in sorted array arr.\n\nExample:\nbinary_search([1, 3, 5, 7, 9], 5) → 2\nbinary_search([1, 3, 5, 7, 9], 6) → -1\n\nConstraints:\n• arr is sorted in ascending order\n• O(log n) time complexity required",
-                
-                "Task Preview: Matrix Multiplication\n\nWrite a function matrix_multiply(A, B) that returns the product of matrices A and B.\n\nExample:\nmatrix_multiply([[1,2],[3,4]], [[5,6],[7,8]]) → [[19,22],[43,50]]\n\nConstraints:\n• Handle incompatible dimensions appropriately\n• Optimize for large matrices",
-                
-                "Task Preview: FizzBuzz\n\nWrite a function fizzbuzz(n) that prints numbers from 1 to n with FizzBuzz rules.\n\nExample output for n=5:\n1\n2\nFizz\n4\nBuzz\n\nConstraints:\n• 1 ≤ n ≤ 100",
-                
-                "Task Preview: SQL Query Optimizer\n\nGiven a slow SQL query, rewrite it for better performance.\n\nExample query:\nSELECT * FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE country = 'USA');\n\nOptimize using JOINs and proper indexing.\n\nConstraints:\n• Must maintain same result set\n• Improve execution time"
-            ];
-            
-            alert(taskPreviews[taskId-1]);
-        }
-
-        // Simulate earning points animation
-        setInterval(() => {
-            // Randomly update notification badge
-            const badge = notificationBtn.querySelector('.notification-badge');
-            if (Math.random() > 0.8 && badge.style.display !== 'none') {
-                const currentCount = parseInt(badge.textContent);
-                if (currentCount < 9) {
-                    badge.textContent = currentCount + 1;
-                }
-            }
-        }, 30000); // Check every 30 seconds
-    </script>
+</script>
 </body>
 </html>

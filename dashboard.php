@@ -1789,14 +1789,14 @@ if ($maxCoins === 0) {
                                 <span class="nav-label">Contact support</span>
                             </a>
                             <a href="https://dragotool.shop/"
-   class="nav-item"
-   target="_blank"
-   rel="noopener noreferrer">
-    <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
-        <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
-    </svg>
-    <span class="nav-label">Drago Tool</span>
-</a>
+                                class="nav-item"
+                                target="_blank"
+                                rel="noopener noreferrer">
+                                <svg class="nav-icon" viewBox="0 0 640 512" fill="currentColor">
+                                    <path d="M18.32 255.78L192 223.96l-91.28 68.69c-10.08 10.08-2.94 27.31 11.31 27.31h222.7c.94 0 1.78-.23 2.65-.29l-79.21 88.62c-9.85 11.03-2.16 28.11 12.58 28.11 6.34 0 12.27-3.59 15.99-9.26l79.21-88.62c.39.04.78.07 1.18.07h78.65c14.26 0 21.39-17.22 11.32-27.31l-79.2-88.62c.39-.04.78-.07 1.18-.07h78.65c14.26 0 21.39-17.22 11.32-27.31L307.33 9.37c-6.01-6.76-17.64-6.76-23.65 0l-265.38 246.4c-10.08 10.08-2.94 27.31 11.31 27.31h79.21c.39 0 .78-.03 1.17-.07L18.32 255.78z"/>
+                                </svg>
+                                <span class="nav-label">Drago Tool</span>
+                            </a>
 
                             <a href="logout.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 512 512" fill="currentColor">
@@ -2138,7 +2138,7 @@ if ($maxCoins === 0) {
                                     align-items: center;
                                     justify-content: center;
                                 ">
-                                    <img src="images/" alt="Eagle Protector" 
+                                    <img src="images/eaglone/e-protector.png" alt="Eagle Protector" 
                                         style="
                                             max-height: 35cap;margin-bottom: 6cap;
                                             margin-right: 70cap;
