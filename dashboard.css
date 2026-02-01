@@ -1,0 +1,331 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  background:#0e0e0e;
+  color:#fff;
+}
+
+/* Layout */
+.dashboard{
+  display:flex;
+}
+
+.menu{
+    padding-top: 50px;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;
+  background:#121212;
+  padding:20px;
+  height:100vh;
+  position:fixed;
+  top:0;
+  left:0;
+}
+
+.logo{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#ff5722;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:40px;
+}
+
+.sidebar ul{
+  list-style:none;
+}
+
+.sidebar li{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:14px 16px;
+  margin-bottom:10px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.3s ease;
+}
+
+.sidebar li span{
+  font-size:15px;
+}
+
+.sidebar li i{
+  font-size:18px;
+  min-width:22px;
+}
+
+.sidebar li:hover,
+.sidebar li.active{
+  background:#1f1f1f;
+  box-shadow:0 0 12px rgba(255,87,34,.4);
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  padding:30px;
+  width:100%;
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:30px;
+}
+
+.search{
+  background:#1a1a1a;
+  padding:10px 18px;
+  border-radius:30px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:260px;
+}
+
+.search input{
+  background:none;
+  border:none;
+  outline:none;
+  color:#fff;
+  width:100%;
+}
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.profile span{
+  font-size:13px;
+  opacity:.7;
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#ff5722;
+}
+
+/* WELCOME CARD */
+.welcome{
+  background:linear-gradient(135deg,#ff005d,#ff5722);
+  padding:30px;
+  border-radius:20px;
+  margin-bottom:30px;
+  transition:.4s ease;
+}
+
+.welcome h2{
+  margin:10px 0;
+}
+
+.welcome:hover{
+  transform:scale(1.02);
+}
+
+/* SECTION TITLE */
+.section-title{
+  margin:25px 0 15px;
+  color:#ff5722;
+}
+
+/* FINANCE CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#1a1a1a;
+  padding:28px;
+  border-radius:18px;
+  text-align:center;
+  transition:.4s ease;
+}
+
+.card h1{
+  margin-bottom:5px;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 0 22px rgba(255,87,34,.4);
+}
+
+.card.highlight{
+  border:2px solid #ff5722;
+}
+
+/* COURSES */
+.courses{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:20px;
+}
+
+.course{
+  background:#1a1a1a;
+  padding:20px;
+  border-radius:15px;
+  transition:.35s ease;
+}
+
+.course:hover{
+  background:#ff5722;
+  transform:translateY(-6px);
+}
+
+
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  position:relative;
+}
+
+.logout-btn{
+  margin-left:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 14px;
+  border-radius:20px;
+  background:#ff3c00;
+  color:#fff;
+  text-decoration:none;
+  font-size:13px;
+  transition:.3s;
+}
+
+.logout-btn:hover{
+  background:#ff1f00;
+  box-shadow:0 0 15px rgba(255,60,0,.5);
+}
+.menu-btn{
+  display:none;
+  font-size:22px;
+  cursor:pointer;
+  color:#fff;
+}
+@media(max-width:1024px){
+  .sidebar{
+    width:200px;
+  }
+
+  .main{
+    margin-left:200px;
+  }
+
+  .search{
+    width:220px;
+  }
+}
+
+@media(max-width:768px){
+
+  /* Show hamburger */
+  .menu-btn{
+    display:block;
+  }
+
+
+
+  /* Sidebar slide */
+  .sidebar{
+    position:fixed;
+    left:-100%;
+    top:0;
+    width:230px;
+    height:100vh;
+    z-index:1000;
+    transition:.4s ease;
+  }
+
+  .sidebar.active{
+    left:0;
+  }
+
+  /* Main full width */
+  .main{
+    margin-left:0;
+    padding:20px;
+  }
+
+  /* Topbar layout */
+  .topbar{
+    flex-wrap:wrap;
+    gap:15px;
+  }
+
+  .search{
+    width:100%;
+    order:3;
+  }
+
+  .profile{
+    margin-left:auto;
+  }
+
+  /* Cards & courses stack */
+  .cards,
+  .courses{
+    grid-template-columns:1fr;
+  }
+
+  /* Logout smaller */
+  .logout-btn{
+    padding:5px 12px;
+    font-size:12px;
+  }
+  .close-btn{
+    display:block;
+    z-index:1100;
+  }
+
+  .overlay.active{
+    display:block;
+  }
+}
+
+
+/* CLOSE BUTTON */
+.close-btn{
+  display:none;
+  position:absolute;
+  top:18px;
+  right:18px;
+  font-size:22px;
+  cursor:pointer;
+  color:#fff;
+}
+
+/* OVERLAY */
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:900;
+}
+
+
