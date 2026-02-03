@@ -281,13 +281,22 @@ class DBconfig {
         return $stmt->execute();
     }
 
-    public function upload_waiting_assign($userId, $assignmentTitle) {
+    public function upload_waiting_assign($userId, $assignmentTitle, $link, $coin) {
         if (empty($userId) || empty($assignmentTitle)) {
             return false;
         }
         
         $existing = $this->get_waiting_assign($userId);
-        $existing[] = $assignmentTitle;
+        
+        // Store as array, not string
+        $newAssignment = [
+            'title' => $assignmentTitle,
+            'link' => $link,
+            'coin' => $coin
+        ];
+        
+        $existing[] = $newAssignment;
+        
         $jsonData = json_encode($existing);
         
         $sql = "UPDATE users SET waiting_assigns = ? WHERE id = ?";
@@ -300,37 +309,71 @@ class DBconfig {
         $stmt->bind_param("ss", $jsonData, $userId);
         return $stmt->execute();
     }
-
     public function get_waiting_assign($userId) {
-        if (empty($userId)) {
-            return [];
-        }
-        
-        $sql = "SELECT waiting_assigns FROM users WHERE id = ? LIMIT 1";
-        $stmt = $this->con->prepare($sql);
-        
-        if (!$stmt) {
-            return [];
-        }
-        
-        $stmt->bind_param("s", $userId);
-        $stmt->execute();
-        
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        
-        if (!$row || empty($row['waiting_assigns'])) {
-            return [];
-        }
-        
-        $data = json_decode($row['waiting_assigns'], true);
-        return is_array($data) ? $data : [];
+    $sql = "SELECT waiting_assigns FROM users WHERE id = ?";
+    $stmt = $this->con->prepare($sql);
+    
+    if (!$stmt) {
+        return [];
     }
+    
+    $stmt->bind_param("s", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($row = $result->fetch_assoc()) {
+        $data = $row['waiting_assigns'];
+        if (!empty($data)) {
+            $decoded = json_decode($data, true);
+            
+            $assignments = [];
+            
+            // Check if decoded is an array
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    // Check if item is a string (old format: "title:link:coin")
+                    if (is_string($item)) {
+                        $parts = explode(':', $item);
+                        if (count($parts) >= 3) {
+                            $assignments[] = [
+                                'title' => $parts[0], 
+                                'link' => $parts[1],
+                                'coin' => $parts[2]
+                            ];
+                        } else if (count($parts) >= 2) {
+                            $assignments[] = [
+                                'title' => $parts[0], 
+                                'link' => $parts[1],
+                                'coin' => 0
+                            ];
+                        } else {
+                            $assignments[] = [
+                                'title' => $item,
+                                'link' => '',
+                                'coin' => 0
+                            ];
+                        }
+                    } 
+                    // If item is already an array (new format)
+                    else if (is_array($item) && isset($item['title'])) {
+                        $assignments[] = [
+                            'title' => $item['title'] ?? '',
+                            'link' => $item['link'] ?? '',
+                            'coin' => $item['coin'] ?? 0
+                        ];
+                    }
+                }
+            }
+            return $assignments;
+        }
+    }
+    
+    return [];
+}
 
-    public function upload_tasks($userId, $taskNameToRemove) {
+    public function upload_tasks($userId, $taskNameToRemove, $coin) {
     if(empty($userId) || empty($taskNameToRemove)) return false;
     
-    // Get both tasks AND completed columns
     $sql = "SELECT tasks, completed FROM tasksdb WHERE id = ?";
     $stmt = $this->con->prepare($sql);
     if(!$stmt) return false;
@@ -342,11 +385,9 @@ class DBconfig {
     
     if(!$data || !isset($data['tasks']) || empty($data['tasks'])) return false;
     
-    // Decode tasks array
     $tasksArray = json_decode($data['tasks'], true);
     if(!is_array($tasksArray)) return false;
     
-    // Get existing completed tasks or initialize empty array
     $completedArray = [];
     if(isset($data['completed']) && !empty($data['completed'])) {
         $completedArray = json_decode($data['completed'], true);
@@ -380,25 +421,68 @@ class DBconfig {
     
     if(!$modified) return false;
     
-    // Add the completed task to completed array
     if($completedTask !== null) {
         $completedArray[] = $completedTask;
     }
     
-    // Encode both arrays back to JSON
     $mod_tasks = json_encode($newTasksArray);
     $mod_completed = json_encode($completedArray);
     
-    $updateSql = "UPDATE tasksdb SET tasks = ?, completed = ? WHERE id = ?";
-    $updateStmt = $this->con->prepare($updateSql);
-    if(!$updateStmt) return false;
+    $this->con->begin_transaction();
     
-    // Pass the JSON encoded completed array, not the plain string
-    $updateStmt->bind_param("sss", $mod_tasks, $mod_completed, $userId);
-    $result = $updateStmt->execute();
-    $updateStmt->close();
-    
-    return $result;
+    try {
+        $updateTasksSql = "UPDATE tasksdb SET tasks = ?, completed = ? WHERE id = ?";
+        $updateTasksStmt = $this->con->prepare($updateTasksSql);
+        if(!$updateTasksStmt) {
+            $this->con->rollback();
+            return false;
+        }
+        $updateTasksStmt->bind_param("sss", $mod_tasks, $mod_completed, $userId);
+        $tasksResult = $updateTasksStmt->execute();
+        $updateTasksStmt->close();
+        
+        if(!$tasksResult) {
+            $this->con->rollback();
+            return false;
+        }
+        
+        $getCoinsSql = "SELECT eagle_coins FROM users WHERE id = ?";
+        $getCoinsStmt = $this->con->prepare($getCoinsSql);
+        if(!$getCoinsStmt) {
+            $this->con->rollback();
+            return false;
+        }
+        $getCoinsStmt->bind_param("s", $userId);
+        $getCoinsStmt->execute();
+        $getCoinsStmt->bind_result($currentCoins);
+        $getCoinsStmt->fetch();
+        $getCoinsStmt->close();
+        
+        $newCoins = $currentCoins + $coin;
+        
+        $updateCoinsSql = "UPDATE users SET eagle_coins = ? WHERE id = ?";
+        $updateCoinsStmt = $this->con->prepare($updateCoinsSql);
+        if(!$updateCoinsStmt) {
+            $this->con->rollback();
+            return false;
+        }
+        $updateCoinsStmt->bind_param("is", $newCoins, $userId);
+        $coinsResult = $updateCoinsStmt->execute();
+        $updateCoinsStmt->close();
+        
+        if(!$coinsResult) {
+            $this->con->rollback();
+            return false;
+        }
+        
+        $this->con->commit();
+        return true;
+        
+    } catch(Exception $e) {
+        $this->con->rollback();
+        error_log("Task update error: " . $e->getMessage());
+        return false;
+    }
 }
 
     public function get_tasks($userId, $all) {

@@ -843,6 +843,22 @@ if (!isset($_SESSION['id'])) {
                                 </svg>
                                 <span class="nav-label">Laboratory</span>
                             </a>
+                            <a href="tasks.php" class="nav-item disabled">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                                <path stroke-width="1.5" d="M5 3.333h8.333a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5H5V3.333z"/>
+                                <path stroke-width="1.5" d="M13.333 3.333v13.334"/>
+                                
+                                <!-- Pen -->
+                                <path stroke-width="1.5" d="M3.333 14.167l1.667-1.667" stroke-linecap="round"/>
+                                <path stroke-width="1.5" d="M8.333 10l-3.333 3.333" stroke-linecap="round"/>
+                                
+                                <!-- Text lines -->
+                                <path stroke-width="1.2" d="M8.333 7.5h3.334" stroke-linecap="round"/>
+                                <path stroke-width="1.2" d="M8.333 9.167h5" stroke-linecap="round"/>
+                                <path stroke-width="1.2" d="M8.333 10.833h4.167" stroke-linecap="round"/>
+                            </svg>
+                                <span class="nav-label">Tasks</span>
+                            </a>
                             <a href="maintanance.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
                                     <path stroke="currentColor" stroke-linecap="square" stroke-width="1.667" d="M10 4.164V2.497m3.333 1.67V2.5M6.667 4.167v-1.67M10 17.5v-1.667m3.333 1.667v-1.667M6.667 17.5v-1.667m9.166-2.5H17.5m-1.667-6.667H17.5M15.833 10H17.5m-15 0h1.667M2.5 13.334h1.667M2.5 6.666h1.667M12.5 10a2.501 2.501 0 1 1-5.002 0 2.501 2.501 0 0 1 5.002 0ZM4.167 4.167h11.666v11.666H4.167V4.167Z"/>

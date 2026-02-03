@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -682,9 +685,8 @@
                                 </svg>
                                 <span class="nav-label">Assignments</span>
                             </a>
-                            <a href="assignment.php" class="nav-item disabled">
+                            <a href="tasks.php" class="nav-item disabled">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
-    <!-- Book -->
                                 <path stroke-width="1.5" d="M5 3.333h8.333a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5H5V3.333z"/>
                                 <path stroke-width="1.5" d="M13.333 3.333v13.334"/>
                                 
@@ -830,7 +832,25 @@
 <script>
 
 function render_tasks(title, e_coins, description) {
-    return `<div class="task-card animate-slideUp" style="animation-delay:0.2s"><div class="task-header"><div class="flex-1"><h3 class="text-lg font-semibold mb-2">${title}</h3></div><div style="display:inline-flex;align-items:center;gap:8px;background-color:#8B4513;color:white;padding:4px 12px;border-radius:20px;"><img src="images/coin.png" alt="coin" style="width:16px;height:16px;"><span style="font-weight:600;">${e_coins}</span></div></div><p class="text-sm text-muted-foreground line-clamp-2">${description}</p><div class="task-actions"><button class="button button-default button-md">Solve</button></div></div>`;
+    return `<div class="task-card animate-slideUp" style="animation-delay:0.2s">
+        <div class="task-header">
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold mb-2">${title}</h3>
+            </div>
+            <div style="display:inline-flex;align-items:center;gap:8px;background-color:#8B4513;color:white;padding:4px 12px;border-radius:20px;">
+                <img src="images/coin.png" alt="coin" style="width:16px;height:16px;">
+                <span style="font-weight:600;">${e_coins}</span>
+            </div>
+        </div>
+        <p class="text-sm text-muted-foreground line-clamp-2">${description}</p>
+        <div class="task-actions">
+            <button class="button button-default button-md solve-btn" 
+                    data-task="${encodeURIComponent(title)}"
+                    data-coins="${e_coins}">
+                Solve
+            </button>
+        </div>
+    </div>`;
 }
 
 fetch('https://proworldz.page.gd/api/tasks.php',{method:'POST',headers:{'Content-Type':'application/json'}})
@@ -854,11 +874,24 @@ fetch('https://proworldz.page.gd/api/tasks.php',{method:'POST',headers:{'Content
     showallDiv.style.gap='20px';
     showallDiv.style.justifyItems='center';
     tasksArray.forEach(taskTitle=>{
-        const reward_ecoins=Math.floor(Math.random()*(20-7))+8;
+        const reward_ecoins = Math.floor(Math.random() * 6) + 1;
         showallDiv.innerHTML+=render_tasks(taskTitle,reward_ecoins,description);
     });
 }).catch(err=>console.log(err));
 
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('solve-btn')) {
+        const taskTitle = event.target.getAttribute('data-task');
+        const taskCoins = event.target.getAttribute('data-coins');
+        
+        console.log("Task Name:", decodeURIComponent(taskTitle));
+        console.log("Eagle Coins:", taskCoins);
+
+        localStorage.setItem('tasksinfo',[decodeURIComponent(taskTitle),taskCoins])
+        
+        window.open('lab/pythoni.php','_blank');
+    }
+});
 </script>
 </body>
 </html>

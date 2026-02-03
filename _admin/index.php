@@ -1,20 +1,36 @@
 <?php
 session_start();
 
-// Database Configuration
 $db_host = "sql204.infinityfree.com";
 $db_user = "if0_40322633";
 $db_pass = "HDm584vG4kZDnt";
 $db_name = "if0_40322633_students";
 
-// Create connection
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check if user is logged in
+function generatePasswordLikePattern() {
+    $uppercase = range('A', 'Z');
+    $lowercase = range('a', 'z');
+    $numbers = range(0, 9);
+    $symbols = ['@', '#', '$', '%', '&', '!', '*', '?'];
+    
+    $password = '';
+    $password .= $uppercase[array_rand($uppercase)];
+    $password .= $lowercase[array_rand($lowercase)];
+    $password .= $lowercase[array_rand($lowercase)];
+    $password .= $symbols[array_rand($symbols)];
+    $password .= $uppercase[array_rand($uppercase)];
+    $password .= $lowercase[array_rand($lowercase)];
+    $password .= $numbers[array_rand($numbers)];
+    $password .= $symbols[array_rand($symbols)];
+    
+    return $password;
+}
+
 $is_logged_in = isset($_SESSION['admin_username']);
 $current_admin = null;
 $admin_role = null;
@@ -39,7 +55,6 @@ if ($is_logged_in) {
     }
 }
 
-// Handle Login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
     header('Content-Type: application/json');
     
@@ -77,14 +92,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// Handle Logout
 if (isset($_GET['logout'])) {
     session_destroy();
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
 }
 
-// Handle Add Student
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_student') {
     header('Content-Type: application/json');
     
@@ -105,11 +118,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $father_name = trim($_POST['father_name'] ?? '');
     $father_phone = trim($_POST['father_phone'] ?? '');
     $course = trim($_POST['course'] ?? '');
-    $password = password_hash('12345678', PASSWORD_BCRYPT);
+    $password = generatePasswordLikePattern();
     $eagle_coins = isset($_POST['eagle_coins']) ? intval($_POST['eagle_coins']) : 0;
-    $assignments = $_POST['assignments'] ?? '';
+    $assignments = $_POST['assignments'] ?? '[]';
     $assigns_complete = isset($_POST['assigns_complete']) ? intval($_POST['assigns_complete']) : 0;
-    $waiting_assigns = $_POST['waiting_assigns'] ?? '';
+    $waiting_assigns = $_POST['waiting_assigns'] ?? '[]';
     
     if (empty($id) || empty($name) || empty($email)) {
         echo json_encode(['success' => false, 'message' => 'ID, name, and email are required']);
@@ -131,11 +144,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $check_stmt->close();
     }
     
-    $query = "INSERT INTO users (id, name, email, dob, gender, phone, address, mother_name, mother_phone, father_name, father_phone, course, passw, eagle_coins, assignments, assigns_complete, waiting_assigns) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO users (id, name, gender, phone, address, mother_name, mother_phone, father_name, father_phone, email, dob, passw, eagle_coins, assignments, course, assigns_complete, waiting_assigns) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $conn->prepare($query);
     if ($stmt) {
-        $stmt->bind_param("sssssssssssssisis", $id, $name, $email, $dob, $gender, $phone, $address, $mother_name, $mother_phone, $father_name, $father_phone, $course, $password, $eagle_coins, $assignments, $assigns_complete, $waiting_assigns);
+        $stmt->bind_param("ssssssssssssissis", $id, $name, $gender, $phone, $address, $mother_name, $mother_phone, $father_name, $father_phone, $email, $dob, $password, $eagle_coins, $assignments, $course, $assigns_complete, $waiting_assigns);
         
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Student added successfully']);
@@ -149,7 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// Handle Get Students
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_students') {
     header('Content-Type: application/json');
     
@@ -158,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
         exit;
     }
     
-    $query = "SELECT id, name, email, phone, gender, address, mother_name, mother_phone, father_name, father_phone, dob, course, eagle_coins, assignments, assigns_complete, waiting_assigns, IPADDR FROM users ORDER BY id DESC";
+    $query = "SELECT id, name, email, phone, gender, address, mother_name, mother_phone, father_name, father_phone, dob, course, eagle_coins, assignments, assigns_complete, waiting_assigns, IPADDR,passw FROM users ORDER BY id DESC";
     $result = $conn->query($query);
     
     $students = [];
@@ -172,7 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     exit;
 }
 
-// Handle Get Single Student
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_student') {
     header('Content-Type: application/json');
     
@@ -207,11 +218,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     exit;
 }
 
-// Handle Update Student
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_student') {
     header('Content-Type: application/json');
     
-    if (!$is_logged_in || $admin_role !== 'root') {
+    if (!$is_logged_in || !in_array($admin_role, ['root', 'admin'])) {
         echo json_encode(['success' => false, 'message' => 'Unauthorized']);
         exit;
     }
@@ -234,15 +244,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $father_phone = trim($_POST['father_phone'] ?? '');
     $course = trim($_POST['course'] ?? '');
     $eagle_coins = isset($_POST['eagle_coins']) ? intval($_POST['eagle_coins']) : 0;
-    $assignments = $_POST['assignments'] ?? '';
+    $assignments = $_POST['assignments'] ?? '[]';
     $assigns_complete = isset($_POST['assigns_complete']) ? intval($_POST['assigns_complete']) : 0;
-    $waiting_assigns = $_POST['waiting_assigns'] ?? '';
+    $waiting_assigns = $_POST['waiting_assigns'] ?? '[]';
     
-    $query = "UPDATE users SET name=?, email=?, dob=?, gender=?, phone=?, address=?, mother_name=?, mother_phone=?, father_name=?, father_phone=?, course=?, eagle_coins=?, assignments=?, assigns_complete=?, waiting_assigns=? WHERE id=?";
+    $query = "UPDATE users SET name=?, gender=?, phone=?, address=?, mother_name=?, mother_phone=?, father_name=?, father_phone=?, email=?, dob=?, course=?, eagle_coins=?, assignments=?, assigns_complete=?, waiting_assigns=? WHERE id=?";
     
     $stmt = $conn->prepare($query);
     if ($stmt) {
-        $stmt->bind_param("sssssssssssisiss", $name, $email, $dob, $gender, $phone, $address, $mother_name, $mother_phone, $father_name, $father_phone, $course, $eagle_coins, $assignments, $assigns_complete, $waiting_assigns, $student_id);
+        $stmt->bind_param("sssssssssssiisss", $name, $gender, $phone, $address, $mother_name, $mother_phone, $father_name, $father_phone, $email, $dob, $course, $eagle_coins, $assignments, $assigns_complete, $waiting_assigns, $student_id);
         
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Student updated successfully']);
@@ -250,11 +260,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             echo json_encode(['success' => false, 'message' => 'Failed to update student']);
         }
         $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error']);
     }
     exit;
 }
 
-// Handle Delete Student
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_student') {
     header('Content-Type: application/json');
     
@@ -280,11 +291,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             echo json_encode(['success' => false, 'message' => 'Failed to delete student']);
         }
         $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error']);
     }
     exit;
 }
 
-// Handle Get All Admins (Root Only)
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_admins') {
     header('Content-Type: application/json');
     
@@ -307,7 +319,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     exit;
 }
 
-// Handle Add Admin (Root Only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_admin') {
     header('Content-Type: application/json');
     
@@ -353,11 +364,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             echo json_encode(['success' => false, 'message' => 'Failed to create admin']);
         }
         $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error']);
     }
     exit;
 }
 
-// Handle Delete Admin (Root Only)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_admin') {
     header('Content-Type: application/json');
     
@@ -383,6 +395,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             echo json_encode(['success' => false, 'message' => 'Failed to delete admin']);
         }
         $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error']);
     }
     exit;
 }
@@ -394,6 +408,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProWorldz - Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../images/eaglone/p-eaglone.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -656,7 +671,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             display: none !important;
         }
 
-        /* DASHBOARD STYLES */
         .dashboard-wrapper {
             display: flex;
             min-height: 100vh;
@@ -1052,7 +1066,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <body>
 
 <?php if (!$is_logged_in): ?>
-<!-- LOGIN PAGE -->
 <div class="login-wrapper">
     <div class="login-container">
         <div class="login-header">
@@ -1154,7 +1167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 </script>
 
 <?php else: ?>
-<!-- DASHBOARD -->
 <div class="dashboard-wrapper">
     <div class="sidebar">
         <div class="sidebar-logo">
@@ -1171,24 +1183,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <div class="nav-section-title">Menu</div>
             
             <?php if ($admin_role === 'root'): ?>
-                <button class="nav-link active" onclick="showSection('student-entry')">
+                <button class="nav-link active" data-section="student-entry">
                     <i class="fas fa-user-plus"></i>
                     Student Entry
                 </button>
-                <button class="nav-link" onclick="showSection('student-management')">
+                <button class="nav-link" data-section="student-management">
                     <i class="fas fa-users"></i>
                     Student Management
                 </button>
-                <button class="nav-link" onclick="showSection('admin-management')">
+                <button class="nav-link" data-section="admin-management">
                     <i class="fas fa-shield-alt"></i>
                     Admin Management
                 </button>
             <?php else: ?>
-                <button class="nav-link active" onclick="showSection('student-entry')">
+                <button class="nav-link active" data-section="student-entry">
                     <i class="fas fa-user-plus"></i>
                     Student Entry
                 </button>
-                <button class="nav-link" onclick="showSection('student-management')">
+                <button class="nav-link" data-section="student-management">
                     <i class="fas fa-users"></i>
                     Student Management
                 </button>
@@ -1217,7 +1229,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
         </div>
 
-        <!-- STUDENT ENTRY SECTION -->
         <div id="student-entry" class="content-section active">
             <h2 class="section-title">Add New Student</h2>
             <div class="form-container">
@@ -1252,10 +1263,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <div class="form-group">
                             <label class="form-label">Gender</label>
                             <select name="gender" class="form-input">
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
+                                <option value="Male" style="color:black;">Male</option>
+                                <option value="Female" style="color:black;">Female</option>
+                                <option value="Other" style="color:black;">Other</option>
                             </select>
                         </div>
                     </div>
@@ -1263,7 +1273,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Course</label>
-                            <input type="text" name="course" class="form-input" placeholder="Enter course name">
+                            <select name="course" class="form-input">
+                                <option value="" style="color: black;">Select Course</option>
+                                <option value="Secure X" style="color: black;">Secure X</option>
+                                <option value="AI Verse Web Labs" style="color: black;">AI Verse Web Labs</option>
+                                <option value="Hunt Elite" style="color: black;">Hunt Elite</option>
+                                <option value="Creative Craft" style="color: black;">Creative Craft</option>
+                                <option value="Py Desk Systems" style="color: black;">Py Desk Systems</option>
+                                <option value="Biz Dev" style="color: black;">Biz Dev</option>
+                                <option value="Code Foundry" style="color: black;">Code Foundry</option>
+                                <option value="Startup Gene Labs" style="color: black;">Startup Gene Labs</option>
+                                <option value="CLI++ Systems" style="color: black;">CLI++ Systems</option>
+                                <option value="APMAN" style="color: black;">APMAN</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Eagle Coins</label>
@@ -1307,7 +1329,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
         </div>
 
-        <!-- STUDENT MANAGEMENT SECTION -->
         <div id="student-management" class="content-section">
             <h2 class="section-title">Student Management</h2>
             <div id="students-alert"></div>
@@ -1333,7 +1354,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
         </div>
 
-        <!-- ADMIN MANAGEMENT SECTION (ROOT ONLY) -->
         <?php if ($admin_role === 'root'): ?>
         <div id="admin-management" class="content-section">
             <h2 class="section-title">Admin Management</h2>
@@ -1392,7 +1412,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </div>
 </div>
 
-<!-- STUDENT INFO MODAL -->
 <div id="student-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1414,7 +1433,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     </div>
 </div>
 
-<!-- EDIT STUDENT MODAL -->
 <div id="edit-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1514,24 +1532,159 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     let currentStudentId = null;
     let allStudents = [];
 
+    function getAssignmentCount(assignmentsJson) {
+        try {
+            if (!assignmentsJson) return 0;
+            const assignments = JSON.parse(assignmentsJson);
+            return Array.isArray(assignments) ? assignments.length : 0;
+        } catch(e) {
+            return 0;
+        }
+    }
+
+    function displayAssignments(assignmentsJson) {
+        try {
+            if (!assignmentsJson) {
+                return '<p style="color: #a0a0a0; font-size: 13px;">No assignments</p>';
+            }
+            
+            const assignments = JSON.parse(assignmentsJson);
+            if (!Array.isArray(assignments) || assignments.length === 0) {
+                return '<p style="color: #a0a0a0; font-size: 13px;">No assignments</p>';
+            }
+
+            return assignments.map((assignment, index) => `
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid rgba(16,185,129,0.5);">
+                    <div style="margin-bottom: 8px;">
+                        <span class="info-label">Title</span>
+                        <span class="info-value">${escapeHtml(assignment.title || 'N/A')}</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span class="info-label">Link</span>
+                        <a href="${escapeHtml(assignment.link || '#')}" target="_blank" style="color: #86efac; text-decoration: underline; font-size: 13px;">
+                            ${escapeHtml(assignment.link || 'N/A')}
+                        </a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span class="info-label">Eagle Coins</span>
+                            <span class="info-value" style="color: #fbbf24;">${escapeHtml(assignment.coin || '0')}</span>
+                        </div>
+                        <button class="btn btn-success btn-sm" onclick="submitAssignment('${escapeHtml(currentStudentId)}', ${index}, '${escapeHtml(assignment.coin || '0')}')">
+                            <i class="fas fa-check"></i> Submit
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(error) {
+            console.error('Error parsing assignments:', error);
+            return '<p style="color: #ef4444; font-size: 13px;">Error loading assignments</p>';
+        }
+    }
+
+    function submitAssignment(studentId, assignmentIndex, coins) {
+        if (!confirm(`Submit this assignment and award ${coins} Eagle Coins to the student?`)) return;
+
+        const student = allStudents.find(s => s.id === studentId);
+        if (!student) return;
+
+        try {
+            let waitingAssigns = [];
+            if (student.waiting_assigns && student.waiting_assigns !== '' && student.waiting_assigns !== 'null') {
+                try {
+                    const parsed = JSON.parse(student.waiting_assigns);
+                    waitingAssigns = Array.isArray(parsed) ? parsed : [];
+                } catch(e) {
+                    console.error('Error parsing waiting_assigns:', e);
+                    waitingAssigns = [];
+                }
+            }
+
+            let completeAssigns = [];
+            if (student.assignments && student.assignments !== '' && student.assignments !== 'null') {
+                try {
+                    const parsed = JSON.parse(student.assignments);
+                    completeAssigns = Array.isArray(parsed) ? parsed : [];
+                } catch(e) {
+                    console.error('Error parsing assignments:', e);
+                    completeAssigns = [];
+                }
+            }
+
+            if (!waitingAssigns[assignmentIndex]) {
+                showAlert('students-alert', 'Assignment not found', 'danger');
+                return;
+            }
+
+            completeAssigns.push(waitingAssigns[assignmentIndex]);
+            waitingAssigns.splice(assignmentIndex, 1);
+
+            const newEagleCoins = parseInt(student.eagle_coins || 0) + parseInt(coins);
+            const newAssignsComplete = parseInt(student.assigns_complete || 0) + 1;
+
+            const formData = new FormData();
+            formData.append('action', 'update_student');
+            formData.append('id', studentId);
+            formData.append('name', student.name);
+            formData.append('gender', student.gender || '');
+            formData.append('phone', student.phone || '');
+            formData.append('address', student.address || '');
+            formData.append('mother_name', student.mother_name || '');
+            formData.append('mother_phone', student.mother_phone || '');
+            formData.append('father_name', student.father_name || '');
+            formData.append('father_phone', student.father_phone || '');
+            formData.append('email', student.email);
+            formData.append('dob', student.dob || '');
+            formData.append('course', student.course || '');
+            formData.append('eagle_coins', newEagleCoins);
+            formData.append('assignments', JSON.stringify(completeAssigns));
+            formData.append('assigns_complete', newAssignsComplete);
+            formData.append('waiting_assigns', JSON.stringify(waitingAssigns));
+
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    student.eagle_coins = newEagleCoins;
+                    student.assigns_complete = newAssignsComplete;
+                    student.assignments = JSON.stringify(completeAssigns);
+                    student.waiting_assigns = JSON.stringify(waitingAssigns);
+                    
+                    showAlert('students-alert', `✓ Assignment submitted! ${coins} coins awarded to ${student.name}!`, 'success');
+                    
+                    setTimeout(() => {
+                        viewStudent(studentId);
+                    }, 500);
+                } else {
+                    showAlert('students-alert', 'Error: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                showAlert('students-alert', 'Network error occurred', 'danger');
+            });
+        } catch(error) {
+            console.error('General Error:', error);
+            showAlert('students-alert', 'Error processing assignment: ' + error.message, 'danger');
+        }
+    }
+
     function showSection(sectionId) {
-        // Hide all sections
         document.querySelectorAll('.content-section').forEach(el => {
             el.classList.remove('active');
         });
         
-        // Remove active class from all nav links
         document.querySelectorAll('.nav-link').forEach(el => {
             el.classList.remove('active');
         });
         
-        // Show selected section
         document.getElementById(sectionId).classList.add('active');
         
-        // Add active class to clicked nav link
         event.target.classList.add('active');
 
-        // Update page title
         const titles = {
             'student-entry': { title: 'Add New Student', subtitle: 'Enter student information' },
             'student-management': { title: 'Student Management', subtitle: 'View and manage students' },
@@ -1543,7 +1696,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             document.getElementById('page-subtitle').textContent = titles[sectionId].subtitle;
         }
 
-        // Load data if needed
         if (sectionId === 'student-management') {
             loadStudents();
         } else if (sectionId === 'admin-management') {
@@ -1676,14 +1828,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <span class="info-label">Assignments Completed</span>
                     <span class="info-value">${student.assigns_complete || 0}</span>
                 </div>
+                <div class="info-item">
+                    <span class="info-label">Password</span>
+                    <span class="info-value">
+                        <span style="display: inline-block; margin-right: 10px;">${escapeHtml(student.passw || '')}</span>
+                        <button class="btn btn-sm" onclick="copyToClipboard('${escapeHtml(student.passw || '')}', event)" style="background: rgba(255,255,255,0.1); color: #86efac; padding: 4px 8px; font-size: 12px;">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </span>
+                </div>
             </div>
             <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-top: 20px;">
                 <span class="info-label">Address</span>
                 <span class="info-value">${escapeHtml(student.address || '-')}</span>
             </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <span class="info-label">Assignments (${getAssignmentCount(student.waiting_assigns)})</span>
+                <div id="assignments-list" style="margin-top: 10px;">
+                    ${displayAssignments(student.waiting_assigns)}
+                </div>
+            </div>
         `;
 
         openModal('student-modal');
+    }
+
+    function copyToClipboard(text, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        navigator.clipboard.writeText(text).then(() => {
+            const button = event.target.closest('button');
+            if (!button) return;
+            
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            button.style.background = 'rgba(16,185,129,0.2)';
+            button.style.color = '#10b981';
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = 'rgba(255,255,255,0.1)';
+                button.style.color = '#86efac';
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy password');
+        });
     }
 
     function editStudent() {
@@ -1882,12 +2073,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         return div.innerHTML;
     }
 
-    // Close modal when clicking outside
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', function(event) {
             if (event.target === this) {
                 this.classList.remove('show');
             }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.nav-link').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                if (sectionId) {
+                    showSection(sectionId);
+                }
+            });
         });
     });
 </script>

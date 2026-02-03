@@ -5,34 +5,10 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit();
 }
-
+echo $_SESSION['id'];
 require_once '../api/dbconf.php';
-
 $userId = $_SESSION['id'];
 $db = new DBconfig();
-
-$info = $db->getUserInfo($userId, ['eagle_coins']);
-$limit = 120;
-
-$coin = (int)$info['eagle_coins'];
-
-if (!isset($_SESSION['page_start_time'])) {
-    $_SESSION['page_start_time'] = time();
-}
-
-$elapsed = time() - $_SESSION['page_start_time'];
-
-if ($elapsed >= $limit) {
-
-    // ✅ increment correctly
-    $coin++;
-    
-    // reset timer
-    $_SESSION['page_start_time'] = time();
-
-    // update DB
-    $db->updateUserEagleCoins($userId, $coin);
-}
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +23,6 @@ if ($elapsed >= $limit) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <style>
-        /* ===== CSS RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -66,7 +41,6 @@ if ($elapsed >= $limit) {
             overflow-x: auto;
         }
 
-        /* ===== CUSTOM FONTS ===== */
         @font-face {
             font-family: "Rebels";
             src: url("https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2") format("woff2");
@@ -75,7 +49,6 @@ if ($elapsed >= $limit) {
             font-display: swap;
         }
 
-        /* ===== CUSTOM PROPERTIES (CSS Variables) ===== */
         :root {
             --radius: 0.625rem;
             --background: #0d1015;
@@ -95,11 +68,9 @@ if ($elapsed >= $limit) {
             --border: rgba(255, 255, 255, 0.1);
             --input: rgba(255, 255, 255, 0.15);
             --ring: rgba(148, 163, 184, 0.5);
-            
             --success: #10b981;
             --destructive: #ef4444;
             --warning: #f59e0b;
-            
             --sidebar: #1a1d24;
             --sidebar-foreground: #f8fafc;
             --sidebar-primary: #6366f1;
@@ -108,12 +79,10 @@ if ($elapsed >= $limit) {
             --sidebar-accent-foreground: #f8fafc;
             --sidebar-border: rgba(255, 255, 255, 0.1);
             --sidebar-ring: rgba(148, 163, 184, 0.5);
-            
             --gap: 1.5rem;
             --sides: 1.5rem;
         }
 
-        /* ===== DESKTOP-ONLY LAYOUT ===== */
         .desktop-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -123,21 +92,18 @@ if ($elapsed >= $limit) {
             background-color: var(--background);
         }
 
-        /* Main Content Area */
         .desktop-main {
             display: flex;
             flex-direction: column;
             gap: var(--gap);
         }
 
-        /* ===== TYPOGRAPHY ===== */
         .font-display {
             font-family: 'Rebels', 'Roboto Mono', monospace;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
 
-        /* ===== UTILITY CLASSES ===== */
         .flex {
             display: flex;
         }
@@ -285,7 +251,6 @@ if ($elapsed >= $limit) {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
-        /* ===== LAYOUT GRID ===== */
         .grid-cols-1 {
             grid-template-columns: repeat(1, minmax(0, 1fr));
         }
@@ -439,7 +404,6 @@ if ($elapsed >= $limit) {
             height: 4rem;
         }
 
-        /* ===== CUSTOM COMPONENT STYLES ===== */
         .card {
             background-color: var(--card);
             border-radius: var(--radius);
@@ -523,7 +487,6 @@ if ($elapsed >= $limit) {
             font-size: 1rem;
         }
 
-        /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -584,7 +547,6 @@ if ($elapsed >= $limit) {
             animation: coinSpin 1s ease-in-out;
         }
 
-        /* ===== CUSTOM SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -603,7 +565,6 @@ if ($elapsed >= $limit) {
             background: var(--muted-foreground);
         }
 
-        /* ===== COIN NOTIFICATION ===== */
         .coin-notification {
             position: fixed;
             top: 20px;
@@ -675,7 +636,6 @@ if ($elapsed >= $limit) {
             color: var(--warning);
         }
 
-        /* ===== PYTHON INTERPRETER SPECIFIC STYLES ===== */
         .interpreter-header {
             background: linear-gradient(135deg, var(--card) 0%, rgba(13, 16, 21, 0.9) 100%);
             border-bottom: 1px solid var(--border);
@@ -841,6 +801,7 @@ if ($elapsed >= $limit) {
             border-radius: calc(var(--radius) - 2px);
             overflow: hidden;
             position: relative;
+            min-height: 400px;
         }
 
         #code {
@@ -882,7 +843,8 @@ if ($elapsed >= $limit) {
             background: var(--muted-foreground);
         }
 
-        .output-display {
+        .output-display,
+        #output {
             flex: 1;
             background: rgba(13, 16, 21, 0.5);
             border: 1px solid var(--border);
@@ -897,19 +859,23 @@ if ($elapsed >= $limit) {
             overflow-y: auto;
         }
 
+        #output::-webkit-scrollbar,
         .output-display::-webkit-scrollbar {
             width: 8px;
         }
 
+        #output::-webkit-scrollbar-track,
         .output-display::-webkit-scrollbar-track {
             background: transparent;
         }
 
+        #output::-webkit-scrollbar-thumb,
         .output-display::-webkit-scrollbar-thumb {
             background: var(--muted);
             border-radius: 4px;
         }
 
+        #output::-webkit-scrollbar-thumb:hover,
         .output-display::-webkit-scrollbar-thumb:hover {
             background: var(--muted-foreground);
         }
@@ -1042,19 +1008,9 @@ if ($elapsed >= $limit) {
     </style>
 </head>
 <body>
-    <!-- Coin Notification -->
-    <div class="coin-notification" id="coinNotification">
-        <i class="fas fa-coins"></i>
-        <div class="coin-info">
-            <div class="coin-amount">+1 Eagle Coin</div>
-            <div class="coin-message">Earned for 2 minutes of activity</div>
-        </div>
-    </div>
-
+    
     <div class="desktop-container">
-        <!-- Main Content Area -->
         <div class="desktop-main">
-            <!-- Python Interpreter Header -->
             <div class="card interpreter-header">
                 <div class="interpreter-hero">
                     <h1 class="font-display">Python Interpreter</h1>
@@ -1080,13 +1036,13 @@ if ($elapsed >= $limit) {
                     onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(99,102,241,0.35)'">
                     ← Back to Lab
                     </a>
-
+                </div>
+                <div style="padding:0.5rem;" id="shower-pending-assign-banner">
+                    <h4 id="pending-assign-banner"></h4>
                 </div>
             </div>
 
-            <!-- Interpreter Grid -->
             <div class="interpreter-grid">
-                <!-- Code Editor -->
                 <div class="editor-section">
                     <div class="section-header">
                         <h3><i class="fas fa-code"></i> Code Editor</h3>
@@ -1096,66 +1052,9 @@ if ($elapsed >= $limit) {
                         </div>
                     </div>
                     <div class="code-editor-container">
-                        <textarea id="code" placeholder="# Welcome to ProWorldz Python Interpreter
-# Write your Python code here
-# Press Ctrl+Enter to execute
-# Use Tab for indentation
-
-# Example: Simple calculator
-def calculate(a, b, operation='add'):
-    operations = {
-        'add': a + b,
-        'subtract': a - b,
-        'multiply': a * b,
-        'divide': a / b if b != 0 else 'Error: Division by zero'
-    }
-    return operations.get(operation, 'Invalid operation')
-
-# Test the function
-if __name__ == '__main__':
-    result = calculate(10, 5, 'multiply')
-    print(f'10 * 5 = {result}')">print("Welcome to ProWorldz Python Interpreter")
-print("=" * 40)
-
-# Calculate circle area
-import math
-
-def calculate_circle_area(radius):
-    return math.pi * radius * radius
-
-def calculate_factorial(n):
-    if n == 0:
-        return 1
-    return n * calculate_factorial(n - 1)
-
-# Execute main program
-if __name__ == "__main__":
-    # Circle calculation
-    radius = 7.5
-    area = calculate_circle_area(radius)
-    print(f"Circle with radius {radius}:")
-    print(f"  Area = {area:.2f}")
-    print()
-    
-    # Factorial calculation
-    num = 6
-    factorial = calculate_factorial(num)
-    print(f"Factorial of {num}:")
-    print(f"  {num}! = {factorial}")
-    print()
-    
-    print("Program execution completed successfully!")</textarea>
+                        <textarea id="code" placeholder="# Welcome to ProWorldz Python Interpreter...">print("Welcome to ProWorldz Python Interpreter")</textarea>
                     </div>
-                    <div class="editor-stats">
-                        <div class="stat-item">
-                            <i class="fas fa-file-code"></i>
-                            <span id="lineCount">Lines: 0</span>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-font"></i>
-                            <span id="charCount">Characters: 0</span>
-                        </div>
-                    </div>
+                   
                     <div class="shortcut-hint">
                         <i class="fas fa-keyboard"></i>
                         <div>
@@ -1167,7 +1066,6 @@ if __name__ == "__main__":
                     </div>
                 </div>
 
-                <!-- Output Console -->
                 <div class="output-section">
                     <div class="section-header">
                         <h3><i class="fas fa-terminal"></i> Output Console</h3>
@@ -1175,15 +1073,14 @@ if __name__ == "__main__":
                             <span id="executionTime">Ready</span>
                         </div>
                     </div>
-                    <pre id="output" class="output-display">Initializing Python interpreter environment...</pre>
+                    <div id="output" class="output-display">Ready to execute code...</div>
                 </div>
             </div>
 
-            <!-- Controls Section -->
             <div class="controls-section">
                 <div class="controls-grid">
                     <button onclick="runPython()" class="button button-lg button-default" id="runBtn">
-                        <i class="fas fa-play"></i>  Execute Code
+                        <i class="fas fa-play"></i> Execute Code
                     </button>
                     <button onclick="clearCode()" class="button button-lg button-secondary">
                         <i class="fas fa-eraser"></i> Clear Editor
@@ -1203,88 +1100,19 @@ if __name__ == "__main__":
         let pyodide = null;
         let isInitialized = false;
         let codeTextarea = null;
-        let executionStartTime = 0;
-        let coinTimerInterval = null;
-        let secondsRemaining = 120; // 2 minutes in seconds
-        let isPageActive = true;
+        let currentTask = null;
+        let originalRunPython = null;
 
-        // Coin tracking functions
-        function updateTimerDisplay() {
-            const minutes = Math.floor(secondsRemaining / 60);
-            const seconds = secondsRemaining % 60;
-            document.getElementById('timerDisplay').textContent =
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function startCoinTimer() {
-            if (coinTimerInterval) clearInterval(coinTimerInterval);
-
-            // Set initial time
-            secondsRemaining = 120;
-            updateTimerDisplay();
-
-            // Start timer
-            coinTimerInterval = setInterval(() => {
-                if (isPageActive && secondsRemaining > 0) {
-                    secondsRemaining--;
-                    updateTimerDisplay();
-
-                    // Check if time's up
-                    if (secondsRemaining === 0) {
-                        awardCoin();
-                    }
-                }
-            }, 1000);
-        }
-
-        function awardCoin() {
-            // Make AJAX call to award coin
-            fetch('?update_coins=true')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.coins_awarded > 0) {
-                        showCoinNotification();
-                        // Reset timer for next coin
-                        secondsRemaining = 120;
-                        updateTimerDisplay();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error awarding coin:', error);
-                    // Still reset timer even if error
-                    secondsRemaining = 120;
-                    updateTimerDisplay();
-                });
-        }
-
-        function showCoinNotification() {
-            const notification = document.getElementById('coinNotification');
-            notification.classList.add('show');
-
-            // Hide after 3 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // Track page visibility
-        document.addEventListener('visibilitychange', function() {
-            isPageActive = !document.hidden;
-        });
-
-        // Initialize coin timer on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            startCoinTimer();
-            setupEditor();
-            initializePyodide();
-        });
-
-        // Original Pyodide functions
         async function initializePyodide() {
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             const runBtn = document.getElementById('runBtn');
             const output = document.getElementById('output');
+
+            if (!statusDot || !statusText || !runBtn || !output) {
+                console.error('Required HTML elements not found');
+                return;
+            }
 
             try {
                 statusDot.className = 'status-dot loading';
@@ -1294,24 +1122,19 @@ if __name__ == "__main__":
 
                 pyodide = await loadPyodide();
 
-                // Load additional packages if needed
-                await pyodide.loadPackage(['numpy', 'micropip']);
-
                 isInitialized = true;
 
                 statusDot.className = 'status-dot';
                 statusText.textContent = 'Python 3.11 Ready';
                 runBtn.disabled = false;
-                output.innerHTML = '<span class="output-success">✓ Python 3.11 environment initialized successfully!</span>\n' +
-                    '<span class="output-info">Standard library modules loaded.</span>\n' +
-                    '<span class="output-info">Write your Python code in the editor and press Execute.</span>';
+                output.innerHTML = '<span class="output-success">✓ Python 3.11 environment initialized successfully!</span>\n<span class="output-info">Standard library modules loaded.</span>\n<span class="output-info">Write your Python code in the editor and press Execute.</span>';
+
+                checkForTask();
 
             } catch (error) {
                 statusDot.className = 'status-dot error';
                 statusText.textContent = 'Initialization Failed';
-                output.innerHTML = '<span class="output-error">✗ Failed to initialize Python environment.</span>\n\n' +
-                    'Error: ' + error.message + '\n\n' +
-                    '<span class="output-info">Please check your internet connection and refresh the page.</span>';
+                output.innerHTML = '<span class="output-error">✗ Failed to initialize Python environment.</span>\n\nError: ' + error.message + '\n\n<span class="output-info">Please check your internet connection and refresh the page.</span>';
             }
         }
 
@@ -1320,17 +1143,25 @@ if __name__ == "__main__":
 
             if (!codeTextarea) return;
 
-            // Update character and line count
             function updateStats() {
                 const text = codeTextarea.value;
                 const lines = text.split('\n').length;
                 const chars = text.length;
-                document.getElementById('lineCount').textContent = `Lines: ${lines}`;
-                document.getElementById('charCount').textContent = `Characters: ${chars}`;
+
+                const lineCountEl = document.getElementById('lineCount');
+                const charCountEl = document.getElementById('charCount');
+
+                if (lineCountEl) {
+                    lineCountEl.textContent = `Lines: ${lines}`;
+                }
+
+                if (charCountEl) {
+                    charCountEl.textContent = `Characters: ${chars}`;
+                }
             }
 
             codeTextarea.addEventListener('input', updateStats);
-            updateStats(); // Initial count
+            updateStats();
 
             codeTextarea.addEventListener('keydown', function(e) {
                 if (e.key === 'Tab') {
@@ -1364,123 +1195,114 @@ if __name__ == "__main__":
 
         async function runPython() {
             if (!pyodide || !isInitialized) {
-                document.getElementById('output').innerHTML = '<span class="output-error">Python environment is still initializing. Please wait...</span>';
+                const output = document.getElementById('output');
+                if (output) {
+                    output.innerHTML = '<span class="output-error">Python environment is still initializing. Please wait...</span>';
+                }
                 return;
             }
 
-            const code = codeTextarea.value;
+            const code = document.getElementById('code').value;
             const output = document.getElementById('output');
             const runBtn = document.getElementById('runBtn');
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             const executionTime = document.getElementById('executionTime');
 
+            if (!output || !runBtn || !statusDot || !statusText) {
+                console.error('Required HTML elements not found');
+                return;
+            }
+
             runBtn.disabled = true;
             runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
             statusDot.className = 'status-dot loading';
             statusText.textContent = 'Executing Code';
-            executionTime.textContent = 'Running...';
+            
+            if (executionTime) {
+                executionTime.textContent = 'Running...';
+            }
 
-            executionStartTime = performance.now();
-
-            const wrappedCode = `
-import sys
-import io
-import traceback
-import time
-
-# Capture output
-old_stdout = sys.stdout
-sys.stdout = io.StringIO()
-
-# Capture errors
-old_stderr = sys.stderr
-sys.stderr = io.StringIO()
-
-try:
-    # User code
-${code.split("\n").map(l => "    " + l).join("\n")}
-
-    # Get captured output
-    stdout_output = sys.stdout.getvalue()
-    stderr_output = sys.stderr.getvalue()
-
-    # Restore original stdout/stderr
-    sys.stdout = old_stdout
-    sys.stderr = old_stderr
-
-    # Combine outputs
-    if stderr_output:
-        result = "STDERR:\\n" + stderr_output + "\\nSTDOUT:\\n" + stdout_output
-    else:
-        result = stdout_output
-
-except Exception as e:
-    # Restore original stdout/stderr
-    sys.stdout = old_stdout
-    sys.stderr = old_stderr
-
-    # Format error with traceback
-    tb = traceback.format_exception(type(e), e, e.__traceback__)
-    result = "ERROR:\\n" + ''.join(tb)
-
-result
-`;
+            const startTime = performance.now();
 
             try {
-                const result = await pyodide.runPythonAsync(wrappedCode);
-                const executionEndTime = performance.now();
-                const executionDuration = (executionEndTime - executionStartTime).toFixed(2);
+                // First set up stdout/stderr capture
+                await pyodide.runPythonAsync(`
+import sys
+import io
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+                `);
 
-                if (result.startsWith('ERROR:')) {
-                    output.innerHTML = `<span class="output-error">${escapeHtml(result)}</span>`;
+                // Run the user's code
+                await pyodide.runPythonAsync(code);
+
+                // Get the output
+                const stdout = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+                const stderr = await pyodide.runPythonAsync("sys.stderr.getvalue()");
+
+                const endTime = performance.now();
+                const executionDuration = (endTime - startTime).toFixed(2);
+                
+                if (stderr) {
+                    output.innerHTML = `<span class="output-error">${stderr}</span>`;
                     statusDot.className = 'status-dot error';
                     statusText.textContent = 'Execution Failed';
-                } else if (result.startsWith('STDERR:')) {
-                    output.textContent = result;
+                } else if (stdout) {
+                    output.textContent = stdout;
                     statusDot.className = 'status-dot';
-                    statusText.textContent = 'Completed with Warnings';
-                } else if (result.trim() !== '') {
-                    output.textContent = result;
-                    statusDot.className = 'status-dot';
-                    statusText.textContent = 'Execution Successful';
+                    statusText.textContent = 'Execution Successfull';
+                    
+                    // Check task if exists
+                    if (currentTask) {
+                        validateTask(code, stdout);
+                    }
                 } else {
                     output.innerHTML = '<span class="output-info">✓ Code executed successfully (no output generated)</span>';
                     statusDot.className = 'status-dot';
                     statusText.textContent = 'Execution Complete';
                 }
 
-                executionTime.textContent = `${executionDuration}ms`;
+                if (executionTime) {
+                    executionTime.textContent = `${executionDuration}ms`;
+                }
 
-            } catch (err) {
-                const executionEndTime = performance.now();
-                const executionDuration = (executionEndTime - executionStartTime).toFixed(2);
+            } catch (error) {
+                const endTime = performance.now();
+                const executionDuration = (endTime - startTime).toFixed(2);
 
-                output.innerHTML = `<span class="output-error">FATAL ERROR: ${escapeHtml(err.toString())}</span>`;
+                output.innerHTML = `<span class="output-error">Error: ${error.message}</span>`;
                 statusDot.className = 'status-dot error';
                 statusText.textContent = 'Fatal Error';
-                executionTime.textContent = `${executionDuration}ms`;
 
+                if (executionTime) {
+                    executionTime.textContent = 'Error';
+                }
             } finally {
                 runBtn.disabled = false;
-                runBtn.innerHTML = '<i class="fas fa-play"></i> Execute Code';
+                if (currentTask) {
+                    runBtn.innerHTML = `<i class="fas fa-check-circle"></i> Validate Task: ${currentTask.name}`;
+                } else {
+                    runBtn.innerHTML = '<i class="fas fa-play"></i> Execute Code';
+                }
             }
         }
 
         function clearCode() {
             if (codeTextarea) {
                 codeTextarea.value = '';
-                const lineCount = document.getElementById('lineCount');
-                const charCount = document.getElementById('charCount');
-                lineCount.textContent = 'Lines: 0';
-                charCount.textContent = 'Characters: 0';
             }
-            document.getElementById('output').innerHTML = '<span class="output-info">✓ Editor cleared. Write your Python code above.</span>';
+            const output = document.getElementById('output');
+            if (output) {
+                output.innerHTML = '<span class="output-info">✓ Editor cleared. Write your Python code above.</span>';
+            }
         }
 
         async function resetInterpreter() {
             const output = document.getElementById('output');
-            output.innerHTML = '<span class="output-info">Resetting Python environment...</span>';
+            if (output) {
+                output.innerHTML = '<span class="output-info">Resetting Python environment...</span>';
+            }
             isInitialized = false;
             await initializePyodide();
         }
@@ -1503,11 +1325,450 @@ result
             URL.revokeObjectURL(url);
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function checkForTask() {
+            const taskInfo = localStorage.getItem('tasksinfo');
+            
+            if (taskInfo) {
+                try {
+                    const parts = taskInfo.split(',');
+                    if (parts.length >= 2) {
+                        const taskName = parts[0].trim();
+                        const taskCoins = parseInt(parts[1].trim());
+                        
+                        if (taskName && !isNaN(taskCoins) && taskCoins > 0) {
+                            currentTask = {
+                                name: taskName,
+                                coins: taskCoins
+                            };
+                            
+                            // Show banner
+                            const banner = document.getElementById('pending-assign-banner');
+                            if (banner) {
+                                banner.innerText = `Current Task: ${taskName} (${taskCoins} coins)`;
+                            }
+                            
+                            // Update button
+                            const runBtn = document.getElementById('runBtn');
+                            if (runBtn) {
+                                runBtn.innerHTML = `<i class="fas fa-check-circle"></i> Validate Task: ${taskName}`;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing task:', error);
+                }
+            }
         }
+
+        function validateTask(code, output) {
+            if (!currentTask) return false;
+            
+            const taskName = currentTask.name;
+            const taskCoins = currentTask.coins;
+            let isValid = false;
+            
+            // Simple task validators
+            const codeLower = code.toLowerCase();
+            const outputLower = output.toLowerCase();
+            
+            if (taskName.toLowerCase().includes('print hello world')) {
+                isValid = codeLower.includes('print') && 
+                         codeLower.includes('hello') && 
+                         codeLower.includes('world') &&
+                         outputLower.includes('hello world');
+            }
+            else if (taskName.toLowerCase().includes('create variables')) {
+                isValid = (/[a-z_]+\s*=/.test(code) || /[a-z_]+\s*=\s*\d+/.test(code) || /[a-z_]+\s*=\s*['"]/.test(code)) &&
+                         codeLower.includes('print') &&
+                         output.trim().length > 0;
+            }
+            else if (taskName.toLowerCase().includes('add two numbers')) {
+                isValid = /\d+\s*\+\s*\d+/.test(code) && /\d+/.test(output);
+            }
+            else if (taskName.toLowerCase().includes('subtract two numbers')) {
+                isValid = /\d+\s*-\s*\d+/.test(code) && /\d+/.test(output);
+            }
+            else if (taskName.toLowerCase().includes('multiply two numbers')) {
+                isValid = /\d+\s*\*\s*\d+/.test(code) && /\d+/.test(output);
+            }
+            else if (taskName.toLowerCase().includes('divide two numbers')) {
+                isValid = /\d+\s*\/\s*\d+/.test(code) && (/\d+/.test(output) || /\./.test(output));
+            }
+            else if (taskName.toLowerCase().includes('take input from user')) {
+                isValid = /input\s*\(/i.test(code);
+            }
+            else if (taskName.toLowerCase().includes('if-else') || taskName.toLowerCase().includes('conditions')) {
+                isValid = /if\s/.test(code) && (/else\s*:/.test(code) || /elif\s/.test(code));
+            }
+            else if (taskName.toLowerCase().includes('list')) {
+                isValid = /\[.*\]/.test(code) || /list\s*\(/.test(code) || /\.append/.test(code);
+            }
+            else if (taskName.toLowerCase().includes('function')) {
+                isValid = /def\s+[a-z_]+\s*\(/.test(code);
+            }
+            
+            if (isValid) {
+                completeTask();
+                return true;
+            }
+            
+            return false;
+        }
+
+        function completeTask() {
+            if (!currentTask) return;
+            
+            const taskName = currentTask.name;
+            const taskCoins = currentTask.coins;
+            console.log(taskName)
+            console.log(taskCoins)
+            const datas = new FormData();
+            datas.append('task-name',String(taskName));
+            datas.append('task-coin',Number(taskCoins));
+            fetch('https://proworldz.page.gd/api/update_task.php', {
+                method: 'POST',
+                body:datas
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Task completion recorded:', data);
+                showSuccessPopup(taskCoins);
+                
+                // Clear task
+                localStorage.removeItem('tasksinfo');
+                currentTask = null;
+                
+                // Update UI
+                const banner = document.getElementById('pending-assign-banner');
+                if (banner) {
+                    banner.innerText = '';
+                }
+                
+                const runBtn = document.getElementById('runBtn');
+                if (runBtn) {
+                    runBtn.innerHTML = '<i class="fas fa-play"></i> Execute Code';
+                }
+            })
+            .catch(err => {
+                console.error('Error updating task:', err);
+                alert('Task completed! Coins will be added.');
+                
+                // Still clear the task
+                localStorage.removeItem('tasksinfo');
+                currentTask = null;
+                
+                const banner = document.getElementById('pending-assign-banner');
+                if (banner) {
+                    banner.innerText = '';
+                }
+                
+                const runBtn = document.getElementById('runBtn');
+                if (runBtn) {
+                    runBtn.innerHTML = '<i class="fas fa-play"></i> Execute Code';
+                }
+            });
+        }
+
+        function showSuccessPopup(coins) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease-out;
+    `;
+
+    // Create popup
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        background: linear-gradient(145deg, #1a1d24, #0f1117);
+        border-radius: 20px;
+        padding: 40px 50px;
+        text-align: center;
+        max-width: 450px;
+        width: 90%;
+        border: 2px solid #6366f1;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 
+                    0 0 0 1px rgba(99, 102, 241, 0.1),
+                    inset 0 0 20px rgba(99, 102, 241, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    `;
+
+    // Add decorative elements
+    const glowEffect = document.createElement('div');
+    glowEffect.style.cssText = `
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+        z-index: -1;
+    `;
+    popup.appendChild(glowEffect);
+
+    // Success icon
+    const successIcon = document.createElement('div');
+    successIcon.innerHTML = `
+        <div style="
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            position: relative;
+        ">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <path d="M20 6L9 17L4 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div style="
+                position: absolute;
+                inset: -5px;
+                border: 2px solid rgba(16, 185, 129, 0.3);
+                border-radius: 50%;
+                animation: pulseRing 2s infinite;
+            "></div>
+        </div>
+    `;
+    popup.appendChild(successIcon);
+
+    // Title
+    const title = document.createElement('h2');
+    title.textContent = '🎉 Task Completed!';
+    title.style.cssText = `
+        color: #f8fafc;
+        font-size: 28px;
+        margin: 0 0 15px 0;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #f8fafc, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    `;
+    popup.appendChild(title);
+
+    // Message
+    const message = document.createElement('p');
+    message.textContent = 'Congratulations! You have successfully completed the task.';
+    message.style.cssText = `
+        color: #94a3b8;
+        font-size: 16px;
+        margin: 0 0 35px 0;
+        line-height: 1.6;
+    `;
+    popup.appendChild(message);
+
+    // Coins display
+    const coinsContainer = document.createElement('div');
+    coinsContainer.style.cssText = `
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.15), rgba(160, 82, 45, 0.1));
+        border: 2px solid #8B4513;
+        border-radius: 15px;
+        padding: 20px 30px;
+        margin: 0 auto 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        max-width: 300px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(139, 69, 19, 0.2);
+    `;
+
+    // Coin icon
+    const coinIcon = document.createElement('img');
+    coinIcon.src = '../images/coin.png';
+    coinIcon.alt = 'Eagle Coin';
+    coinIcon.style.cssText = `
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        animation: coinSpin 2s ease-in-out;
+        filter: drop-shadow(0 5px 15px rgba(245, 158, 11, 0.4));
+    `;
+    
+    // Fallback if image fails to load
+    coinIcon.onerror = function() {
+        this.onerror = null;
+        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkJCQjI0IiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBhdGggZD0iTTggMTIuNUwxMC41IDE1TDE2IDkiLz48L3N2Zz4=';
+    };
+
+    // Coins text
+    const coinsText = document.createElement('div');
+    coinsText.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    `;
+
+    const earnedText = document.createElement('span');
+    earnedText.textContent = 'Earned';
+    earnedText.style.cssText = `
+        color: #94a3b8;
+        font-size: 14px;
+        margin-bottom: 5px;
+    `;
+
+    const coinsAmount = document.createElement('span');
+    coinsAmount.innerHTML = `<span style="color: #fbbf24; font-size: 36px; font-weight: 800;">${coins}</span> <span style="color: #f8fafc; font-size: 20px; font-weight: 600;">Eagle Coins</span>`;
+    
+    coinsText.appendChild(earnedText);
+    coinsText.appendChild(coinsAmount);
+    coinsContainer.appendChild(coinIcon);
+    coinsContainer.appendChild(coinsText);
+    popup.appendChild(coinsContainer);
+
+    // Close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = `
+        <span style="margin-right: 8px;">✓</span>
+        Awesome!
+    `;
+    closeButton.style.cssText = `
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        min-width: 180px;
+    `;
+    
+    closeButton.onmouseover = function() {
+        this.style.transform = 'translateY(-3px)';
+        this.style.boxShadow = '0 15px 35px rgba(99, 102, 241, 0.4)';
+    };
+    
+    closeButton.onmouseout = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 10px 25px rgba(99, 102, 241, 0.3)';
+    };
+    
+    closeButton.onclick = function() {
+        document.body.removeChild(overlay);
+        if (typeof onPopupClose === 'function') {
+            onPopupClose();
+        }
+    };
+    popup.appendChild(closeButton);
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: translateY(40px) scale(0.95); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+        }
+        
+        @keyframes coinSpin {
+            0% { 
+                transform: rotateY(0deg) scale(1); 
+            }
+            50% { 
+                transform: rotateY(180deg) scale(1.1); 
+            }
+            100% { 
+                transform: rotateY(360deg) scale(1); 
+            }
+        }
+        
+        @keyframes pulseRing {
+            0% { 
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 0.5;
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px); 
+            }
+            50% { 
+                transform: translateY(-10px); 
+            }
+        }
+        
+        .coin-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Add floating effect to coins
+    setTimeout(() => {
+        coinIcon.classList.add('coin-float');
+    }, 500);
+
+    // Add to page
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    // Auto close after 8 seconds
+    setTimeout(() => {
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+        }
+    }, 8000);
+
+    // Close on ESC key
+    const closeOnEsc = function(e) {
+        if (e.key === 'Escape' && document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+            document.removeEventListener('keydown', closeOnEsc);
+        }
+    };
+    document.addEventListener('keydown', closeOnEsc);
+}
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEditor();
+            initializePyodide();
+        });
     </script>
 </body>
 </html>

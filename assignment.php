@@ -2,12 +2,10 @@
 session_start();
 require_once 'api/dbconf.php';
 
-// Debug: Check if file exists
 if (!file_exists('api/dbconf.php')) {
     die("Error: dbconf.php not found at: " . realpath('api/dbconf.php'));
 }
 
-// Check if user is logged in
 if (!isset($_SESSION['id'])) {
     header('Location: login.php');
     exit();
@@ -15,89 +13,68 @@ if (!isset($_SESSION['id'])) {
 
 $userId = $_SESSION['id'];
 
-// Create database connection with error handling
+$successMessage = '';
+$errorMessage = '';
+
 try {
     $db = new DBconfig();
     $connection = $db->check_con();
     
     if ($connection === "connection error") {
-        die("Database connection failed. Please check your database credentials.");
+        die("Database connection failed.");
     }
 } catch (Exception $e) {
     die("Database error: " . $e->getMessage());
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment'])) {
     $assignmentTitle = $_POST['assignmentTitle'] ?? '';
     $projectLink = $_POST['projectLink'] ?? '';
     $coins = $_POST['coins'] ?? 0;
     
     if (!empty($assignmentTitle) && !empty($projectLink)) {
-        // 1. Add to waiting assignments in database
-        $db->upload_waiting_assign($userId, $assignmentTitle);
+        $result = $db->upload_waiting_assign($userId, $assignmentTitle, $projectLink, $coins);
         
-        // 2. Send to Discord - FIXED METHOD
-        $discordWebhook = 'https://discord.com/api/webhooks/1466008772072702098/tgU1oW1SkiqZZ9FD3-s9dR4gdzjBN7n839_RICXRlv0_XMBCnjb_jI1h8oyeUwr1NaqC';
-        
-        // Simple text message that always works
-        $message = "**New Assignment Submission**\n\n" .
-                   "**Assignment:** " . htmlspecialchars($assignmentTitle) . "\n" .
-                   "**User:** <@hathim0012169>\n" .
-                   "**Project Link:** " . htmlspecialchars($projectLink) . "\n" .
-                   "**Coins Earned:** " . htmlspecialchars($coins) . "\n\n" .
-                   "Submitted at: " . date('Y-m-d H:i:s');
-        
-        // Send using POST - most reliable method
-        $data = ['content' => $message];
-        $options = [
-            'http' => [
-                'header'  => "Content-Type: application/json\r\n",
-                'method'  => 'POST',
-                'content' => json_encode($data),
-                'ignore_errors' => true // Don't fail on HTTP errors
-            ]
-        ];
-        
-        $context = stream_context_create($options);
-        
-        // Try to send to Discord (ignore if it fails)
-        try {
-            @file_get_contents($discordWebhook, false, $context);
-        } catch (Exception $e) {
-            // Silent fail - don't break the user experience
+        if ($result !== false) {
+            // Redirect to refresh the page and show updated status
+            header("Location: assignment.php?success=1");
+            exit();
+        } else {
+            $errorMessage = "Failed to submit assignment. Please try again.";
         }
-        
-        // 3. Reload page to show updated status
-        header("Location: assignment.php?success=1");
-        exit();
+    } else {
+        $errorMessage = "Please fill in all required fields.";
     }
 }
 
-// Get user information
+
 $userInfo = $db->getUserInfo($userId, ['name', 'course', 'assignments', 'eagle_coins']);
 $userName = isset($userInfo['name']) ? $userInfo['name'] : 'User';
 $course = isset($userInfo['course']) ? $userInfo['course'] : 'Not enrolled';
 $assignmentsData = isset($userInfo['assignments']) ? $userInfo['assignments'] : '';
 
-// Parse assignments
 $assignmentsArray = !empty($assignmentsData) ? explode(',', $assignmentsData) : [];
-$assignmentsArray = array_filter($assignmentsArray); // Remove empty values
+$assignmentsArray = array_filter($assignmentsArray);
 $hasAssignments = !empty($assignmentsArray);
 
-// Get waiting assignments - SAFE VERSION
 try {
     $waitingAssignments = $db->get_waiting_assign($userId);
     $waitingAssignments = is_array($waitingAssignments) ? $waitingAssignments : [];
 } catch (Exception $e) {
-    // If there's an error (like missing column), use empty array
     $waitingAssignments = [];
 }
 
-// Get assignment titles based on course
+$waitingAssignmentTitles = [];
+foreach ($waitingAssignments as $assignment) {
+    if (isset($assignment['title'])) {
+        $waitingAssignmentTitles[] = $assignment['title'];
+    }
+}
+
+$submittedAssignments = array_merge($assignmentsArray, $waitingAssignmentTitles);
+
 $assignmentTitles = [];
 if ($course !== "Not enrolled") {
-    // Course-specific assignments
     if ($course === "Secure X") {
         $assignmentTitles = ["Network Security Audit Report", "Penetration Testing Lab", "Firewall Configuration"];
     } else if ($course === "AI Verse Web Labs") {
@@ -113,8 +90,9 @@ if ($course !== "Not enrolled") {
     }
 }
 
-// Check for success message
-$successMessage = isset($_GET['success']) ? "Assignment submitted successfully!" : "";
+// if (isset($_GET['success']) && empty($successMessage)) {
+//     $successMessage = "Assignment submitted successfully!";
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -807,6 +785,23 @@ body {
                                 </svg>
                                 <span class="nav-label">Laboratory</span>
                             </a>
+                            <a href="tasks.php" class="nav-item">
+                                <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+    <!-- Book -->
+                                <path stroke-width="1.5" d="M5 3.333h8.333a2.5 2.5 0 0 1 2.5 2.5v10a2.5 2.5 0 0 1-2.5 2.5H5V3.333z"/>
+                                <path stroke-width="1.5" d="M13.333 3.333v13.334"/>
+                                
+                                <!-- Pen -->
+                                <path stroke-width="1.5" d="M3.333 14.167l1.667-1.667" stroke-linecap="round"/>
+                                <path stroke-width="1.5" d="M8.333 10l-3.333 3.333" stroke-linecap="round"/>
+                                
+                                <!-- Text lines -->
+                                <path stroke-width="1.2" d="M8.333 7.5h3.334" stroke-linecap="round"/>
+                                <path stroke-width="1.2" d="M8.333 9.167h5" stroke-linecap="round"/>
+                                <path stroke-width="1.2" d="M8.333 10.833h4.167" stroke-linecap="round"/>
+                            </svg>
+                                <span class="nav-label">Tasks</span>
+                            </a>
                             <a href="ourcourse.php" class="nav-item">
                                 <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
                                     <!-- Book icon -->
@@ -880,6 +875,19 @@ body {
 
     <!-- Main Content Area -->
     <main class="desktop-main">
+        <?php if ($successMessage): ?>
+        <div class="success-message">
+            <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>
+            <?php echo htmlspecialchars($successMessage); ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if ($errorMessage): ?>
+        <div class="error-message" style="background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 0.625rem; text-align: center; margin-bottom: 1rem;">
+            <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+            <?php echo htmlspecialchars($errorMessage); ?>
+        </div>
+    <?php endif; ?>
         <div class="page-header">
             <h1>Assignments - <?php echo htmlspecialchars($course); ?></h1>
             <p>Track and submit your course assignments</p>
@@ -903,8 +911,8 @@ body {
                 $coinValues = [12, 15, 7];
                 
                 foreach ($assignmentTitles as $index => $assignmentTitle): 
-                    $isSubmitted = in_array($assignmentTitle, $assignmentsArray);
-                    $isWaiting = in_array($assignmentTitle, $waitingAssignments);
+                    $isSubmitted = in_array($assignmentTitle, $submittedAssignments);
+                    $isWaiting = in_array($assignmentTitle, $waitingAssignmentTitles);
                     $coins = isset($coinValues[$index]) ? $coinValues[$index] : 10; // Default to 10 if not set
                 ?>
                     <div class="assignment-card" id="assignment-card-<?php echo $index + 1; ?>">
