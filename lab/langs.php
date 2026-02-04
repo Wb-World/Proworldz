@@ -932,63 +932,58 @@ if (!isset($_SESSION['id'])) {
 
             <!-- Lab Grid -->
             <div class="lab-grid">
-                <!-- Python Lab -->
-                <div class="lab-card animate-fadeIn">
-                    <div class="lab-card-icon">
-                        <i class="fab fa-python"></i>
-                    </div>
-                    <div class="lab-card-content">
-                        <h3>Python Lab</h3>
-                        <p>Write, run and debug Python code in our interactive environment. Perfect for beginners and advanced developers alike.</p>
-                        <a class="button button-lg button-default w-full" href="codings/pythoni.php" style="text-decoration:none">
-                            Go to Python Lab
-                        </a>
-                    </div>
-                </div>
+    <div class="lab-card animate-fadeIn">
+        <div class="lab-card-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968350.png" alt="Python" style="width: 60px; height: 60px; object-fit: contain;">
+        </div>
+        <div class="lab-card-content">
+            <h3>Python Lab</h3>
+            <p>Write, run and debug Python code in our interactive environment. Perfect for beginners and advanced developers alike.</p>
+            <a class="button button-lg button-default w-full" href="codings/pythoni.php" style="text-decoration:none">
+                Go to Python Lab
+            </a>
+        </div>
+    </div>
 
-                
+    <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
+        <div class="lab-card-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/6132/6132222.png" alt="C++" style="width: 60px; height: 60px; object-fit: contain;">
+        </div>
+        <div class="lab-card-content">
+            <h3>C++ Lab</h3>
+            <p>Compile and execute C++ programs with our dedicated lab. Supports C++11, C++14, C++17 and C++20 standards.</p>
+            <a class="button button-lg button-default w-full" href="codings/cpp.php" style="text-decoration:none">
+                Go to C++ Lab
+            </a>
+        </div>
+    </div>
 
-                <!-- C++ Lab -->
-                <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
-                    <div class="lab-card-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <div class="lab-card-content">
-                        <h3>C++ Lab</h3>
-                        <p>Compile and execute C++ programs with our dedicated lab. Supports C++11, C++14, C++17 and C++20 standards.</p>
-                        <a class="button button-lg button-default w-full" href="codings/cpp.php" style="text-decoration:none">
-                            Go to C++ Lab
-                        </a>
-                    </div>
-                </div>
+    <div class="lab-card animate-fadeIn" style="animation-delay: 0.2s">
+        <div class="lab-card-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" alt="PHP" style="width: 60px; height: 60px; object-fit: contain;">
+        </div>
+        <div class="lab-card-content">
+            <h3>PHP Lab</h3>
+            <p>Compile and execute PHP scripts with our dedicated lab. Supports modern PHP versions with fast and secure execution.</p>
+            <a class="button button-lg button-default w-full" href="codings/php.php" style="text-decoration:none">
+                Go to PHP Lab
+            </a>
+        </div>
+    </div>
 
-
-                <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
-                    <div class="lab-card-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <div class="lab-card-content">
-                        <h3>PHP Lab</h3>
-                        <p>Compile and execute PHP scripts with our dedicated lab. Supports modern PHP versions with fast and secure execution.</p>
-                        <a class="button button-lg button-default w-full" href="codings/php.php" style="text-decoration:none">
-                            Go to PHP Lab
-                        </a>
-                    </div>
-                </div>
-
-                <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
-                    <div class="lab-card-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <div class="lab-card-content">
-                        <h3>JS Lab</h3>
-                        <p>Compile and execute JavaScript programs with our dedicated lab. Supports modern Node.js runtime for server-side execution.</p>
-                        <a class="button button-lg button-default w-full" href="codings/js.php" style="text-decoration:none">
-                            Go to JS Lab
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <div class="lab-card animate-fadeIn" style="animation-delay: 0.3s">
+        <div class="lab-card-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" alt="JavaScript" style="width: 60px; height: 60px; object-fit: contain;">
+        </div>
+        <div class="lab-card-content">
+            <h3>JS Lab</h3>
+            <p>Compile and execute JavaScript programs with our dedicated lab. Supports modern Node.js runtime for server-side execution.</p>
+            <a class="button button-lg button-default w-full" href="codings/js.php" style="text-decoration:none">
+                Go to JS Lab
+            </a>
+        </div>
+    </div>
+</div>
         </div>
     </div>
 

@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['execute_php'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP Interpreter - ProWorldz</title>
+    <title>C++ compiler - ProWorldz</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -130,8 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['execute_php'])) {
 <div class="desktop-main">
 <div class="card interpreter-header">
 <div class="interpreter-hero">
-<h1 class="font-display">PHP Interpreter</h1>
-<a href="../lab.php" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;margin-top:1rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;border-radius:0.5rem;border:1px solid rgba(255,255,255,0.15);box-shadow:0 6px 18px rgba(99,102,241,0.35);transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(99,102,241,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(99,102,241,0.35)'">← Back to Lab</a>
+<h1 class="font-display">C++ compiler</h1>
+<a href="../langs.php" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;margin-top:1rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;border-radius:0.5rem;border:1px solid rgba(255,255,255,0.15);box-shadow:0 6px 18px rgba(99,102,241,0.35);transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 30px rgba(99,102,241,0.5)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(99,102,241,0.35)'">← Back to Lab</a>
 </div>
 <div style="padding:0.5rem;" id="shower-pending-assign-banner"><h4 id="pending-assign-banner"></h4></div>
 </div>
@@ -146,9 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['execute_php'])) {
 </div>
 <div class="code-editor-container">
 <textarea id="code" placeholder="<?php
-echo "<?php\necho 'Hello, World!';\n?>";
+echo "#include <iostream>\n\nint main() {\n    std::cout << \"Hello, World!\" << std::endl;\n    return 0;\n}";
 ?>"><?php
-echo "<?php\necho 'Hello, World!';\n?>";
+echo "#include <iostream>\n\nint main() {\n    std::cout << \"Hello, World!\" << std::endl;\n    return 0;\n}";
 ?></textarea>
 </div>
 <div class="shortcut-hint">

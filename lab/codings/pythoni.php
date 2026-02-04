@@ -5,10 +5,6 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit();
 }
-echo $_SESSION['id'];
-require_once '../api/dbconf.php';
-$userId = $_SESSION['id'];
-$db = new DBconfig();
 ?>
 
 <!DOCTYPE html>
@@ -1014,7 +1010,7 @@ $db = new DBconfig();
             <div class="card interpreter-header">
                 <div class="interpreter-hero">
                     <h1 class="font-display">Python Interpreter</h1>
-                    <a href="../lab.php"
+                    <a href="../langs.php"
                     style="
                         display:inline-flex;
                         align-items:center;
