@@ -940,39 +940,54 @@ if (!isset($_SESSION['id'])) {
                     <div class="lab-card-content">
                         <h3>Python Lab</h3>
                         <p>Write, run and debug Python code in our interactive environment. Perfect for beginners and advanced developers alike.</p>
-                        <a class="button button-lg button-default w-full" href="pythoni.php" style="text-decoration:none">
+                        <a class="button button-lg button-default w-full" href="codings/pythoni.php" style="text-decoration:none">
                             Go to Python Lab
                         </a>
                     </div>
                 </div>
 
+                
+
                 <!-- C++ Lab -->
-                <!-- <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
+                <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
                     <div class="lab-card-icon">
                         <i class="fas fa-cogs"></i>
                     </div>
                     <div class="lab-card-content">
                         <h3>C++ Lab</h3>
                         <p>Compile and execute C++ programs with our dedicated lab. Supports C++11, C++14, C++17 and C++20 standards.</p>
-                        <button class="button button-lg button-default w-full" onclick="location.href='cpp-lab.php'">
+                        <a class="button button-lg button-default w-full" href="codings/cpp.php" style="text-decoration:none">
                             Go to C++ Lab
-                        </button>
+                        </a>
                     </div>
                 </div>
 
 
-                <div class="lab-card animate-fadeIn" style="animation-delay: 0.2s">
+                <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
                     <div class="lab-card-icon">
-                        <i class="fab fa-php"></i>
+                        <i class="fas fa-cogs"></i>
                     </div>
                     <div class="lab-card-content">
                         <h3>PHP Lab</h3>
-                        <p>Develop server-side scripts with PHP in our web-focused lab. Includes MySQL database integration and Apache server.</p>
-                        <button class="button button-lg button-default w-full" onclick="location.href='php-lab.php'">
+                        <p>Compile and execute PHP scripts with our dedicated lab. Supports modern PHP versions with fast and secure execution.</p>
+                        <a class="button button-lg button-default w-full" href="codings/php.php" style="text-decoration:none">
                             Go to PHP Lab
-                        </button>
+                        </a>
                     </div>
-                </div> -->
+                </div>
+
+                <div class="lab-card animate-fadeIn" style="animation-delay: 0.1s">
+                    <div class="lab-card-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="lab-card-content">
+                        <h3>JS Lab</h3>
+                        <p>Compile and execute JavaScript programs with our dedicated lab. Supports modern Node.js runtime for server-side execution.</p>
+                        <a class="button button-lg button-default w-full" href="codings/js.php" style="text-decoration:none">
+                            Go to JS Lab
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

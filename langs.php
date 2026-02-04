@@ -263,7 +263,7 @@ body {
         <div class="lab-content">
           <h3 style="color:#ff5722">Python Lab</h3>
           <p>Write, run and debug Python code in our interactive environment. Perfect for beginners and advanced developers alike.</p>
-          <button class="lab-btn" onclick="location.href='lab/pythoni.php'" style="background:#ff5722">
+          <button class="lab-btn" onclick="location.href='lab/codings/pythoni.php'" style="background:#ff5722">
             Go to Python Lab
           </button>
         </div>

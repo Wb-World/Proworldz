@@ -889,7 +889,7 @@ document.addEventListener('click', function(event) {
 
         localStorage.setItem('tasksinfo',[decodeURIComponent(taskTitle),taskCoins])
         
-        window.open('lab/pythoni.php','_blank');
+        window.open('lab/codings/pythoni.php','_blank');
     }
 });
 </script>
